@@ -1,0 +1,20 @@
+{
+  "name": "network.piot.nimble.steps",
+  "version": "0.0.1",
+  "displayName": "Predicted steps",
+  "description": "",
+  "dependencies": {
+    "network.piot.clog": "0.0.1",
+    "network.piot.tick": "0.0.1",
+    "network.piot.flood": "0.0.1",
+    "network.piot.monotonic-time": "0.0.1",
+    "network.piot.monotonic-time.lower-bits": "0.0.1"
+  },
+  "unity": "2021.3",
+  "author": {
+    "name": "Peter Bjorklund",
+    "email": "piot@hotmail.com",
+    "url": "https://github.com/piot"
+  },
+  "license": "MIT"
+}

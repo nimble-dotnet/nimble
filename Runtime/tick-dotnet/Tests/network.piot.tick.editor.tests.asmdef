@@ -1,0 +1,15 @@
+{
+  "name": "network.piot.tick.editor.tests",
+  "references": [
+    "network.piot.tick",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner",
+    "network.piot.flood"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ]
+}

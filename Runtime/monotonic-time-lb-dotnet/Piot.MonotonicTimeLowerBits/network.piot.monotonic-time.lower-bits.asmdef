@@ -1,0 +1,7 @@
+{
+  "name": "network.piot.monotonic-time.lower-bits",
+  "references": [
+    "network.piot.flood",
+    "network.piot.monotonic-time"
+  ]
+}

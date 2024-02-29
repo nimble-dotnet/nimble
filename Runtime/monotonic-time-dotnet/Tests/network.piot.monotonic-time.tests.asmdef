@@ -1,0 +1,12 @@
+{
+  "name": "network.piot.monotonic-time.tests",
+  "references": [
+    "network.piot.monotonic-time"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ]
+}

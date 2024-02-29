@@ -1,0 +1,14 @@
+{
+  "name": "network.piot.monotonic-time",
+  "version": "0.0.1",
+  "displayName": "Monotonic Time",
+  "description": "Monotonic Time for .NET",
+  "unity": "2021.3",
+  "author": {
+    "name": "Peter Bjorklund",
+    "email": "info@outbreakstudios.com",
+    "url": "https://outbreakstudios.com"
+  },
+  "testables": [ "network.piot.monotonic-time" ],
+  "license": "MIT"
+}

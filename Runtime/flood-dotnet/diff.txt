@@ -1,0 +1,365 @@
+commit 06589e4c9646b659470adcf8caedc9dc439c2755
+Author: Peter Bjorklund <piot@hotmail.com>
+Date:   Sun Sep 24 08:50:06 2023 +0200
+
+    chore: move directory
+    
+    chore: update license
+
+diff --git a/LICENSE.meta b/LICENSE.meta
+new file mode 100644
+index 0000000..cf6f3b0
+--- /dev/null
++++ b/LICENSE.meta
+@@ -0,0 +1,7 @@
++fileFormatVersion: 2
++guid: 61df101c90d82477392ebc71e353b681
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Piot.Flood.meta b/Piot.Flood.meta
+new file mode 100644
+index 0000000..42639c9
+--- /dev/null
++++ b/Piot.Flood.meta
+@@ -0,0 +1,8 @@
++fileFormatVersion: 2
++guid: fa5ae4881a59f4b13b0dcfa5cf77d44c
++folderAsset: yes
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/src/lib/BitMarker.cs b/Piot.Flood/BitMarker.cs
+similarity index 100%
+rename from src/lib/BitMarker.cs
+rename to Piot.Flood/BitMarker.cs
+diff --git a/src/lib/BitMarker.cs.meta b/Piot.Flood/BitMarker.cs.meta
+similarity index 100%
+rename from src/lib/BitMarker.cs.meta
+rename to Piot.Flood/BitMarker.cs.meta
+diff --git a/src/lib/BitReader.cs b/Piot.Flood/BitReader.cs
+similarity index 100%
+rename from src/lib/BitReader.cs
+rename to Piot.Flood/BitReader.cs
+diff --git a/src/lib/BitReader.cs.meta b/Piot.Flood/BitReader.cs.meta
+similarity index 100%
+rename from src/lib/BitReader.cs.meta
+rename to Piot.Flood/BitReader.cs.meta
+diff --git a/src/lib/BitReaderUtils.cs b/Piot.Flood/BitReaderUtils.cs
+similarity index 100%
+rename from src/lib/BitReaderUtils.cs
+rename to Piot.Flood/BitReaderUtils.cs
+diff --git a/src/lib/BitReaderUtils.cs.meta b/Piot.Flood/BitReaderUtils.cs.meta
+similarity index 100%
+rename from src/lib/BitReaderUtils.cs.meta
+rename to Piot.Flood/BitReaderUtils.cs.meta
+diff --git a/src/lib/BitWriter.cs b/Piot.Flood/BitWriter.cs
+similarity index 100%
+rename from src/lib/BitWriter.cs
+rename to Piot.Flood/BitWriter.cs
+diff --git a/src/lib/BitWriter.cs.meta b/Piot.Flood/BitWriter.cs.meta
+similarity index 100%
+rename from src/lib/BitWriter.cs.meta
+rename to Piot.Flood/BitWriter.cs.meta
+diff --git a/src/lib/BitWriterUtils.cs b/Piot.Flood/BitWriterUtils.cs
+similarity index 100%
+rename from src/lib/BitWriterUtils.cs
+rename to Piot.Flood/BitWriterUtils.cs
+diff --git a/src/lib/BitWriterUtils.cs.meta b/Piot.Flood/BitWriterUtils.cs.meta
+similarity index 100%
+rename from src/lib/BitWriterUtils.cs.meta
+rename to Piot.Flood/BitWriterUtils.cs.meta
+diff --git a/src/lib/FileStreamCreator.cs b/Piot.Flood/FileStreamCreator.cs
+similarity index 100%
+rename from src/lib/FileStreamCreator.cs
+rename to Piot.Flood/FileStreamCreator.cs
+diff --git a/src/lib/FileStreamCreator.cs.meta b/Piot.Flood/FileStreamCreator.cs.meta
+similarity index 100%
+rename from src/lib/FileStreamCreator.cs.meta
+rename to Piot.Flood/FileStreamCreator.cs.meta
+diff --git a/src/lib/IBitReader.cs b/Piot.Flood/IBitReader.cs
+similarity index 100%
+rename from src/lib/IBitReader.cs
+rename to Piot.Flood/IBitReader.cs
+diff --git a/src/lib/IBitReader.cs.meta b/Piot.Flood/IBitReader.cs.meta
+similarity index 100%
+rename from src/lib/IBitReader.cs.meta
+rename to Piot.Flood/IBitReader.cs.meta
+diff --git a/src/lib/IBitWriter.cs b/Piot.Flood/IBitWriter.cs
+similarity index 100%
+rename from src/lib/IBitWriter.cs
+rename to Piot.Flood/IBitWriter.cs
+diff --git a/src/lib/IBitWriter.cs.meta b/Piot.Flood/IBitWriter.cs.meta
+similarity index 100%
+rename from src/lib/IBitWriter.cs.meta
+rename to Piot.Flood/IBitWriter.cs.meta
+diff --git a/src/lib/IBitWriterResult.cs b/Piot.Flood/IBitWriterResult.cs
+similarity index 100%
+rename from src/lib/IBitWriterResult.cs
+rename to Piot.Flood/IBitWriterResult.cs
+diff --git a/src/lib/IBitWriterResult.cs.meta b/Piot.Flood/IBitWriterResult.cs.meta
+similarity index 100%
+rename from src/lib/IBitWriterResult.cs.meta
+rename to Piot.Flood/IBitWriterResult.cs.meta
+diff --git a/src/lib/IBitWriterWithResult.cs b/Piot.Flood/IBitWriterWithResult.cs
+similarity index 100%
+rename from src/lib/IBitWriterWithResult.cs
+rename to Piot.Flood/IBitWriterWithResult.cs
+diff --git a/src/lib/IBitWriterWithResult.cs.meta b/Piot.Flood/IBitWriterWithResult.cs.meta
+similarity index 100%
+rename from src/lib/IBitWriterWithResult.cs.meta
+rename to Piot.Flood/IBitWriterWithResult.cs.meta
+diff --git a/src/lib/IDisposableOctetWriter.cs b/Piot.Flood/IDisposableOctetWriter.cs
+similarity index 100%
+rename from src/lib/IDisposableOctetWriter.cs
+rename to Piot.Flood/IDisposableOctetWriter.cs
+diff --git a/src/lib/IDisposableOctetWriter.cs.meta b/Piot.Flood/IDisposableOctetWriter.cs.meta
+similarity index 100%
+rename from src/lib/IDisposableOctetWriter.cs.meta
+rename to Piot.Flood/IDisposableOctetWriter.cs.meta
+diff --git a/src/lib/IOctetReader.cs b/Piot.Flood/IOctetReader.cs
+similarity index 100%
+rename from src/lib/IOctetReader.cs
+rename to Piot.Flood/IOctetReader.cs
+diff --git a/src/lib/IOctetReader.cs.meta b/Piot.Flood/IOctetReader.cs.meta
+similarity index 100%
+rename from src/lib/IOctetReader.cs.meta
+rename to Piot.Flood/IOctetReader.cs.meta
+diff --git a/src/lib/IOctetReaderWithSkip.cs b/Piot.Flood/IOctetReaderWithSkip.cs
+similarity index 100%
+rename from src/lib/IOctetReaderWithSkip.cs
+rename to Piot.Flood/IOctetReaderWithSkip.cs
+diff --git a/src/lib/IOctetReaderWithSkip.cs.meta b/Piot.Flood/IOctetReaderWithSkip.cs.meta
+similarity index 100%
+rename from src/lib/IOctetReaderWithSkip.cs.meta
+rename to Piot.Flood/IOctetReaderWithSkip.cs.meta
+diff --git a/src/lib/IOctetSerializable.cs b/Piot.Flood/IOctetSerializable.cs
+similarity index 100%
+rename from src/lib/IOctetSerializable.cs
+rename to Piot.Flood/IOctetSerializable.cs
+diff --git a/src/lib/IOctetSerializable.cs.meta b/Piot.Flood/IOctetSerializable.cs.meta
+similarity index 100%
+rename from src/lib/IOctetSerializable.cs.meta
+rename to Piot.Flood/IOctetSerializable.cs.meta
+diff --git a/src/lib/IOctetSerializableRead.cs b/Piot.Flood/IOctetSerializableRead.cs
+similarity index 100%
+rename from src/lib/IOctetSerializableRead.cs
+rename to Piot.Flood/IOctetSerializableRead.cs
+diff --git a/src/lib/IOctetSerializableRead.cs.meta b/Piot.Flood/IOctetSerializableRead.cs.meta
+similarity index 100%
+rename from src/lib/IOctetSerializableRead.cs.meta
+rename to Piot.Flood/IOctetSerializableRead.cs.meta
+diff --git a/src/lib/IOctetSerializableWrite.cs b/Piot.Flood/IOctetSerializableWrite.cs
+similarity index 100%
+rename from src/lib/IOctetSerializableWrite.cs
+rename to Piot.Flood/IOctetSerializableWrite.cs
+diff --git a/src/lib/IOctetSerializableWrite.cs.meta b/Piot.Flood/IOctetSerializableWrite.cs.meta
+similarity index 100%
+rename from src/lib/IOctetSerializableWrite.cs.meta
+rename to Piot.Flood/IOctetSerializableWrite.cs.meta
+diff --git a/src/lib/IOctetWriter.cs b/Piot.Flood/IOctetWriter.cs
+similarity index 100%
+rename from src/lib/IOctetWriter.cs
+rename to Piot.Flood/IOctetWriter.cs
+diff --git a/src/lib/IOctetWriter.cs.meta b/Piot.Flood/IOctetWriter.cs.meta
+similarity index 100%
+rename from src/lib/IOctetWriter.cs.meta
+rename to Piot.Flood/IOctetWriter.cs.meta
+diff --git a/src/lib/IOctetWriterResult.cs b/Piot.Flood/IOctetWriterResult.cs
+similarity index 100%
+rename from src/lib/IOctetWriterResult.cs
+rename to Piot.Flood/IOctetWriterResult.cs
+diff --git a/src/lib/IOctetWriterResult.cs.meta b/Piot.Flood/IOctetWriterResult.cs.meta
+similarity index 100%
+rename from src/lib/IOctetWriterResult.cs.meta
+rename to Piot.Flood/IOctetWriterResult.cs.meta
+diff --git a/src/lib/IOctetWriterWithResult.cs b/Piot.Flood/IOctetWriterWithResult.cs
+similarity index 100%
+rename from src/lib/IOctetWriterWithResult.cs
+rename to Piot.Flood/IOctetWriterWithResult.cs
+diff --git a/src/lib/IOctetWriterWithResult.cs.meta b/Piot.Flood/IOctetWriterWithResult.cs.meta
+similarity index 100%
+rename from src/lib/IOctetWriterWithResult.cs.meta
+rename to Piot.Flood/IOctetWriterWithResult.cs.meta
+diff --git a/src/lib/ISeekable.cs b/Piot.Flood/ISeekable.cs
+similarity index 100%
+rename from src/lib/ISeekable.cs
+rename to Piot.Flood/ISeekable.cs
+diff --git a/src/lib/ISeekable.cs.meta b/Piot.Flood/ISeekable.cs.meta
+similarity index 100%
+rename from src/lib/ISeekable.cs.meta
+rename to Piot.Flood/ISeekable.cs.meta
+diff --git a/src/lib/ISkip.cs b/Piot.Flood/ISkip.cs
+similarity index 100%
+rename from src/lib/ISkip.cs
+rename to Piot.Flood/ISkip.cs
+diff --git a/src/lib/ISkip.cs.meta b/Piot.Flood/ISkip.cs.meta
+similarity index 100%
+rename from src/lib/ISkip.cs.meta
+rename to Piot.Flood/ISkip.cs.meta
+diff --git a/src/lib/OctetMarker.cs b/Piot.Flood/OctetMarker.cs
+similarity index 100%
+rename from src/lib/OctetMarker.cs
+rename to Piot.Flood/OctetMarker.cs
+diff --git a/src/lib/OctetMarker.cs.meta b/Piot.Flood/OctetMarker.cs.meta
+similarity index 100%
+rename from src/lib/OctetMarker.cs.meta
+rename to Piot.Flood/OctetMarker.cs.meta
+diff --git a/src/lib/OctetReader.cs b/Piot.Flood/OctetReader.cs
+similarity index 100%
+rename from src/lib/OctetReader.cs
+rename to Piot.Flood/OctetReader.cs
+diff --git a/src/lib/OctetReader.cs.meta b/Piot.Flood/OctetReader.cs.meta
+similarity index 100%
+rename from src/lib/OctetReader.cs.meta
+rename to Piot.Flood/OctetReader.cs.meta
+diff --git a/src/lib/OctetWriter.cs b/Piot.Flood/OctetWriter.cs
+similarity index 100%
+rename from src/lib/OctetWriter.cs
+rename to Piot.Flood/OctetWriter.cs
+diff --git a/src/lib/OctetWriter.cs.meta b/Piot.Flood/OctetWriter.cs.meta
+similarity index 100%
+rename from src/lib/OctetWriter.cs.meta
+rename to Piot.Flood/OctetWriter.cs.meta
+diff --git a/src/lib/StreamOctetReader.cs b/Piot.Flood/StreamOctetReader.cs
+similarity index 100%
+rename from src/lib/StreamOctetReader.cs
+rename to Piot.Flood/StreamOctetReader.cs
+diff --git a/src/lib/StreamOctetReader.cs.meta b/Piot.Flood/StreamOctetReader.cs.meta
+similarity index 100%
+rename from src/lib/StreamOctetReader.cs.meta
+rename to Piot.Flood/StreamOctetReader.cs.meta
+diff --git a/src/lib/StreamOctetWriter.cs b/Piot.Flood/StreamOctetWriter.cs
+similarity index 100%
+rename from src/lib/StreamOctetWriter.cs
+rename to Piot.Flood/StreamOctetWriter.cs
+diff --git a/src/lib/StreamOctetWriter.cs.meta b/Piot.Flood/StreamOctetWriter.cs.meta
+similarity index 100%
+rename from src/lib/StreamOctetWriter.cs.meta
+rename to Piot.Flood/StreamOctetWriter.cs.meta
+diff --git a/src/lib/com.outbreakstudios.flood.base.asmdef b/Piot.Flood/com.outbreakstudios.flood.base.asmdef
+similarity index 100%
+rename from src/lib/com.outbreakstudios.flood.base.asmdef
+rename to Piot.Flood/com.outbreakstudios.flood.base.asmdef
+diff --git a/src/lib/com.outbreakstudios.flood.base.asmdef.meta b/Piot.Flood/com.outbreakstudios.flood.base.asmdef.meta
+similarity index 100%
+rename from src/lib/com.outbreakstudios.flood.base.asmdef.meta
+rename to Piot.Flood/com.outbreakstudios.flood.base.asmdef.meta
+diff --git a/README.md b/README.md
+index 4bb5919..71fe11c 100644
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1,2 @@
+ # Flood for .NET
+ 
+-## Unity
+-
+-Add .tgz file from release page, or add using a git url: https://github.com/piot/flood-dotnet.git?path=src/lib#main
+diff --git a/README.md.meta b/README.md.meta
+new file mode 100644
+index 0000000..0793ad6
+--- /dev/null
++++ b/README.md.meta
+@@ -0,0 +1,7 @@
++fileFormatVersion: 2
++guid: 4648cfeac8a5843b884fad126b63e3d2
++TextScriptImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..c8264e7
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,13 @@
++{
++  "name": "network.piot.flood.dotnet",
++  "version": "0.0.1",
++  "displayName": "Flood Bit Serializer",
++  "description": "",
++  "unity": "2021.3",
++  "author": {
++    "name": "Peter Bjorklund",
++    "email": "piot@hotmail.com",
++    "url": "https://github.com/piot"
++  },
++  "license": "MIT"
++}
+diff --git a/src/lib/package.json.meta b/package.json.meta
+similarity index 76%
+rename from src/lib/package.json.meta
+rename to package.json.meta
+index 5a2d95c..0d8bbf4 100644
+--- a/src/lib/package.json.meta
++++ b/package.json.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: 02c746b49824a1049868844900a29964
++guid: 4eeb11a64468f4b51acc66d0bd2ab447
+ PackageManifestImporter:
+   externalObjects: {}
+   userData: 
+diff --git a/src/.gitignore b/src/.gitignore
+deleted file mode 100644
+index cd42ee3..0000000
+--- a/src/.gitignore
++++ /dev/null
+@@ -1,2 +0,0 @@
+-bin/
+-obj/
+diff --git a/src/Flood.csproj b/src/Flood.csproj
+deleted file mode 100644
+index ceb4130..0000000
+--- a/src/Flood.csproj
++++ /dev/null
+@@ -1,25 +0,0 @@
+-<Project Sdk="Microsoft.NET.Sdk">
+-
+-    <PropertyGroup>
+-        <TargetFramework>net5.0</TargetFramework>
+-        <PackageId>Piot.Flood</PackageId>
+-        <Version>0.0.1</Version>
+-        <ImplicitUsings>disable</ImplicitUsings>
+-        <Nullable>enable</Nullable>
+-        <WarningsAsErrors>Nullable</WarningsAsErrors>
+-        <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+-        <IntermediateOutputPath>../../output</IntermediateOutputPath>
+-        <RootNamespace>Piot.Flood</RootNamespace>
+-        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+-        <AnalysisLevel>latest</AnalysisLevel>
+-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+-        <Copyright>Peter Björklund. All rights reserved.</Copyright>
+-        <PackageReadmeFile>README.md</PackageReadmeFile>
+-    </PropertyGroup>
+-
+-    <ItemGroup>
+-        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+-        <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0" />
+-    </ItemGroup>
+-
+-</Project>
+diff --git a/src/lib/package.json b/src/lib/package.json
+deleted file mode 100644
+index f5c153e..0000000
+--- a/src/lib/package.json
++++ /dev/null
+@@ -1,13 +0,0 @@
+-{
+-  "name": "com.outbreakstudios.flood.base",
+-  "version": "0.0.1",
+-  "displayName": "Outbreak Studios - Flood Bit Serializer",
+-  "description": "Flood Bit Serializer",
+-  "unity": "2021.3",
+-  "author": {
+-    "name": "Outbreak Studios",
+-    "email": "info@outbreakstudios.com",
+-    "url": "https://outbreakstudios.com"
+-  },
+-  "license": "MIT"
+-}

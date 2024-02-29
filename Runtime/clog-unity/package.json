@@ -1,0 +1,16 @@
+{
+  "name": "network.piot.clog.unity",
+  "version": "0.0.1",
+  "description": "Log output for Unity",
+  "displayName": "Clog Unity",
+  "unity": "2021.3",
+  "author": {
+    "name": "Peter Bjorklund",
+    "email": "piot@hotmail.com",
+    "url": "https://github.com/piot"
+  },
+  "dependencies": {
+    "network.piot.clog": "0.0.1"
+  },
+  "license": "MIT"
+}

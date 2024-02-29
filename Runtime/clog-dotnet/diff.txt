@@ -1,0 +1,308 @@
+commit 0b5f24ac1a9176a875140dc6ac3cf55cccde53e0
+Author: Peter Bjorklund <piot@hotmail.com>
+Date:   Sun Sep 24 08:53:01 2023 +0200
+
+    chore: move directory
+
+diff --git a/LICENSE.meta b/LICENSE.meta
+new file mode 100644
+index 0000000..c4ba4aa
+--- /dev/null
++++ b/LICENSE.meta
+@@ -0,0 +1,7 @@
++fileFormatVersion: 2
++guid: 09e111a6bdb7941a985e9d41475d8566
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Piot.Clog.meta b/Piot.Clog.meta
+new file mode 100644
+index 0000000..0ad912a
+--- /dev/null
++++ b/Piot.Clog.meta
+@@ -0,0 +1,8 @@
++fileFormatVersion: 2
++guid: 29addf1d2077c4cdb811b88d47fc750a
++folderAsset: yes
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/src/lib/ArgumentReplace.cs b/Piot.Clog/ArgumentReplace.cs
+similarity index 100%
+rename from src/lib/ArgumentReplace.cs
+rename to Piot.Clog/ArgumentReplace.cs
+diff --git a/src/lib/ArgumentReplace.cs.meta b/Piot.Clog/ArgumentReplace.cs.meta
+similarity index 100%
+rename from src/lib/ArgumentReplace.cs.meta
+rename to Piot.Clog/ArgumentReplace.cs.meta
+diff --git a/src/lib/CombinedLogTarget.cs b/Piot.Clog/CombinedLogTarget.cs
+similarity index 100%
+rename from src/lib/CombinedLogTarget.cs
+rename to Piot.Clog/CombinedLogTarget.cs
+diff --git a/src/lib/CombinedLogTarget.cs.meta b/Piot.Clog/CombinedLogTarget.cs.meta
+similarity index 100%
+rename from src/lib/CombinedLogTarget.cs.meta
+rename to Piot.Clog/CombinedLogTarget.cs.meta
+diff --git a/src/lib/ConsoleOutputLogger.cs b/Piot.Clog/ConsoleOutputLogger.cs
+similarity index 100%
+rename from src/lib/ConsoleOutputLogger.cs
+rename to Piot.Clog/ConsoleOutputLogger.cs
+diff --git a/src/lib/ConsoleOutputLogger.cs.meta b/Piot.Clog/ConsoleOutputLogger.cs.meta
+similarity index 100%
+rename from src/lib/ConsoleOutputLogger.cs.meta
+rename to Piot.Clog/ConsoleOutputLogger.cs.meta
+diff --git a/src/lib/ILog.cs b/Piot.Clog/ILog.cs
+similarity index 100%
+rename from src/lib/ILog.cs
+rename to Piot.Clog/ILog.cs
+diff --git a/src/lib/ILog.cs.meta b/Piot.Clog/ILog.cs.meta
+similarity index 100%
+rename from src/lib/ILog.cs.meta
+rename to Piot.Clog/ILog.cs.meta
+diff --git a/src/lib/ILogConfiguration.cs b/Piot.Clog/ILogConfiguration.cs
+similarity index 100%
+rename from src/lib/ILogConfiguration.cs
+rename to Piot.Clog/ILogConfiguration.cs
+diff --git a/src/lib/ILogConfiguration.cs.meta b/Piot.Clog/ILogConfiguration.cs.meta
+similarity index 100%
+rename from src/lib/ILogConfiguration.cs.meta
+rename to Piot.Clog/ILogConfiguration.cs.meta
+diff --git a/src/lib/ILogTarget.cs b/Piot.Clog/ILogTarget.cs
+similarity index 100%
+rename from src/lib/ILogTarget.cs
+rename to Piot.Clog/ILogTarget.cs
+diff --git a/src/lib/ILogTarget.cs.meta b/Piot.Clog/ILogTarget.cs.meta
+similarity index 100%
+rename from src/lib/ILogTarget.cs.meta
+rename to Piot.Clog/ILogTarget.cs.meta
+diff --git a/src/lib/Log.cs b/Piot.Clog/Log.cs
+similarity index 100%
+rename from src/lib/Log.cs
+rename to Piot.Clog/Log.cs
+diff --git a/src/lib/Log.cs.meta b/Piot.Clog/Log.cs.meta
+similarity index 100%
+rename from src/lib/Log.cs.meta
+rename to Piot.Clog/Log.cs.meta
+diff --git a/src/lib/LogLevel.cs b/Piot.Clog/LogLevel.cs
+similarity index 100%
+rename from src/lib/LogLevel.cs
+rename to Piot.Clog/LogLevel.cs
+diff --git a/src/lib/LogLevel.cs.meta b/Piot.Clog/LogLevel.cs.meta
+similarity index 100%
+rename from src/lib/LogLevel.cs.meta
+rename to Piot.Clog/LogLevel.cs.meta
+diff --git a/src/lib/LogLevelExtension.cs b/Piot.Clog/LogLevelExtension.cs
+similarity index 100%
+rename from src/lib/LogLevelExtension.cs
+rename to Piot.Clog/LogLevelExtension.cs
+diff --git a/src/lib/LogLevelExtension.cs.meta b/Piot.Clog/LogLevelExtension.cs.meta
+similarity index 100%
+rename from src/lib/LogLevelExtension.cs.meta
+rename to Piot.Clog/LogLevelExtension.cs.meta
+diff --git a/Piot.Clog/Piot.Clog.asmdef b/Piot.Clog/Piot.Clog.asmdef
+new file mode 100644
+index 0000000..5b13927
+--- /dev/null
++++ b/Piot.Clog/Piot.Clog.asmdef
+@@ -0,0 +1,3 @@
++{
++  "name": "Piot.Clog"
++}
+\ No newline at end of file
+diff --git a/src/lib/com.outbreakstudios.clog.base.asmdef.meta b/Piot.Clog/Piot.Clog.asmdef.meta
+similarity index 76%
+rename from src/lib/com.outbreakstudios.clog.base.asmdef.meta
+rename to Piot.Clog/Piot.Clog.asmdef.meta
+index f067db4..7e672ed 100644
+--- a/src/lib/com.outbreakstudios.clog.base.asmdef.meta
++++ b/Piot.Clog/Piot.Clog.asmdef.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: 2d5c39cc1d51ff94b823988b60288385
++guid: 17aa1338735c14ab49709b488f830bd3
+ AssemblyDefinitionImporter:
+   externalObjects: {}
+   userData: 
+diff --git a/src/lib/Utils.cs b/Piot.Clog/Utils.cs
+similarity index 100%
+rename from src/lib/Utils.cs
+rename to Piot.Clog/Utils.cs
+diff --git a/src/lib/Utils.cs.meta b/Piot.Clog/Utils.cs.meta
+similarity index 100%
+rename from src/lib/Utils.cs.meta
+rename to Piot.Clog/Utils.cs.meta
+diff --git a/README.md b/README.md
+index 5303b94..5e02fd5 100644
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1 @@
+ # Clog for .NET
+-
+-## Unity
+-
+-Add .tgz file from release page, or add using a git url: https://github.com/piot/clog-dotnet.git?path=src/lib#main
+diff --git a/README.md.meta b/README.md.meta
+new file mode 100644
+index 0000000..f1d05db
+--- /dev/null
++++ b/README.md.meta
+@@ -0,0 +1,7 @@
++fileFormatVersion: 2
++guid: f06545389617c42099cafb71698d3977
++TextScriptImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..054a579
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,13 @@
++{
++  "name": "network.piot.clog.dotnet",
++  "version": "0.0.1",
++  "description": "Simple log library based on clog",
++  "displayName": "Clog",
++  "unity": "2021.3",
++  "author": {
++    "name": "Peter Bjorklund",
++    "email": "piot@hotmail.com",
++    "url": "https://github.com/piot"
++  },
++  "license": "MIT"
++}
+\ No newline at end of file
+diff --git a/src/lib/package.json.meta b/package.json.meta
+similarity index 76%
+rename from src/lib/package.json.meta
+rename to package.json.meta
+index c8c0eaa..707898e 100644
+--- a/src/lib/package.json.meta
++++ b/package.json.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: 76c02ab10ddaf57448d2256dfa68a42d
++guid: 8e51965d41d624d20a1fed91aa6c7630
+ PackageManifestImporter:
+   externalObjects: {}
+   userData: 
+diff --git a/src/Clog.csproj.meta b/src/Clog.csproj.meta
+new file mode 100644
+index 0000000..595e2c6
+--- /dev/null
++++ b/src/Clog.csproj.meta
+@@ -0,0 +1,7 @@
++fileFormatVersion: 2
++guid: 568c6aedb0bc7479383295718951b80b
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/src/bin.meta b/src/bin.meta
+new file mode 100644
+index 0000000..0750fbe
+--- /dev/null
++++ b/src/bin.meta
+@@ -0,0 +1,8 @@
++fileFormatVersion: 2
++guid: 6febc622fee504c39a34b64d2645a0b4
++folderAsset: yes
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/src/lib/com.outbreakstudios.clog.base.asmdef b/src/lib/com.outbreakstudios.clog.base.asmdef
+deleted file mode 100644
+index f507c29..0000000
+--- a/src/lib/com.outbreakstudios.clog.base.asmdef
++++ /dev/null
+@@ -1,3 +0,0 @@
+-{
+-  "name": "com.outbreakstudios.clog.base"
+-}
+\ No newline at end of file
+diff --git a/src/lib/package.json b/src/lib/package.json
+deleted file mode 100644
+index 08efc69..0000000
+--- a/src/lib/package.json
++++ /dev/null
+@@ -1,13 +0,0 @@
+-{
+-  "name": "com.outbreakstudios.clog.base",
+-  "version": "0.0.1",
+-  "description": "Simple log library based on clog",
+-  "displayName": "Outbreak Studios - Clog",
+-  "unity": "2021.3",
+-  "author": {
+-    "name": "Outbreak Studios",
+-    "email": "info@outbreakstudios.com",
+-    "url": "https://outbreakstudios.com"
+-  },
+-  "license": "MIT"
+-}
+diff --git a/src/obj.meta b/src/obj.meta
+new file mode 100644
+index 0000000..a8e9ee9
+--- /dev/null
++++ b/src/obj.meta
+@@ -0,0 +1,8 @@
++fileFormatVersion: 2
++guid: 400a56be94d334957a993d56cae605c8
++folderAsset: yes
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/src/src.sln b/src/src.sln
+new file mode 100644
+index 0000000..dd960f8
+--- /dev/null
++++ b/src/src.sln
+@@ -0,0 +1,25 @@
++﻿
++Microsoft Visual Studio Solution File, Format Version 12.00
++# Visual Studio Version 17
++VisualStudioVersion = 17.5.002.0
++MinimumVisualStudioVersion = 10.0.40219.1
++Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clog", "Clog.csproj", "{D58F4ED3-9D5E-4208-9E47-DBB3D80FDAD6}"
++EndProject
++Global
++	GlobalSection(SolutionConfigurationPlatforms) = preSolution
++		Debug|Any CPU = Debug|Any CPU
++		Release|Any CPU = Release|Any CPU
++	EndGlobalSection
++	GlobalSection(ProjectConfigurationPlatforms) = postSolution
++		{D58F4ED3-9D5E-4208-9E47-DBB3D80FDAD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
++		{D58F4ED3-9D5E-4208-9E47-DBB3D80FDAD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
++		{D58F4ED3-9D5E-4208-9E47-DBB3D80FDAD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
++		{D58F4ED3-9D5E-4208-9E47-DBB3D80FDAD6}.Release|Any CPU.Build.0 = Release|Any CPU
++	EndGlobalSection
++	GlobalSection(SolutionProperties) = preSolution
++		HideSolutionNode = FALSE
++	EndGlobalSection
++	GlobalSection(ExtensibilityGlobals) = postSolution
++		SolutionGuid = {A32A1C6D-F860-4C26-BBF9-8A3CF6D26BA8}
++	EndGlobalSection
++EndGlobal
+diff --git a/src/src.sln.meta b/src/src.sln.meta
+new file mode 100644
+index 0000000..426f507
+--- /dev/null
++++ b/src/src.sln.meta
+@@ -0,0 +1,7 @@
++fileFormatVersion: 2
++guid: 9ceac21878ffd4f4ba92fcc26780d548
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 

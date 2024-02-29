@@ -1,0 +1,17 @@
+{
+  "name": "network.piot.nimble.authoritative.steps.tests",
+  "references": [
+    "network.piot.nimble.authoritative.steps",
+    "UnityEditor.TestRunner",
+    "network.piot.flood",
+    "network.piot.tick",
+    "network.piot.clog",
+    "network.piot.nimble.steps"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ]
+}

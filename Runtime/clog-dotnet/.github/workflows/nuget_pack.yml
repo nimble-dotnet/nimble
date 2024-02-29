@@ -1,0 +1,21 @@
+name: Nuget Pack
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  pack:
+    name: Pack Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Pack
+        run: dotnet pack
+        working-directory: src/
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          path: src/bin/Debug/*.nupkg

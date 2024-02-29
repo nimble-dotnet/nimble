@@ -1,0 +1,16 @@
+{
+  "name": "network.piot.tick",
+  "version": "0.0.1",
+  "displayName": "Tick",
+  "description": "Tick types and serialization",
+  "unity": "2021.3",
+  "dependencies": {
+    "network.piot.flood": "0.0.1"
+  },
+  "author": {
+    "name": "Peter Bjorklund",
+    "email": "piot@hotmail.com",
+    "url": "https://github.com/piot"
+  },
+  "license": "MIT"
+}

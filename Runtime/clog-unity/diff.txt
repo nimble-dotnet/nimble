@@ -1,0 +1,204 @@
+commit 204b6369faee0bd8fce07f7bbaa1c61087366ad9
+Author: Peter Bjorklund <piot@hotmail.com>
+Date:   Sun Sep 24 08:54:32 2023 +0200
+
+    chore: move directory
+
+diff --git a/LICENSE.meta b/LICENSE.meta
+new file mode 100644
+index 0000000..ba84794
+--- /dev/null
++++ b/LICENSE.meta
+@@ -0,0 +1,7 @@
++fileFormatVersion: 2
++guid: 2b903059716f241b596db1f3360124a4
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Piot.Clog.Unity.meta b/Piot.Clog.Unity.meta
+new file mode 100644
+index 0000000..e127094
+--- /dev/null
++++ b/Piot.Clog.Unity.meta
+@@ -0,0 +1,8 @@
++fileFormatVersion: 2
++guid: 61a026e470a2646c185695939eb5f5bd
++folderAsset: yes
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Piot.Clog.Unity/Piot.Clog.Unity.asmdef b/Piot.Clog.Unity/Piot.Clog.Unity.asmdef
+new file mode 100644
+index 0000000..7632f88
+--- /dev/null
++++ b/Piot.Clog.Unity/Piot.Clog.Unity.asmdef
+@@ -0,0 +1,9 @@
++{
++  "name": "Piot.Clog.Unity",
++  "references": [
++    "Piot.Clog"
++  ],
++  "dependencies": {
++    "network.piot.clog.dotnet": "0.0.1"
++  }
++}
+\ No newline at end of file
+diff --git a/src/lib/com.outbreakstudios.clog.unity.asmdef.meta b/Piot.Clog.Unity/Piot.Clog.Unity.asmdef.meta
+similarity index 76%
+rename from src/lib/com.outbreakstudios.clog.unity.asmdef.meta
+rename to Piot.Clog.Unity/Piot.Clog.Unity.asmdef.meta
+index 5474b68..5555fb8 100644
+--- a/src/lib/com.outbreakstudios.clog.unity.asmdef.meta
++++ b/Piot.Clog.Unity/Piot.Clog.Unity.asmdef.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: 8bbbe233b054f1d4886608dc86c6abe0
++guid: c0dc6f49f20ff4cbcbbc2fffcb7b5428
+ AssemblyDefinitionImporter:
+   externalObjects: {}
+   userData: 
+diff --git a/src/lib/UnityLogger.cs b/Piot.Clog.Unity/UnityLogger.cs
+similarity index 98%
+rename from src/lib/UnityLogger.cs
+rename to Piot.Clog.Unity/UnityLogger.cs
+index 1049fff..84199b9 100644
+--- a/src/lib/UnityLogger.cs
++++ b/Piot.Clog.Unity/UnityLogger.cs
+@@ -5,6 +5,7 @@
+ 
+ using System;
+ using Piot.Clog;
++using UnityEditor.PackageManager;
+ using UnityEngine;
+ 
+ namespace Piot.Clog.Unity
+@@ -28,13 +29,13 @@ namespace Piot.Clog.Unity
+ 
+             return Color(message, noticeColorName, true);
+         }
+-        
++
+         public void Log(LogLevel level, string prefix, string message, object[] args)
+         {
+             var messageWithValues = ArgumentReplace.ReplaceArgumentsWithValues(message, args);
+ 
+             var msg = $"<b>{prefix}</b>: {ColorMessage(level, messageWithValues)}";
+-            
++
+             switch (level)
+             {
+                 case LogLevel.LowLevel:
+diff --git a/src/lib/UnityLogger.cs.meta b/Piot.Clog.Unity/UnityLogger.cs.meta
+similarity index 83%
+rename from src/lib/UnityLogger.cs.meta
+rename to Piot.Clog.Unity/UnityLogger.cs.meta
+index 67f333a..83fdd4a 100644
+--- a/src/lib/UnityLogger.cs.meta
++++ b/Piot.Clog.Unity/UnityLogger.cs.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: 32b1412d5eaebfa4bafcd48d78e0fb9b
++guid: ca7c0e9cca92f4dd9a3f46c9b9e593de
+ MonoImporter:
+   externalObjects: {}
+   serializedVersion: 2
+diff --git a/README.md.meta b/README.md.meta
+new file mode 100644
+index 0000000..4f522fc
+--- /dev/null
++++ b/README.md.meta
+@@ -0,0 +1,7 @@
++fileFormatVersion: 2
++guid: b2577e52c04be4cd49b17b53fe51f906
++TextScriptImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..3fd12bb
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,13 @@
++{
++  "name": "network.piot.clog.unity",
++  "version": "0.0.1",
++  "description": "Log output for Unity",
++  "displayName": "Clog Unity",
++  "unity": "2021.3",
++  "author": {
++    "name": "Peter Bjorklund",
++    "email": "piot@hotmail.com",
++    "url": "https://github.com/piot"
++  },
++  "license": "MIT"
++}
+\ No newline at end of file
+diff --git a/src/lib/package.json.meta b/package.json.meta
+similarity index 76%
+rename from src/lib/package.json.meta
+rename to package.json.meta
+index 4db5674..55a8cbe 100644
+--- a/src/lib/package.json.meta
++++ b/package.json.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: f47c96aacfa201a4fa8c7c4e7ed55383
++guid: d3700522244a945879d4e80f8b850204
+ PackageManifestImporter:
+   externalObjects: {}
+   userData: 
+diff --git a/src/lib.meta b/src/lib.meta
+new file mode 100644
+index 0000000..2cabb10
+--- /dev/null
++++ b/src/lib.meta
+@@ -0,0 +1,8 @@
++fileFormatVersion: 2
++guid: e5f1e793af8794f78b65dfd1d142fe3a
++folderAsset: yes
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/src/lib/com.outbreakstudios.clog.unity.asmdef b/src/lib/com.outbreakstudios.clog.unity.asmdef
+deleted file mode 100644
+index 3ea9640..0000000
+--- a/src/lib/com.outbreakstudios.clog.unity.asmdef
++++ /dev/null
+@@ -1,9 +0,0 @@
+-{
+-  "name": "com.outbreakstudios.clog.unity",
+-  "references": [
+-    "com.outbreakstudios.clog.base"
+-  ],
+-  "dependencies": {
+-    "com.outbreakstudios.clog.base": "0.0.1"
+-  }
+-}
+\ No newline at end of file
+diff --git a/src/lib/package.json b/src/lib/package.json
+deleted file mode 100644
+index b5735b7..0000000
+--- a/src/lib/package.json
++++ /dev/null
+@@ -1,13 +0,0 @@
+-{
+-  "name": "com.outbreakstudios.clog.unity",
+-  "version": "0.0.1",
+-  "description": "Log output for Unity",
+-  "displayName": "Outbreak Studios - Clog Unity",
+-  "unity": "2021.3",
+-  "author": {
+-    "name": "Outbreak Studios",
+-    "email": "info@outbreakstudios.com",
+-    "url": "https://outbreakstudios.com"
+-  },
+-  "license": "MIT"
+-}
