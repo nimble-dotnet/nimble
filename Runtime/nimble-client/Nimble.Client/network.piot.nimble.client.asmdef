@@ -1,0 +1,12 @@
+{
+  "name": "network.piot.nimble.client",
+  "references": [
+    "network.piot.tick",
+    "network.piot.flood",
+    "network.piot.monotonic-time",
+    "network.piot.clog",
+    "network.piot.monotonic-time.lower-bits",
+    "network.piot.nimble.steps",
+    "network.piot.nimble.authoritative.steps"
+  ]
+}

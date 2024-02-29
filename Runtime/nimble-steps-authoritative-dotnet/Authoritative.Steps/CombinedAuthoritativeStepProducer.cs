@@ -1,4 +1,3 @@
-using Nimble.Authoritative.Steps;
 using Piot.Clog;
 using Piot.Tick;
 
@@ -10,6 +9,8 @@ namespace Nimble.Authoritative.Steps
 		private CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
 		private TickId tickId;
 		private ILog log;
+
+		public CombinedAuthoritativeStepsQueue AuthoritativeStepsQueue => combinedAuthoritativeStepsQueue;
 
 		public CombinedAuthoritativeStepProducer(TickId tickId, ParticipantConnections connections, ILog log)
 		{

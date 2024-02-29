@@ -23,6 +23,11 @@ namespace Nimble.Authoritative.Steps
 			participantConnections.Remove(participantConnection.participantId.id);
 		}
 
+		public ParticipantConnection GetParticipantConnection(ParticipantId participantId)
+		{
+			return participantConnections[participantId.id];
+		}
+
 		public ParticipantId GetFreeParticipantId()
 		{
 			for (var i = (byte)0; i < 64; ++i)
@@ -33,7 +38,7 @@ namespace Nimble.Authoritative.Steps
 				}
 			}
 
-			throw new Exception($"out of participant Ids");
+			throw new Exception("out of participant Ids");
 		}
 	}
 

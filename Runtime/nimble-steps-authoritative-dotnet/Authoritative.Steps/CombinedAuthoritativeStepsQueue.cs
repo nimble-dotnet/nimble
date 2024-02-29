@@ -22,6 +22,8 @@ namespace Nimble.Authoritative.Steps
 
 		public int Count => queue.Count;
 
+		public bool IsEmpty => Count == 0;
+
 		public TickId WaitingForTickId => waitingForTickId;
 
 		public CombinedAuthoritativeStep Last => queue.Last();

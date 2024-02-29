@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Collections.Generic;
 using Piot.Tick;
 
 
@@ -17,6 +18,17 @@ namespace Piot.Nimble.Steps
         }
     }
 
+
+    public class PredictedStepsLocalPlayers
+    {
+        public Dictionary<LocalPlayerIndex, PredictedStepsQueue> predictedStepsQueues = new();
+
+        public PredictedStepsQueue GetStepsQueueForLocalPlayer(LocalPlayerIndex playerIndex)
+        {
+            return predictedStepsQueues[playerIndex];
+        }
+        
+    }
 
     public readonly struct PredictedStepsForAllLocalPlayers
     {
