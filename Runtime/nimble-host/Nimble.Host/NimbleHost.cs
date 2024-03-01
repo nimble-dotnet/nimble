@@ -14,9 +14,16 @@ namespace Piot.Nimble.Host
 		public CombinedAuthoritativeStepProducer authoritativeStepProducer;
 		public ParticipantConnections participantConnections = new();
 
+		private HostDatagram fakeDatagram;
+
 		public NimbleHost(TickId startId, ILog log)
 		{
 			authoritativeStepProducer = new CombinedAuthoritativeStepProducer(startId, participantConnections, log);
+			fakeDatagram = new HostDatagram
+			{
+				connection = 0,
+				payload = new byte[] { 0xca, 0xfe }
+			};
 		}
 
 		public void ReceiveDatagram(in HostDatagram datagram)
@@ -30,6 +37,6 @@ namespace Piot.Nimble.Host
 			authoritativeStepProducer.ComposeOneStep();
 		}
 
-		public IEnumerable<HostDatagram> DatagramsToSend => new List<HostDatagram>();
+		public IEnumerable<HostDatagram> DatagramsToSend => new List<HostDatagram> { fakeDatagram };
 	}
 }
