@@ -7,6 +7,7 @@
     "network.piot.clog",
     "network.piot.monotonic-time.lower-bits",
     "network.piot.nimble.steps",
-    "network.piot.nimble.authoritative.steps"
+    "network.piot.nimble.authoritative.steps",
+    "network.piot.datagram"
   ]
 }

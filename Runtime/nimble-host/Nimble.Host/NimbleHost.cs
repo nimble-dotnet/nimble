@@ -3,17 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Nimble.Authoritative.Steps;
 using Piot.Clog;
+using Piot.Datagram;
 using Piot.Nimble.Steps;
 using Piot.Tick;
 
 namespace Piot.Nimble.Host
 {
-	public struct NimbleHostDatagram
-	{
-		public ConnectionId connectionId;
-		public Memory<byte> payload;
-	}
-	
 	public class NimbleHost
 	{
 		public CombinedAuthoritativeStepProducer authoritativeStepProducer;
@@ -24,20 +19,17 @@ namespace Piot.Nimble.Host
 			authoritativeStepProducer = new CombinedAuthoritativeStepProducer(startId, participantConnections, log);
 		}
 
-		public void ReceiveDatagram(ConnectionId connectionId, ReadOnlySpan<byte> span)
+		public void ReceiveDatagram(in HostDatagram datagram)
 		{
 			var participantConnection = participantConnections.GetParticipantConnection(new ParticipantId(0));
 			participantConnection.incomingSteps.AddPredictedStep(new PredictedStep());
 		}
 
-		public void Update()
+		public void Tick(TickId simulationTickId)
 		{
 			authoritativeStepProducer.ComposeOneStep();
 		}
 
-		public IEnumerable<NimbleHostDatagram> DatagramsToSend()
-		{
-			return new List<NimbleHostDatagram>();
-		}
+		public IEnumerable<HostDatagram> DatagramsToSend => new List<HostDatagram>();
 	}
 }

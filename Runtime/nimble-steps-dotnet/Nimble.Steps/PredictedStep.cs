@@ -10,91 +10,95 @@ using Piot.Tick;
 
 namespace Piot.Nimble.Steps
 {
-    public static class CompareOctets
-    {
-        public static bool Compare(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
-        {
-            return a.SequenceEqual(b);
-        }
-    }
+	public static class CompareOctets
+	{
+		public static bool Compare(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
+		{
+			return a.SequenceEqual(b);
+		}
+	}
 
 
-    public class PredictedStepsLocalPlayers
-    {
-        public Dictionary<LocalPlayerIndex, PredictedStepsQueue> predictedStepsQueues = new();
+	public class PredictedStepsLocalPlayers
+	{
+		public Dictionary<LocalPlayerIndex, PredictedStepsQueue> predictedStepsQueues = new();
 
-        public PredictedStepsQueue GetStepsQueueForLocalPlayer(LocalPlayerIndex playerIndex)
-        {
-            return predictedStepsQueues[playerIndex];
-        }
-        
-    }
+		public PredictedStepsQueue GetStepsQueueForLocalPlayer(LocalPlayerIndex playerIndex)
+		{
+			return predictedStepsQueues[playerIndex];
+		}
 
-    public readonly struct PredictedStepsForAllLocalPlayers
-    {
-        public readonly PredictedStepsForPlayer[] stepsForEachPlayerInSequence;
+		public void CreateLocalPlayer(LocalPlayerIndex playerIndex)
+		{
+			predictedStepsQueues.Add(playerIndex, new PredictedStepsQueue());
+		}
+	}
 
-        public TickId debugFirstId => stepsForEachPlayerInSequence.Length == 0 ||
-                                      stepsForEachPlayerInSequence[0].steps.Length == 0
-            ? default
-            : stepsForEachPlayerInSequence[0].steps[0].appliedAtTickId;
+	public readonly struct PredictedStepsForAllLocalPlayers
+	{
+		public readonly PredictedStepsForPlayer[] stepsForEachPlayerInSequence;
 
-        public TickId debugLastId => stepsForEachPlayerInSequence.Length == 0 ||
-                                     stepsForEachPlayerInSequence[0].steps.Length == 0
-            ? default
-            : stepsForEachPlayerInSequence[0].steps[^1].appliedAtTickId;
+		public TickId debugFirstId => stepsForEachPlayerInSequence.Length == 0 ||
+		                              stepsForEachPlayerInSequence[0].steps.Length == 0
+			? default
+			: stepsForEachPlayerInSequence[0].steps[0].appliedAtTickId;
 
-        public PredictedStepsForAllLocalPlayers(PredictedStepsForPlayer[] stepsForEachPlayerInSequence)
-        {
-            this.stepsForEachPlayerInSequence = stepsForEachPlayerInSequence;
-        }
-    }
+		public TickId debugLastId => stepsForEachPlayerInSequence.Length == 0 ||
+		                             stepsForEachPlayerInSequence[0].steps.Length == 0
+			? default
+			: stepsForEachPlayerInSequence[0].steps[^1].appliedAtTickId;
 
-    public struct PredictedStepsForPlayer
-    {
-        public PredictedStep[] steps;
-        public LocalPlayerIndex localPlayerIndex;
+		public PredictedStepsForAllLocalPlayers(PredictedStepsForPlayer[] stepsForEachPlayerInSequence)
+		{
+			this.stepsForEachPlayerInSequence = stepsForEachPlayerInSequence;
+		}
+	}
 
-        public PredictedStepsForPlayer(LocalPlayerIndex localPlayerIndex,
-            PredictedStep[] steps)
-        {
-            this.localPlayerIndex = localPlayerIndex;
-            this.steps = steps;
-        }
-    }
-    
+	public struct PredictedStepsForPlayer
+	{
+		public PredictedStep[] steps;
+		public LocalPlayerIndex localPlayerIndex;
 
-    /// <summary>
-    ///     Serialized Game specific input step in the <see cref="PredictedStep.payload" />.
-    /// </summary>
-    public readonly struct PredictedStep
-    {
-        public readonly TickId appliedAtTickId;
-        public readonly ReadOnlyMemory<byte> payload;
+		public PredictedStepsForPlayer(LocalPlayerIndex localPlayerIndex,
+			PredictedStep[] steps)
+		{
+			this.localPlayerIndex = localPlayerIndex;
+			this.steps = steps;
+		}
+	}
 
-        public PredictedStep(TickId appliedAtTickId, ReadOnlySpan<byte> payload)
-        {
-            this.appliedAtTickId = appliedAtTickId;
-            this.payload = payload.ToArray();
-        }
 
-        public override bool Equals(object? obj)
-        {
-            if (obj is null)
-            {
-                return false;
-            }
+	/// <summary>
+	///     Serialized Game specific input step in the <see cref="PredictedStep.payload" />.
+	/// </summary>
+	public readonly struct PredictedStep
+	{
+		public readonly TickId appliedAtTickId;
+		public readonly ReadOnlyMemory<byte> payload;
 
-            var other = (PredictedStep)obj;
+		public PredictedStep(TickId appliedAtTickId, ReadOnlySpan<byte> payload)
+		{
+			this.appliedAtTickId = appliedAtTickId;
+			this.payload = payload.ToArray();
+		}
 
-            return other.appliedAtTickId.tickId == appliedAtTickId.tickId &&
-                   CompareOctets.Compare(other.payload.Span, payload.Span);
-        }
+		public override bool Equals(object? obj)
+		{
+			if(obj is null)
+			{
+				return false;
+			}
 
-        public readonly override string ToString()
-        {
-            return
-                $"[PredictedStep TickId:{appliedAtTickId} octetSize:{payload.Length}]";
-        }
-    }
+			var other = (PredictedStep)obj;
+
+			return other.appliedAtTickId.tickId == appliedAtTickId.tickId &&
+			       CompareOctets.Compare(other.payload.Span, payload.Span);
+		}
+
+		public readonly override string ToString()
+		{
+			return
+				$"[PredictedStep TickId:{appliedAtTickId} octetSize:{payload.Length}]";
+		}
+	}
 }

@@ -8,7 +8,7 @@ namespace Nimble.Authoritative.Steps
 	{
 		public readonly Dictionary<byte, ParticipantConnection> participantConnections = new();
 
-		public ParticipantConnection CreateParticipantConnection(ConnectionId connectionId)
+		public ParticipantConnection CreateParticipantConnection(byte connectionId)
 		{
 			var newParticipantId = GetFreeParticipantId();
 			var newConnection = new ParticipantConnection(newParticipantId);
@@ -39,16 +39,6 @@ namespace Nimble.Authoritative.Steps
 			}
 
 			throw new Exception("out of participant Ids");
-		}
-	}
-
-	public class ConnectionId
-	{
-		public byte id;
-
-		public ConnectionId(byte id)
-		{
-			this.id = id;
 		}
 	}
 }
