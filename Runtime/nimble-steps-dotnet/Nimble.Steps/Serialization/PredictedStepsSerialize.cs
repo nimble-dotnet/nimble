@@ -67,12 +67,12 @@ namespace Piot.Nimble.Steps.Serialization
 					if(predictedStep.appliedAtTickId.tickId != expectedTickIdValue)
 					{
 						throw new(
-							$"logical input in wrong order in collection. Expected {expectedTickIdValue} but received {predictedStep.appliedAtTickId.tickId}");
+							$"predicted step in wrong order in collection. Expected {expectedTickIdValue} but received {predictedStep.appliedAtTickId.tickId}");
 					}
 
 					OctetMarker.WriteMarker(writer, Constants.PredictedStepsPayloadHeaderMarker);
 
-					log.Debug("writing  {{TickID}} {{PayloadLength}}", predictedStep.appliedAtTickId,
+					log.Debug("writing predicted step {{TickID}} {{PayloadLength}}", predictedStep.appliedAtTickId,
 						(byte)predictedStep.payload.Length);
 					writer.WriteUInt8((byte)predictedStep.payload.Length);
 					writer.WriteOctets(predictedStep.payload.Span);

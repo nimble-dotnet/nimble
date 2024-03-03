@@ -7,10 +7,12 @@ namespace Nimble.Authoritative.Steps
 	{
 		public PredictedStepsQueue incomingSteps = new();
 		public ParticipantId participantId;
+		private LocalPlayerIndex localPlayerIndex;
 
-		public ParticipantConnection(ParticipantId participantId)
+		public ParticipantConnection(ParticipantId participantId, LocalPlayerIndex localPlayerIndex)
 		{
 			this.participantId = participantId;
+			this.localPlayerIndex = localPlayerIndex;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Nimble.Authoritative.Steps;
+using Piot.Nimble.Steps;
 
 namespace Nimble.Authoritative.Steps
 {
@@ -8,10 +9,10 @@ namespace Nimble.Authoritative.Steps
 	{
 		public readonly Dictionary<byte, ParticipantConnection> participantConnections = new();
 
-		public ParticipantConnection CreateParticipantConnection(byte connectionId)
+		public ParticipantConnection CreateParticipantConnection(byte connectionId, LocalPlayerIndex localPlayerIndex)
 		{
 			var newParticipantId = GetFreeParticipantId();
-			var newConnection = new ParticipantConnection(newParticipantId);
+			var newConnection = new ParticipantConnection(newParticipantId, localPlayerIndex);
 
 			participantConnections.Add(newParticipantId.id, newConnection);
 
@@ -27,6 +28,7 @@ namespace Nimble.Authoritative.Steps
 		{
 			return participantConnections[participantId.id];
 		}
+
 
 		public ParticipantId GetFreeParticipantId()
 		{
