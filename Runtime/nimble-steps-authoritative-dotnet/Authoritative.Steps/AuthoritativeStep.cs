@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Piot.Nimble.Steps;
 using Piot.Tick;
 
@@ -22,8 +23,31 @@ namespace Nimble.Authoritative.Steps
 			return authoritativeSteps[participantId];
 		}
 	}
-	
-	
+
+	public class CombinedAuthoritativeSteps
+	{
+		private CombinedAuthoritativeStep[] steps;
+		private TickIdRange range;
+
+		public CombinedAuthoritativeSteps(CombinedAuthoritativeStep[] steps)
+		{
+			this.steps = steps;
+			range = new TickIdRange(steps[0].appliedAtTickId, steps[^1].appliedAtTickId);
+		}
+
+		public IReadOnlyCollection<CombinedAuthoritativeStep> FromRange(TickIdRange filterRange)
+		{
+			if(!filterRange.Contains(filterRange))
+			{
+				throw new Exception($"can not query {filterRange} from {range}");
+			}
+
+			var startIndex = range.Offset(filterRange);
+
+			return steps.Skip((int)startIndex).Take((int)filterRange.Length).ToArray();
+		}
+	}
+
 
 	public readonly struct AuthoritativeStep
 	{

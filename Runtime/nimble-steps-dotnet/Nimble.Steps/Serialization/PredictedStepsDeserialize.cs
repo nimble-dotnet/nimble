@@ -27,7 +27,7 @@ namespace Piot.Nimble.Steps.Serialization
 			if(localPlayerCount == 0)
 			{
 				log.Notice("no player count");
-				return default;
+				return new(Array.Empty<PredictedStepsForPlayer>());
 			}
 
 			var players = new List<PredictedStepsForPlayer>();
@@ -55,6 +55,7 @@ namespace Piot.Nimble.Steps.Serialization
 					{
 						throw new("suspicious step deltaSnapshotPackPayload octet count");
 					}
+
 					log.Debug("deserialize payload {{PayloadOctetCount}}", payloadOctetCount);
 
 					PredictedStep predictedStep = new(new((uint)(firstFrameId.tickId + i)),

@@ -67,6 +67,16 @@ namespace Piot.Tick
 
             return (other.startTickId.tickId - startTickId.tickId, other.lastTickId.tickId - startTickId.tickId);
         }
+        
+        public uint Offset(TickIdRange other)
+        {
+            if (!Contains(other))
+            {
+                throw new ArgumentOutOfRangeException(nameof(other));
+            }
+
+            return other.startTickId.tickId - startTickId.tickId;
+        }
 
         public uint Length => lastTickId.tickId - startTickId.tickId + 1;
 

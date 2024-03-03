@@ -83,6 +83,11 @@ namespace Piot.Tick
             return new(a.tickId + b.tickId);
         }
 
+        public static TickId operator +(TickId a, uint delta)
+        {
+            return new(a.tickId + delta);
+        }
+
 
         public bool Equals(TickId other)
         {
