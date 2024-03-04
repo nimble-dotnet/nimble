@@ -5,6 +5,7 @@ using Piot.Datagram;
 using Piot.Flood;
 using Piot.Nimble.Steps.Serialization;
 using Piot.Tick;
+using UnityEngine;
 
 namespace Piot.Nimble.Host
 {
@@ -26,11 +27,16 @@ namespace Piot.Nimble.Host
 
 		public void ReceiveDatagram(in HostDatagram datagram)
 		{
+			log.Debug($"receive datagram {{OctetCount}} from {{Connection}}", datagram.payload.Length,
+				datagram.connection);
 			var hostConnection = hostConnections.GetOrCreateConnection(datagram.connection);
 
 			var reader = new OctetReader(datagram.payload.Span);
 
 			var predictedStepsForAllLocalPlayers = PredictedStepsDeserialize.Deserialize(reader, log);
+
+			log.Debug("received datagram {{PredictedStepsFromClient}}", predictedStepsForAllLocalPlayers);
+
 			foreach (var predictedStepsForPlayer in predictedStepsForAllLocalPlayers.stepsForEachPlayerInSequence)
 			{
 				var existingLocalPlayer =
@@ -49,8 +55,13 @@ namespace Piot.Nimble.Host
 
 				foreach (var predictedStep in predictedStepsForPlayer.steps)
 				{
-					log.Debug("adding incoming predicted step {{LocalPlayerIndex}} {{PredictedStepTick}}",
-						predictedStepsForPlayer.localPlayerIndex, predictedStep.appliedAtTickId);
+					if(predictedStep.appliedAtTickId < participantConnection.incomingSteps.WaitingForTickId)
+					{
+						continue;
+					}
+
+//					log.Debug("adding incoming predicted step {{LocalPlayerIndex}} {{PredictedStepTick}}",
+//						predictedStepsForPlayer.localPlayerIndex, predictedStep.appliedAtTickId);
 					participantConnection.incomingSteps.AddPredictedStep(predictedStep);
 				}
 			}
@@ -58,18 +69,22 @@ namespace Piot.Nimble.Host
 
 		public void Tick(TickId simulationTickId)
 		{
-			authoritativeStepProducer.ComposeOneStep();
+			authoritativeStepProducer.Tick();
 
 			outDatagrams.Clear();
 
 			var authoritativeStepsQueue = authoritativeStepProducer.AuthoritativeStepsQueue;
 
+			const uint MaximumAuthoritativeSteps = 32;
 			// HACK: For now just send the last authoritative steps
-			if(authoritativeStepsQueue.Count > 15)
+			if(authoritativeStepsQueue.Count > MaximumAuthoritativeSteps)
 			{
-				var diff = 15 - authoritativeStepsQueue.Count;
+				var diff = authoritativeStepsQueue.Count - MaximumAuthoritativeSteps;
+				var oldestTickId = authoritativeStepsQueue.Peek().appliedAtTickId;
+				log.Debug("Too many authoritative steps composed, discarding from {{TickID}} {{Count}}", oldestTickId,
+					diff);
 				authoritativeStepsQueue.DiscardUpToAndExcluding(
-					new((uint)(authoritativeStepsQueue.Peek().appliedAtTickId.tickId + diff)));
+					new((uint)(oldestTickId.tickId + diff)));
 			}
 
 			var allAuthoritativeSteps = authoritativeStepsQueue.Collection;
@@ -87,11 +102,15 @@ namespace Piot.Nimble.Host
 			{
 				// TODO: Find out range for host connection
 				var hostRanges = new List<TickIdRange> { range };
+
+				log.Debug("decision is to send combined authoritative step range {{Range}}", range);
 				var hostConnectionRange = new TickIdRanges { ranges = hostRanges };
 
 				outWriter.Reset();
 
-				CombinedRangesWriter.Write(combinedSteps, hostConnectionRange, outWriter);
+				CombinedRangesWriter.Write(combinedSteps, hostConnectionRange, outWriter, log);
+
+				log.Debug("combined authoritative step range {{OctetSize}}", outWriter.Position);
 
 				var outDatagram = new HostDatagram
 				{

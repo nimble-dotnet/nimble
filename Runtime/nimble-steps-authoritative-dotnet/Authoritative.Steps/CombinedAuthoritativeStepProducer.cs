@@ -9,6 +9,7 @@ namespace Nimble.Authoritative.Steps
 		private CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
 		private TickId tickId;
 		private ILog log;
+		public uint timer;
 
 		public CombinedAuthoritativeStepsQueue AuthoritativeStepsQueue => combinedAuthoritativeStepsQueue;
 
@@ -20,14 +21,54 @@ namespace Nimble.Authoritative.Steps
 			combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
 		}
 
-		public CombinedAuthoritativeStep ComposeOneStep()
+		private CombinedAuthoritativeStep ComposeOneStep()
 		{
 			var combinedAuthoritativeStep = Combiner.ComposeOneAuthoritativeSteps(connections, tickId, log);
 			tickId = tickId.Next;
-			
+
 			combinedAuthoritativeStepsQueue.Add(combinedAuthoritativeStep);
 
 			return combinedAuthoritativeStep;
+		}
+
+		private bool TryToComposeOneStep()
+		{
+			var percentageThatAreReady = connections.PercentageThatHasPredictedStepForAtLeast(tickId);
+			if(percentageThatAreReady == 100 || timer > 3)
+			{
+				if(percentageThatAreReady == 100)
+				{
+					log.Debug("{{Percentage}} says that we should compose am authoritative step for {{TickID}}",
+						percentageThatAreReady, tickId);
+				}
+				else
+				{
+					log.Debug("{{Timeout}} says that we should compose an authoritative step for {{TickID}}", timer, tickId);
+				}
+
+				ComposeOneStep();
+				timer = 0;
+				return true;
+			}
+			
+			if(percentageThatAreReady >= 50)
+			{
+				timer++;
+			}
+			else
+			{
+				log.Debug("only {{Percentage}} are ready for {{TickID}} , waiting with authoritative step", percentageThatAreReady, tickId);
+			}
+
+			return false;
+		}
+
+		public void Tick()
+		{
+			while (TryToComposeOneStep())
+			{
+				
+			}
 		}
 	}
 }

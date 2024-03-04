@@ -36,8 +36,6 @@ namespace Piot.Nimble.Steps.Serialization
 				var stepCount = reader.ReadUInt8();
 				var localPlayerId = reader.ReadUInt8();
 
-				log.Debug("deserialize {{LocalPlayerId}} {{StepCount}}", localPlayerId, stepCount);
-
 				if(stepCount == 0)
 				{
 					throw new Exception($"zero count payload is not allowed");
@@ -51,15 +49,18 @@ namespace Piot.Nimble.Steps.Serialization
 				{
 					OctetMarker.AssertMarker(reader, Constants.PredictedStepsPayloadHeaderMarker);
 					var payloadOctetCount = reader.ReadUInt8();
-					if(payloadOctetCount > 70)
+					if(payloadOctetCount > 20)
 					{
-						throw new("suspicious step deltaSnapshotPackPayload octet count");
+						throw new($"suspicious step predicted step octet count {payloadOctetCount}");
 					}
 
-					log.Debug("deserialize payload {{PayloadOctetCount}}", payloadOctetCount);
+//					log.Debug("deserialize predicted payload {{PayloadOctetCount}}", payloadOctetCount);
 
-					PredictedStep predictedStep = new(new((uint)(firstFrameId.tickId + i)),
+					var predictedStep = new PredictedStep(new((uint)(firstFrameId.tickId + i)),
 						reader.ReadOctets(payloadOctetCount));
+
+					///					log.Debug("deserialized predicted step {{LocalPlayerId}} {{PredictedStep}}", localPlayerId,
+					//					predictedStep);
 
 					array[i] = predictedStep;
 				}

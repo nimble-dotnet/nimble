@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Nimble.Authoritative.Steps;
 using Piot.Nimble.Steps;
+using Piot.Tick;
 
 namespace Nimble.Authoritative.Steps
 {
@@ -41,6 +42,28 @@ namespace Nimble.Authoritative.Steps
 			}
 
 			throw new Exception("out of participant Ids");
+		}
+
+		public uint PercentageThatHasPredictedStepForAtLeast(TickId tickId)
+		{
+			if(participantConnections.Count == 0)
+			{
+				return 0;
+			}
+			
+			var count = 0u;
+
+			foreach (var participant in participantConnections.Values)
+			{
+				if(participant.incomingSteps.HasStepForAtLeastTickId(tickId))
+				{
+					count++;
+				}
+			}
+
+			var percentage = count * 100 / participantConnections.Count;
+
+			return (uint)percentage;
 		}
 	}
 }

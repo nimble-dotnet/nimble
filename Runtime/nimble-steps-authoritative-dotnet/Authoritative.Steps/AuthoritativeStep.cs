@@ -18,9 +18,36 @@ namespace Nimble.Authoritative.Steps
 			appliedAtTickId = tickId;
 		}
 
+		public bool TryGetAuthoritativeStep(ParticipantId participantId, out AuthoritativeStep authoritativeStep)
+		{
+			return authoritativeSteps.TryGetValue(participantId, out authoritativeStep);
+		}
+
 		public AuthoritativeStep GetAuthoritativeStep(ParticipantId participantId)
 		{
 			return authoritativeSteps[participantId];
+		}
+
+		public static string AuthoritativeStepsToString(Dictionary<ParticipantId, AuthoritativeStep> steps)
+		{
+			if(steps.Count == 0)
+			{
+				return "  completely empty";
+			}
+			
+			var s = "";
+			
+			foreach (var (participantId, authoritativeStep) in steps)
+			{
+				s += $"\n {participantId}: {authoritativeStep}";
+			}
+
+			return s;
+		}
+
+		public override string ToString()
+		{
+			return $"{appliedAtTickId}: {AuthoritativeStepsToString(authoritativeSteps)}";
 		}
 	}
 
@@ -87,7 +114,7 @@ namespace Nimble.Authoritative.Steps
 		public override string ToString()
 		{
 			return
-				$"[PredictedStep TickId:{appliedAtTickId} octetSize:{payload.Length}]";
+				$"[AuthoritativeStep TickId:{appliedAtTickId} octetSize:{payload.Length} state:{connectState}]";
 		}
 	}
 }

@@ -43,10 +43,10 @@ namespace Piot.Nimble.Steps
 			}
 			else
 			{
-				if(predictedStep.appliedAtTickId.tickId == waitingForTickId.tickId)
+				if(predictedStep.appliedAtTickId.tickId < waitingForTickId.tickId)
 				{
 					throw new Exception(
-						$"you tried to add a prediction for a step that is already added to the prediction queuee {waitingForTickId}");
+						$"you tried to add a prediction for a step that has already passed in the prediction queue. was waiting for {waitingForTickId} and you provided {predictedStep.appliedAtTickId}");
 				}
 
 				if(predictedStep.appliedAtTickId.tickId > waitingForTickId.tickId)
@@ -67,7 +67,7 @@ namespace Piot.Nimble.Steps
 			queue.Clear();
 		}
 
-		public bool HasInputForTickId(TickId tickId)
+		public bool HasStepForTickId(TickId tickId)
 		{
 			if(queue.Count == 0)
 			{
@@ -78,6 +78,18 @@ namespace Piot.Nimble.Steps
 			var lastTick = waitingForTickId.tickId - 1;
 
 			return tickId.tickId >= firstTickId && tickId.tickId <= lastTick;
+		}
+
+		public bool HasStepForAtLeastTickId(TickId tickId)
+		{
+			if(queue.Count == 0)
+			{
+				return false;
+			}
+
+			var lastTick = waitingForTickId.tickId - 1;
+
+			return lastTick >= tickId.tickId;
 		}
 
 		public PredictedStep GetInputFromTickId(TickId tickId)
@@ -111,6 +123,13 @@ namespace Piot.Nimble.Steps
 		public PredictedStep Dequeue()
 		{
 			return queue.Dequeue();
+		}
+
+		public override string ToString()
+		{
+			return queue.Count == 0
+				? "[PredictedStepsQueue empty]"
+				: $"[PredictedStepsQueue first: {Peek().appliedAtTickId} last: {waitingForTickId.tickId - 1}]";
 		}
 	}
 }

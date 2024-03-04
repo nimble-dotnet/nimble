@@ -10,7 +10,7 @@ using Constants = Piot.Datagram.Constants;
 
 namespace Piot.Nimble.Client
 {
-	public class NimbleSendClient
+	public sealed class NimbleSendClient
 	{
 		public const uint MaxOctetSize = 1024;
 		public PredictedStepsLocalPlayers predictedSteps;
@@ -33,6 +33,9 @@ namespace Piot.Nimble.Client
 
 			octetWriter.Reset();
 			PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);
+
+			log.Debug("predicted steps to send to the host {{OctetCount}}", octetWriter.Position);
+
 			clientOutDatagrams.Clear();
 
 			if(octetWriter.Position > Constants.MaxDatagramOctetSize)
@@ -59,21 +62,36 @@ namespace Piot.Nimble.Client
 			var maxOctetSizePerPlayer = MaxOctetSize / localPlayerCount;
 			foreach (var (playerIndex, predictedStepsQueue) in predictedSteps.predictedStepsQueues)
 			{
+				// HACK, Make sure predicted queues aren't too big
+				if(predictedStepsQueue.Count > 25)
+				{
+					var diff = predictedStepsQueue.Count - 25;
+					predictedStepsQueue.DiscardUpToAndExcluding(new(
+						(uint)(predictedStepsQueue.Peek().appliedAtTickId.tickId +
+						       diff)));
+				}
+
 				var allPredictedSteps = predictedStepsQueue.Collection;
+				log.Debug("Decide how many to filter out from {PredictedStepCount}", allPredictedSteps.Length);
+
 				if(allPredictedSteps.Length == 0)
 				{
 					continue;
 				}
-				log.Debug("prepare predictedStep for {{PlayerIndex}}", playerIndex);
+
+				//		log.Debug("prepare predictedStep for {{PlayerIndex}}", playerIndex);
 
 				var octetCount = 0;
 				var stepCount = 0;
 				foreach (var predictedStep in allPredictedSteps)
 				{
-					log.Debug($"prepare predictedStep: {{PlayerIndex}} {{TickID}}", playerIndex, predictedStep.appliedAtTickId);
+//					log.Debug($"prepare predictedStep: {{PlayerIndex}} {{TickID}}", playerIndex,
+//						predictedStep.appliedAtTickId);
 					octetCount += predictedStep.payload.Length + 2;
 					if(octetCount > maxOctetSizePerPlayer)
 					{
+						log.Debug("we reached our limit, break here {OctetCount} {MaxOctetSizePerPlayer}", octetCount,
+							maxOctetSizePerPlayer);
 						break;
 					}
 
@@ -85,6 +103,9 @@ namespace Piot.Nimble.Client
 					log.Notice("didnt have room to add a single step into the buffer {{MaxOctetSizePerPlayer}}",
 						maxOctetSizePerPlayer);
 				}
+
+				log.Debug("filtered out {{StepCount}} predicted steps to send for {{PlayerIndex}}", stepCount,
+					playerIndex);
 
 				var filteredOutSteps = allPredictedSteps.Take(stepCount);
 

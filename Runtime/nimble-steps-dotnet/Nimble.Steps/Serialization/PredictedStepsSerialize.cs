@@ -58,8 +58,8 @@ namespace Piot.Nimble.Steps.Serialization
 
 				var first = stepsForPlayer.steps[0];
 				TickIdWriter.Write(writer, first.appliedAtTickId);
-				log.Notice("first {{TickCount}} {{LocalPlayerID}}  {{TickID}}", tickCount,
-					stepsForPlayer.localPlayerIndex, first.appliedAtTickId);
+//				log.Notice("first {{TickCount}} {{LocalPlayerID}}  {{TickID}}", tickCount,
+//					stepsForPlayer.localPlayerIndex, first.appliedAtTickId);
 				var expectedTickIdValue = first.appliedAtTickId.tickId;
 
 				foreach (var predictedStep in stepsForPlayer.steps)
@@ -72,8 +72,8 @@ namespace Piot.Nimble.Steps.Serialization
 
 					OctetMarker.WriteMarker(writer, Constants.PredictedStepsPayloadHeaderMarker);
 
-					log.Debug("writing predicted step {{TickID}} {{PayloadLength}}", predictedStep.appliedAtTickId,
-						(byte)predictedStep.payload.Length);
+//					log.Debug("writing predicted step {{TickID}} {{PayloadLength}}", predictedStep.appliedAtTickId,
+//						(byte)predictedStep.payload.Length);
 					writer.WriteUInt8((byte)predictedStep.payload.Length);
 					writer.WriteOctets(predictedStep.payload.Span);
 

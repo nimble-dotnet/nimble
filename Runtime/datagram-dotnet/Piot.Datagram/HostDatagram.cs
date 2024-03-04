@@ -6,5 +6,10 @@ namespace Piot.Datagram
     {
         public byte connection;
         public Memory<byte> payload;
+
+        public override string ToString()
+        {
+            return $"[HostDatagram connection:{connection} octetSize:{payload.Length}]";
+        }
     }
 }

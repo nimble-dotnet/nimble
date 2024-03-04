@@ -52,6 +52,23 @@ namespace Piot.Nimble.Steps
 		{
 			this.stepsForEachPlayerInSequence = stepsForEachPlayerInSequence;
 		}
+
+		private static string PredictedStepsForPlayers(PredictedStepsForPlayer[] stepsForEachPlayerInSequence)
+		{
+			var s = "";
+
+			foreach (var stepsForPlayer in stepsForEachPlayerInSequence)
+			{
+				s += $"\n  {stepsForPlayer}";
+			}
+
+			return s;
+		}
+
+		public override string ToString()
+		{
+			return $"[PredictedFromLocalPlayers {stepsForEachPlayerInSequence}";
+		}
 	}
 
 	public struct PredictedStepsForPlayer
@@ -64,6 +81,23 @@ namespace Piot.Nimble.Steps
 		{
 			this.localPlayerIndex = localPlayerIndex;
 			this.steps = steps;
+		}
+
+		private static string PredictedStepsToString(PredictedStep[] predictedSteps)
+		{
+			var s = "";
+
+			foreach (var predictedStep in predictedSteps)
+			{
+				s += $"\n  {predictedStep}";
+			}
+
+			return s;
+		}
+
+		public override string ToString()
+		{
+			return $"[PredictedStepsForPlayer {localPlayerIndex}: {PredictedStepsToString(steps)}]";
 		}
 	}
 
@@ -95,7 +129,7 @@ namespace Piot.Nimble.Steps
 			       CompareOctets.Compare(other.payload.Span, payload.Span);
 		}
 
-		public readonly override string ToString()
+		public override string ToString()
 		{
 			return
 				$"[PredictedStep TickId:{appliedAtTickId} octetSize:{payload.Length}]";
