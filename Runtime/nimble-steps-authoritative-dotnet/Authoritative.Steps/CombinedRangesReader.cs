@@ -33,7 +33,7 @@ namespace Nimble.Authoritative.Steps
 					}
 					else
 					{
-						log.Notice("ignoring authoritative step {{TickId}}, was waiting for {{WaitingTickId}}", tickId, combinedAuthoritativeSteps.WaitingForTickId);
+						//log.Notice("ignoring authoritative step {{TickId}}, was waiting for {{WaitingTickId}}", tickId, combinedAuthoritativeSteps.WaitingForTickId);
 					}
 				}
 			}
