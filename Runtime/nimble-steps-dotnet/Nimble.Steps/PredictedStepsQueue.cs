@@ -87,7 +87,7 @@ namespace Piot.Nimble.Steps
 				return false;
 			}
 
-			var lastTick = waitingForTickId.tickId - 1;
+			var lastTick = (int)waitingForTickId.tickId - 1;
 
 			return lastTick >= tickId.tickId;
 		}
