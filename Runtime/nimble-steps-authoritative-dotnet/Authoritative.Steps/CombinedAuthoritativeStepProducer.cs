@@ -5,7 +5,7 @@ namespace Nimble.Authoritative.Steps
 {
 	public class CombinedAuthoritativeStepProducer
 	{
-		private Participants connections;
+		private Participants participants;
 		private CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
 		private TickId tickId;
 		private ILog log;
@@ -13,17 +13,17 @@ namespace Nimble.Authoritative.Steps
 
 		public CombinedAuthoritativeStepsQueue AuthoritativeStepsQueue => combinedAuthoritativeStepsQueue;
 
-		public CombinedAuthoritativeStepProducer(TickId tickId, Participants connections, ILog log)
+		public CombinedAuthoritativeStepProducer(TickId tickId, Participants participants, ILog log)
 		{
 			this.tickId = tickId;
 			this.log = log;
-			this.connections = connections;
+			this.participants = participants;
 			combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
 		}
 
 		private CombinedAuthoritativeStep ComposeOneStep()
 		{
-			var combinedAuthoritativeStep = Combiner.ComposeOneAuthoritativeSteps(connections, tickId, log);
+			var combinedAuthoritativeStep = Combiner.ComposeOneAuthoritativeSteps(participants, tickId, log);
 			tickId = tickId.Next;
 
 			combinedAuthoritativeStepsQueue.Add(combinedAuthoritativeStep);
@@ -33,7 +33,7 @@ namespace Nimble.Authoritative.Steps
 
 		private bool TryToComposeOneStep()
 		{
-			var percentageThatAreReady = connections.PercentageThatHasPredictedStepForAtLeast(tickId);
+			var percentageThatAreReady = participants.PercentageThatHasPredictedStepForAtLeast(tickId);
 			if(percentageThatAreReady == 100 || timer > 3)
 			{
 				if(percentageThatAreReady == 100)
@@ -51,7 +51,7 @@ namespace Nimble.Authoritative.Steps
 				return true;
 			}
 			
-			if(percentageThatAreReady >= 50)
+			if(percentageThatAreReady >= 100) // TODO: Move back to 50
 			{
 				timer++;
 			}
