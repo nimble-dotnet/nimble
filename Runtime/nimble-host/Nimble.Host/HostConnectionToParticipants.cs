@@ -5,17 +5,17 @@ namespace Nimble.Authoritative.Steps
 {
 	public class ConnectionToParticipants
 	{
-		public Dictionary<LocalPlayerIndex, ParticipantConnection> connections = new();
+		public Dictionary<LocalPlayerIndex, Participant> connections = new();
 
 		public bool TryGetParticipantConnectionFromLocalPlayer(LocalPlayerIndex localPlayerIndex,
-			out ParticipantConnection participantConnection)
+			out Participant participant)
 		{
-			return connections.TryGetValue(localPlayerIndex, out participantConnection);
+			return connections.TryGetValue(localPlayerIndex, out participant);
 		}
 
-		public void Add(LocalPlayerIndex localPlayerIndex, ParticipantConnection participantConnection)
+		public void Add(LocalPlayerIndex localPlayerIndex, Participant participant)
 		{
-			connections.Add(localPlayerIndex, participantConnection);
+			connections.Add(localPlayerIndex, participant);
 		}
 	}
 }

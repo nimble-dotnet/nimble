@@ -12,7 +12,7 @@ namespace Piot.Nimble.Host
 	public class NimbleHost
 	{
 		public CombinedAuthoritativeStepProducer authoritativeStepProducer;
-		public ParticipantConnections participantConnections = new();
+		public Participants participants = new();
 		public HostConnections hostConnections = new();
 		private List<HostDatagram> outDatagrams = new();
 		private OctetWriter outWriter = new(1024);
@@ -21,7 +21,7 @@ namespace Piot.Nimble.Host
 
 		public NimbleHost(TickId startId, ILog log)
 		{
-			authoritativeStepProducer = new CombinedAuthoritativeStepProducer(startId, participantConnections, log);
+			authoritativeStepProducer = new CombinedAuthoritativeStepProducer(startId, participants, log);
 			this.log = log;
 		}
 
@@ -39,30 +39,31 @@ namespace Piot.Nimble.Host
 
 			foreach (var predictedStepsForPlayer in predictedStepsForAllLocalPlayers.stepsForEachPlayerInSequence)
 			{
-				var existingLocalPlayer =
+				var hasExistingParticipant =
 					hostConnection.connectionToParticipants.TryGetParticipantConnectionFromLocalPlayer(
 						predictedStepsForPlayer
-							.localPlayerIndex, out var participantConnection);
-				if(!existingLocalPlayer)
+							.localPlayerIndex, out var participant);
+				if(!hasExistingParticipant)
 				{
-					log.Debug("detected a new local player {{LocalPlayer}} creating a new participant connection",
+					participant = participants.CreateParticipant(datagram.connection,
 						predictedStepsForPlayer.localPlayerIndex);
-					participantConnection = participantConnections.CreateParticipantConnection(datagram.connection,
-						predictedStepsForPlayer.localPlayerIndex);
+
+					log.Debug("detect new local player index, creating a new {{Participant}} for {{Connection}} and {{LocalIndex}}",
+						participant, hostConnection, predictedStepsForPlayer.localPlayerIndex);
 					hostConnection.connectionToParticipants.Add(predictedStepsForPlayer.localPlayerIndex,
-						participantConnection);
+						participant);
 				}
 
 				foreach (var predictedStep in predictedStepsForPlayer.steps)
 				{
-					if(predictedStep.appliedAtTickId < participantConnection.incomingSteps.WaitingForTickId)
+					if(predictedStep.appliedAtTickId < participant.incomingSteps.WaitingForTickId)
 					{
 						continue;
 					}
 
-//					log.Debug("adding incoming predicted step {{LocalPlayerIndex}} {{PredictedStepTick}}",
-//						predictedStepsForPlayer.localPlayerIndex, predictedStep.appliedAtTickId);
-					participantConnection.incomingSteps.AddPredictedStep(predictedStep);
+					log.Debug("adding incoming predicted step {{Participant}} {{PredictedStepTick}}",
+						participant, predictedStep.appliedAtTickId);
+					participant.incomingSteps.AddPredictedStep(predictedStep);
 				}
 			}
 		}
@@ -95,6 +96,7 @@ namespace Piot.Nimble.Host
 
 			var range = new TickIdRange(allAuthoritativeSteps[0].appliedAtTickId,
 				allAuthoritativeSteps[^1].appliedAtTickId);
+			log.Debug("total authoritative steps in NimbleHost {Range}", range);
 
 			var combinedSteps = new CombinedAuthoritativeSteps(allAuthoritativeSteps);
 

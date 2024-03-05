@@ -57,13 +57,13 @@ public class AuthoritativeStepsTests
 
 		var startId = new TickId(13);
 
-		var participantConnections = new ParticipantConnections();
+		var participantConnections = new Participants();
 
 		const int NUMBER_OF_PARTICIPANTS = 3;
 		for (var playerIndex = 0; playerIndex < NUMBER_OF_PARTICIPANTS; ++playerIndex)
 		{
 			var participantConnection =
-				participantConnections.CreateParticipantConnection(0, new LocalPlayerIndex((byte)playerIndex));
+				participantConnections.CreateParticipant(0, new LocalPlayerIndex((byte)playerIndex));
 			FillPredictedSteps((uint)(startId.tickId + playerIndex), 10, participantConnection.incomingSteps);
 		}
 

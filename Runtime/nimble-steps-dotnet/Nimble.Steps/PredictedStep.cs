@@ -67,7 +67,7 @@ namespace Piot.Nimble.Steps
 
 		public override string ToString()
 		{
-			return $"[PredictedFromLocalPlayers {stepsForEachPlayerInSequence}";
+			return $"[PredictedFromLocalPlayers {PredictedStepsForPlayers(stepsForEachPlayerInSequence)}";
 		}
 	}
 

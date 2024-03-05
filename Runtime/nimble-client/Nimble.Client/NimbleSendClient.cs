@@ -85,8 +85,8 @@ namespace Piot.Nimble.Client
 				var stepCount = 0;
 				foreach (var predictedStep in allPredictedSteps)
 				{
-//					log.Debug($"prepare predictedStep: {{PlayerIndex}} {{TickID}}", playerIndex,
-//						predictedStep.appliedAtTickId);
+					log.Debug($"prepare predictedStep: {{PlayerIndex}} {{TickID}}", playerIndex,
+						predictedStep.appliedAtTickId);
 					octetCount += predictedStep.payload.Length + 2;
 					if(octetCount > maxOctetSizePerPlayer)
 					{

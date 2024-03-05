@@ -5,7 +5,7 @@ namespace Nimble.Authoritative.Steps
 {
 	public class CombinedAuthoritativeStepProducer
 	{
-		private ParticipantConnections connections;
+		private Participants connections;
 		private CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
 		private TickId tickId;
 		private ILog log;
@@ -13,7 +13,7 @@ namespace Nimble.Authoritative.Steps
 
 		public CombinedAuthoritativeStepsQueue AuthoritativeStepsQueue => combinedAuthoritativeStepsQueue;
 
-		public CombinedAuthoritativeStepProducer(TickId tickId, ParticipantConnections connections, ILog log)
+		public CombinedAuthoritativeStepProducer(TickId tickId, Participants connections, ILog log)
 		{
 			this.tickId = tickId;
 			this.log = log;

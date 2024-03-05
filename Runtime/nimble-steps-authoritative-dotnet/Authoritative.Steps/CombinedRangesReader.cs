@@ -28,12 +28,12 @@ namespace Nimble.Authoritative.Steps
 						//log.Debug("did read combined authoritative {{combinedAuthoritativeStep}}", combinedAuthoritativeStep);
 					if(tickId == combinedAuthoritativeSteps.WaitingForTickId)
 					{
-//						log.Debug("adding authoritative step {{AuthoritativeStep}}", combinedAuthoritativeStep);
+						log.Debug("adding authoritative step {{AuthoritativeStep}} to nimble queue", combinedAuthoritativeStep);
 						combinedAuthoritativeSteps.Add(combinedAuthoritativeStep);
 					}
 					else
 					{
-						//log.Debug("ignoring authoritative step {{TickId}}, was waiting for {{WaitingTickId}}", tickId, combinedAuthoritativeSteps.WaitingForTickId);
+						log.Notice("ignoring authoritative step {{TickId}}, was waiting for {{WaitingTickId}}", tickId, combinedAuthoritativeSteps.WaitingForTickId);
 					}
 				}
 			}

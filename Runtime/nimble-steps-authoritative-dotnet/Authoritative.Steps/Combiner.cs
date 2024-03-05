@@ -30,11 +30,11 @@ namespace Nimble.Authoritative.Steps
 	public class Combiner
 	{
 		public static CombinedAuthoritativeStep ComposeOneAuthoritativeSteps(
-			ParticipantConnections connections, TickId tickIdToCompose, ILog log)
+			Participants connections, TickId tickIdToCompose, ILog log)
 		{
 			var combined = new CombinedAuthoritativeStep(tickIdToCompose);
 
-			foreach (var (participantId, participantConnection) in connections.participantConnections)
+			foreach (var (participantId, participantConnection) in connections.participants)
 			{
 				var incomingPredictedSteps = participantConnection.incomingSteps;
 				SerializeProviderConnectState connectState = SerializeProviderConnectState.Normal;

@@ -14,7 +14,7 @@ namespace Nimble.Authoritative.Steps
 				return hostConnection;
 			}
 
-			var newConnection = new HostConnection();
+			var newConnection = new HostConnection(connectionId);
 			connections.Add(connectionId, newConnection);
 
 			return newConnection;
