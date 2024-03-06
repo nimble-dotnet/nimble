@@ -54,7 +54,7 @@ namespace Piot.Nimble.Steps.Serialization
 						throw new($"suspicious step predicted step octet count {payloadOctetCount}");
 					}
 
-//					log.Debug("deserialize predicted payload {{PayloadOctetCount}}", payloadOctetCount);
+//					log.Debug("deserialize predicted payload {PayloadOctetCount}", payloadOctetCount);
 
 					var predictedStep = new PredictedStep(new((uint)(firstFrameId.tickId + i)),
 						reader.ReadOctets(payloadOctetCount));

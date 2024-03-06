@@ -13,12 +13,12 @@ namespace Nimble.Authoritative.Steps
 		{
 			//TickIdWriter.Write(outStream, ranges.ranges[0].startTickId);
 			var rangesCount = reader.ReadUInt8();
-			log.Debug("Read combined authoritative steps {{RangeCount}}", rangesCount);
+			log.Debug("Read combined authoritative steps {RangeCount}", rangesCount);
 
 			for (var i = 0; i < rangesCount; ++i)
 			{
 				var tickIdRange = TickIdRangeReader.Read(reader);
-				log.Debug("Read combined authoritative {{Index}} {{Range}}", i, tickIdRange);
+				log.Debug("Read combined authoritative {Index} {Range}", i, tickIdRange);
 
 				for (var stepIndex = 0u; stepIndex < tickIdRange.Length; ++stepIndex)
 				{
@@ -28,7 +28,7 @@ namespace Nimble.Authoritative.Steps
 						//log.Debug("did read combined authoritative {{combinedAuthoritativeStep}}", combinedAuthoritativeStep);
 					if(tickId == combinedAuthoritativeSteps.WaitingForTickId)
 					{
-						log.Debug("adding authoritative step {{AuthoritativeStep}} to nimble queue", combinedAuthoritativeStep);
+						log.Debug("adding authoritative step {AuthoritativeStep} to nimble queue", combinedAuthoritativeStep);
 						combinedAuthoritativeSteps.Add(combinedAuthoritativeStep);
 					}
 					else

@@ -15,7 +15,7 @@ namespace Nimble.Authoritative.Steps
 
 		public override string ToString()
 		{
-			return $"[participant {id}]";
+			return $"[participantId {id}]";
 		}
 	}
 

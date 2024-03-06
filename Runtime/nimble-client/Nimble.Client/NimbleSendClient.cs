@@ -34,7 +34,7 @@ namespace Piot.Nimble.Client
 			octetWriter.Reset();
 			PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);
 
-			log.Debug("predicted steps to send to the host {{OctetCount}}", octetWriter.Position);
+			log.Debug("predicted steps to send to the host {OctetCount}", octetWriter.Position);
 
 			clientOutDatagrams.Clear();
 
@@ -85,8 +85,8 @@ namespace Piot.Nimble.Client
 				var stepCount = 0;
 				foreach (var predictedStep in allPredictedSteps)
 				{
-					log.Debug($"prepare predictedStep: {{PlayerIndex}} {{TickID}}", playerIndex,
-						predictedStep.appliedAtTickId);
+//					log.Debug($"prepare predictedStep: {{PlayerIndex}} {{TickID}}", playerIndex,
+//						predictedStep.appliedAtTickId);
 					octetCount += predictedStep.payload.Length + 2;
 					if(octetCount > maxOctetSizePerPlayer)
 					{
@@ -100,11 +100,11 @@ namespace Piot.Nimble.Client
 
 				if(stepCount == 0)
 				{
-					log.Notice("didnt have room to add a single step into the buffer {{MaxOctetSizePerPlayer}}",
+					log.Notice("didnt have room to add a single step into the buffer {MaxOctetSizePerPlayer}",
 						maxOctetSizePerPlayer);
 				}
 
-				log.Debug("filtered out {{StepCount}} predicted steps to send for {{PlayerIndex}}", stepCount,
+				log.Debug("filtered out {StepCount} predicted steps to send for {PlayerIndex}", stepCount,
 					playerIndex);
 
 				var filteredOutSteps = allPredictedSteps.Take(stepCount);

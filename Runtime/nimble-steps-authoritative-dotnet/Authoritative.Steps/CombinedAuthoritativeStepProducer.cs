@@ -38,12 +38,12 @@ namespace Nimble.Authoritative.Steps
 			{
 				if(percentageThatAreReady == 100)
 				{
-					log.Debug("{{Percentage}} says that we should compose am authoritative step for {{TickID}}",
+					log.Debug("{Percentage} says that we should compose am authoritative step for {{TickID}}",
 						percentageThatAreReady, tickId);
 				}
 				else
 				{
-					log.Debug("{{Timeout}} says that we should compose an authoritative step for {{TickID}}", timer, tickId);
+					log.Debug("{Timeout} says that we should compose an authoritative step for {{TickID}}", timer, tickId);
 				}
 
 				ComposeOneStep();
@@ -51,13 +51,13 @@ namespace Nimble.Authoritative.Steps
 				return true;
 			}
 			
-			if(percentageThatAreReady >= 100) // TODO: Move back to 50
+			if(percentageThatAreReady >= 50) // TODO: Move back to 50
 			{
 				timer++;
 			}
 			else
 			{
-				log.Debug("only {{Percentage}} are ready for {{TickID}} , waiting with authoritative step", percentageThatAreReady, tickId);
+				log.Debug("only {Percentage} are ready for {TickID} , waiting with authoritative step", percentageThatAreReady, tickId);
 			}
 
 			return false;

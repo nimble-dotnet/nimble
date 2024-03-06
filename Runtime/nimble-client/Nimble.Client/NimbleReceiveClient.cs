@@ -19,7 +19,7 @@ namespace Piot.Nimble.Client
 
 		public void ReceiveDatagram(ReadOnlySpan<byte> payload)
 		{
-			log.Debug("Received datagram of {{Size}}", payload.Length);
+			log.Debug("Received datagram of {Size}", payload.Length);
 
 			var reader = new OctetReader(payload);
 			CombinedRangesReader.Read(combinedAuthoritativeStepsQueue, reader, log);

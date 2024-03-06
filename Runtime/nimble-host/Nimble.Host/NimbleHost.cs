@@ -27,7 +27,7 @@ namespace Piot.Nimble.Host
 
 		public void ReceiveDatagram(in HostDatagram datagram)
 		{
-			log.Debug($"receive datagram {{OctetCount}} from {{Connection}}", datagram.payload.Length,
+			log.DebugLowLevel("receive datagram {OctetCount} from {Connection}", datagram.payload.Length,
 				datagram.connection);
 			var hostConnection = hostConnections.GetOrCreateConnection(datagram.connection);
 
@@ -35,7 +35,7 @@ namespace Piot.Nimble.Host
 
 			var predictedStepsForAllLocalPlayers = PredictedStepsDeserialize.Deserialize(reader, log);
 
-			log.Debug("received datagram {{PredictedStepsFromClient}}", predictedStepsForAllLocalPlayers);
+			log.DebugLowLevel("received predicted steps {PredictedStepsFromClient}", predictedStepsForAllLocalPlayers);
 
 			foreach (var predictedStepsForPlayer in predictedStepsForAllLocalPlayers.stepsForEachPlayerInSequence)
 			{
@@ -48,7 +48,7 @@ namespace Piot.Nimble.Host
 					participant = participants.CreateParticipant(datagram.connection,
 						predictedStepsForPlayer.localPlayerIndex);
 
-					log.Debug("detect new local player index, creating a new {{Participant}} for {{Connection}} and {{LocalIndex}}",
+					log.Info("detect new local player index, creating a new {Participant} for {Connection} and {LocalIndex}",
 						participant, hostConnection, predictedStepsForPlayer.localPlayerIndex);
 					hostConnection.connectionToParticipants.Add(predictedStepsForPlayer.localPlayerIndex,
 						participant);
@@ -61,7 +61,7 @@ namespace Piot.Nimble.Host
 						continue;
 					}
 
-					log.Debug("adding incoming predicted step {{Participant}} {{PredictedStepTick}}",
+					log.DebugLowLevel("adding incoming predicted step {Participant} {PredictedStepTick}",
 						participant, predictedStep.appliedAtTickId);
 					participant.incomingSteps.AddPredictedStep(predictedStep);
 				}
@@ -82,7 +82,7 @@ namespace Piot.Nimble.Host
 			{
 				var diff = authoritativeStepsQueue.Count - MaximumAuthoritativeSteps;
 				var oldestTickId = authoritativeStepsQueue.Peek().appliedAtTickId;
-				log.Debug("Too many authoritative steps composed, discarding from {{TickID}} {{Count}}", oldestTickId,
+				log.Debug("Too many authoritative steps composed, discarding from {TickID} {Count}", oldestTickId,
 					diff);
 				authoritativeStepsQueue.DiscardUpToAndExcluding(
 					new((uint)(oldestTickId.tickId + diff)));
@@ -96,7 +96,7 @@ namespace Piot.Nimble.Host
 
 			var range = new TickIdRange(allAuthoritativeSteps[0].appliedAtTickId,
 				allAuthoritativeSteps[^1].appliedAtTickId);
-			log.Debug("total authoritative steps in NimbleHost {Range}", range);
+			log.DebugLowLevel("total authoritative steps in NimbleHost {Range}", range);
 
 			var combinedSteps = new CombinedAuthoritativeSteps(allAuthoritativeSteps);
 
@@ -105,14 +105,14 @@ namespace Piot.Nimble.Host
 				// TODO: Find out range for host connection
 				var hostRanges = new List<TickIdRange> { range };
 
-				log.Debug("decision is to send combined authoritative step range {{Range}}", range);
+				log.Debug("decision is to send combined authoritative step range {Range}", range);
 				var hostConnectionRange = new TickIdRanges { ranges = hostRanges };
 
 				outWriter.Reset();
 
 				CombinedRangesWriter.Write(combinedSteps, hostConnectionRange, outWriter, log);
 
-				log.Debug("combined authoritative step range {{OctetSize}}", outWriter.Position);
+				log.Debug("combined authoritative step range {OctetSize}", outWriter.Position);
 
 				var outDatagram = new HostDatagram
 				{

@@ -58,7 +58,7 @@ namespace Piot.Nimble.Steps.Serialization
 
 				var first = stepsForPlayer.steps[0];
 				TickIdWriter.Write(writer, first.appliedAtTickId);
-//				log.Notice("first {{TickCount}} {{LocalPlayerID}}  {{TickID}}", tickCount,
+//				log.Notice("first {TickCount} {LocalPlayerID}  {TickID}", tickCount,
 //					stepsForPlayer.localPlayerIndex, first.appliedAtTickId);
 				var expectedTickIdValue = first.appliedAtTickId.tickId;
 
