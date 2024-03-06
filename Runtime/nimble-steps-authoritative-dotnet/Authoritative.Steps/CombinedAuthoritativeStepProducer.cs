@@ -1,74 +1,58 @@
 using Piot.Clog;
 using Piot.Tick;
+using UnityEngine;
 
 namespace Nimble.Authoritative.Steps
 {
-	public class CombinedAuthoritativeStepProducer
-	{
-		private Participants participants;
-		private CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
-		private TickId tickId;
-		private ILog log;
-		public uint timer;
+    public class CombinedAuthoritativeStepProducer
+    {
+        private Participants participants;
+        private CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
+        private TickId tickId;
+        private ILog log;
 
-		public CombinedAuthoritativeStepsQueue AuthoritativeStepsQueue => combinedAuthoritativeStepsQueue;
+        public CombinedAuthoritativeStepsQueue AuthoritativeStepsQueue => combinedAuthoritativeStepsQueue;
 
-		public CombinedAuthoritativeStepProducer(TickId tickId, Participants participants, ILog log)
-		{
-			this.tickId = tickId;
-			this.log = log;
-			this.participants = participants;
-			combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
-		}
+        public CombinedAuthoritativeStepProducer(TickId tickId, Participants participants, ILog log)
+        {
+            this.tickId = tickId;
+            this.log = log;
+            this.participants = participants;
+            combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
+        }
 
-		private CombinedAuthoritativeStep ComposeOneStep()
-		{
-			var combinedAuthoritativeStep = Combiner.ComposeOneAuthoritativeSteps(participants, tickId, log);
-			tickId = tickId.Next;
+        private CombinedAuthoritativeStep ComposeOneStep()
+        {
+            var combinedAuthoritativeStep = Combiner.ComposeOneAuthoritativeSteps(participants, tickId, log);
+            tickId = tickId.Next;
 
-			combinedAuthoritativeStepsQueue.Add(combinedAuthoritativeStep);
+            combinedAuthoritativeStepsQueue.Add(combinedAuthoritativeStep);
 
-			return combinedAuthoritativeStep;
-		}
+            return combinedAuthoritativeStep;
+        }
 
-		private bool TryToComposeOneStep()
-		{
-			var percentageThatAreReady = participants.PercentageThatHasPredictedStepForAtLeast(tickId);
-			if(percentageThatAreReady == 100 || timer > 3)
-			{
-				if(percentageThatAreReady == 100)
-				{
-					log.Debug("{Percentage} says that we should compose am authoritative step for {{TickID}}",
-						percentageThatAreReady, tickId);
-				}
-				else
-				{
-					log.Debug("{Timeout} says that we should compose an authoritative step for {{TickID}}", timer, tickId);
-				}
+        private bool TryToComposeOneStep()
+        {
+            var isAnyoneAhead = participants.IsAnyoneAheadOfTheRequestedTickId(tickId);
+            if (!isAnyoneAhead)
+            {
+                return false;
+            }
+            
+            ComposeOneStep();
 
-				ComposeOneStep();
-				timer = 0;
-				return true;
-			}
-			
-			if(percentageThatAreReady >= 50) // TODO: Move back to 50
-			{
-				timer++;
-			}
-			else
-			{
-				log.Debug("only {Percentage} are ready for {TickID} , waiting with authoritative step", percentageThatAreReady, tickId);
-			}
+            return true;
+        }
 
-			return false;
-		}
-
-		public void Tick()
-		{
-			while (TryToComposeOneStep())
-			{
-				
-			}
-		}
-	}
+        public void Tick()
+        {
+            var stepsComposedCount = 0u;
+            while (TryToComposeOneStep())
+            {
+                stepsComposedCount++;
+            }
+            
+//            log.Warn("steps composed in one tick {StepsComposedCount}", stepsComposedCount);
+        }
+    }
 }

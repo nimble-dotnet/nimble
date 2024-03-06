@@ -1,75 +1,98 @@
 using System;
 using System.Collections.Generic;
-using Nimble.Authoritative.Steps;
 using Piot.Nimble.Steps;
 using Piot.Tick;
 
 namespace Nimble.Authoritative.Steps
 {
-	public class Participants
-	{
-		public readonly Dictionary<byte, Participant> participants = new();
+    public class Participants
+    {
+        public readonly Dictionary<byte, Participant> participants = new();
 
-		public Participant CreateParticipant(byte connectionId, LocalPlayerIndex localPlayerIndex)
-		{
-			var newParticipantId = GetFreeParticipantId();
-			var newConnection = new Participant(newParticipantId, localPlayerIndex);
+        public Participant CreateParticipant(byte connectionId, LocalPlayerIndex localPlayerIndex)
+        {
+            var newParticipantId = GetFreeParticipantId();
+            var newConnection = new Participant(newParticipantId, localPlayerIndex);
 
-			participants.Add(newParticipantId.id, newConnection);
+            participants.Add(newParticipantId.id, newConnection);
 
-			return newConnection;
-		}
+            return newConnection;
+        }
 
-		public void RemoveParticipant(Participant participant)
-		{
-			participants.Remove(participant.participantId.id);
-		}
+        public void RemoveParticipant(Participant participant)
+        {
+            participants.Remove(participant.participantId.id);
+        }
 
-		public Participant GetParticipant(ParticipantId participantId)
-		{
-			return participants[participantId.id];
-		}
+        public Participant GetParticipant(ParticipantId participantId)
+        {
+            return participants[participantId.id];
+        }
 
 
-		public ParticipantId GetFreeParticipantId()
-		{
-			for (var i = (byte)0; i < 64; ++i)
-			{
-				if(!participants.ContainsKey(i))
-				{
-					// HACK:
+        public ParticipantId GetFreeParticipantId()
+        {
+            for (var i = (byte)0; i < 64; ++i)
+            {
+                if (!participants.ContainsKey(i))
+                {
+                    // HACK:
 
-					if (i > 3)
-					{
-						throw new Exception($"only 0-3 are valid numbers in this nimble version {i}");
-					}
-					return new ParticipantId(i);
-				}
-			}
+                    if (i > 3)
+                    {
+                        throw new Exception($"only 0-3 are valid numbers in this nimble version {i}");
+                    }
 
-			throw new Exception("out of participant Ids");
-		}
+                    return new ParticipantId(i);
+                }
+            }
 
-		public uint PercentageThatHasPredictedStepForAtLeast(TickId tickId)
-		{
-			if(participants.Count == 0)
-			{
-				return 0;
-			}
-			
-			var count = 0u;
+            throw new Exception("out of participant Ids");
+        }
 
-			foreach (var participant in participants.Values)
-			{
-				if(participant.incomingSteps.HasStepForAtLeastTickId(tickId))
-				{
-					count++;
-				}
-			}
+        public bool IsAnyoneAheadOfTheRequestedTickId(TickId tickId)
+        {
+            if (participants.Count == 0)
+            {
+                return false;
+            }
 
-			var percentage = count * 100 / participants.Count;
+            var maxCount = 0u;
+            var connectionCountThatCouldNotContribute = 0u;
 
-			return (uint)percentage;
-		}
-	}
+            foreach (var participant in participants.Values)
+            {
+                if (participant.incomingSteps.IsEmpty)
+                {
+                    connectionCountThatCouldNotContribute++;
+                    continue;
+                }
+
+                // Is there a gap
+                if (participant.incomingSteps.Peek().appliedAtTickId > tickId)
+                {
+                    connectionCountThatCouldNotContribute++;
+                    continue;
+                }
+
+                var delta = (long)participant.incomingSteps.Last.appliedAtTickId.tickId - (long)tickId.tickId;
+                if (delta > maxCount)
+                {
+                    maxCount = (uint)delta;
+                }
+            }
+
+            switch (maxCount)
+            {
+                case > 6: // It is so much ahead, that we simply must do it
+                    return true;
+
+                case > 2:
+                    return connectionCountThatCouldNotContribute == 0;
+            }
+
+
+            return false;
+        }
+    }
 }

@@ -23,6 +23,8 @@ namespace Piot.Nimble.Steps
 
 		public int Count => queue.Count;
 
+		public bool IsEmpty => queue.Count == 0;
+
 		public TickId WaitingForTickId => waitingForTickId;
 
 		public bool IsInitialized { get; private set; }

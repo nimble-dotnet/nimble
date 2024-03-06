@@ -61,8 +61,8 @@ namespace Piot.Nimble.Host
 						continue;
 					}
 
-					log.DebugLowLevel("adding incoming predicted step {Participant} {PredictedStepTick}",
-						participant, predictedStep.appliedAtTickId);
+				//	log.Warn("adding incoming predicted step {Participant} {PredictedStepTick}",
+				//		participant, predictedStep.appliedAtTickId);
 					participant.incomingSteps.AddPredictedStep(predictedStep);
 				}
 			}

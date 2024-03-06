@@ -33,8 +33,9 @@ namespace Piot.Nimble.Client
 
 			octetWriter.Reset();
 			PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);
+			
 
-			log.Debug("predicted steps to send to the host {OctetCount}", octetWriter.Position);
+//			log.Warn($"decision to send predicted steps to send to the host {filteredOutPredictedStepsForLocalPlayers} {{OctetCount}}", octetWriter.Position);
 
 			clientOutDatagrams.Clear();
 
