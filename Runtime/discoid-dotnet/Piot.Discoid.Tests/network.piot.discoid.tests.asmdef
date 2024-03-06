@@ -1,0 +1,13 @@
+{
+  "name": "network.piot.discoid.tests",
+  "references": [
+    "network.piot.discoid",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ]
+}

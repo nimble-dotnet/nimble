@@ -1,0 +1,6 @@
+{
+  "name": "network.piot.discoid",
+  "references": [
+    "network.piot.clog"
+  ]
+}
