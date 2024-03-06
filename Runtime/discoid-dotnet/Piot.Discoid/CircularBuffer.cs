@@ -155,7 +155,7 @@ namespace Piot.Discoid
 
 			public void Reset()
 			{
-				currentIndex = queue.head;
+				currentIndex = queue.head - 1;
 				itemsEnumerated = 0;
 			}
 		}
