@@ -84,10 +84,10 @@ namespace Nimble.Authoritative.Steps
 
             switch (maxCount)
             {
-                case > 6: // It is so much ahead, that we simply must do it
+                case > 15: // It is so much ahead, that we simply must do it
                     return true;
 
-                case > 2:
+                case > 5:
                     return connectionCountThatCouldNotContribute == 0;
             }
 
