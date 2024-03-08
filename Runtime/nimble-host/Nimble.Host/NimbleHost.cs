@@ -78,17 +78,6 @@ namespace Piot.Nimble.Host
         public void Tick(TickId simulationTickId)
         {
             var authoritativeStepsQueue = authoritativeStepProducer.AuthoritativeStepsQueue;
-            var maximumAuthoritativeSteps = authoritativeStepsQueue.Capacity / 2;
-            // HACK: For now just send the last authoritative steps
-            if (authoritativeStepsQueue.Count > maximumAuthoritativeSteps)
-            {
-                var diff = authoritativeStepsQueue.Count - maximumAuthoritativeSteps;
-                var oldestTickId = authoritativeStepsQueue.Peek().appliedAtTickId;
-        //        log.Warn("Too many authoritative steps composed, discarding from {TickID} {Count}", oldestTickId,
-          //          diff);
-                authoritativeStepsQueue.DiscardUpToAndExcluding(
-                    new((uint)(oldestTickId.tickId + diff)));
-            }
 
             authoritativeStepProducer.Tick();
 

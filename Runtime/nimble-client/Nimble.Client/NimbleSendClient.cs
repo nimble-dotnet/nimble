@@ -106,7 +106,7 @@ namespace Piot.Nimble.Client
 
                 var filteredOutSteps = allPredictedSteps.Take(stepCount);
 
-                var predictedStepsForOnePlayer = new PredictedStepsForPlayer(playerIndex, filteredOutSteps.ToArray());
+                var predictedStepsForOnePlayer = new PredictedStepsForPlayer(new(playerIndex), filteredOutSteps.ToArray());
                 predictedStepsForPlayers.Add(predictedStepsForOnePlayer);
             }
 

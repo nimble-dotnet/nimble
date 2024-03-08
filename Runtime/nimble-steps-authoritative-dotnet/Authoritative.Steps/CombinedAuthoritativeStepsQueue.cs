@@ -14,7 +14,7 @@ namespace Nimble.Authoritative.Steps
     /// </summary>
     public sealed class CombinedAuthoritativeStepsQueue
     {
-        readonly CircularBuffer<CombinedAuthoritativeStep> queue = new(60);
+        readonly OverwriteCircularBuffer<CombinedAuthoritativeStep> queue = new(60);
 
         TickId waitingForTickId;
 

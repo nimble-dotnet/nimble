@@ -21,16 +21,16 @@ namespace Piot.Nimble.Steps
 
 	public class PredictedStepsLocalPlayers
 	{
-		public Dictionary<LocalPlayerIndex, PredictedStepsQueue> predictedStepsQueues = new();
+		public Dictionary<byte, PredictedStepsQueue> predictedStepsQueues = new();
 
 		public PredictedStepsQueue GetStepsQueueForLocalPlayer(LocalPlayerIndex playerIndex)
 		{
-			return predictedStepsQueues[playerIndex];
+			return predictedStepsQueues[playerIndex.Value];
 		}
 
 		public void CreateLocalPlayer(LocalPlayerIndex playerIndex)
 		{
-			predictedStepsQueues.Add(playerIndex, new PredictedStepsQueue());
+			predictedStepsQueues.Add(playerIndex.Value, new PredictedStepsQueue());
 		}
 	}
 

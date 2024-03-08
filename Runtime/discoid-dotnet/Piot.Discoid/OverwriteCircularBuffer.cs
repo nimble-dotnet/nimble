@@ -10,7 +10,7 @@ using UnityEditor;
 
 namespace Piot.Discoid
 {
-    public class CircularBuffer<T> : IEnumerable<T>
+    public class OverwriteCircularBuffer<T> : IEnumerable<T>
     {
         private readonly T[] buffer;
         private readonly int capacity;
@@ -18,7 +18,7 @@ namespace Piot.Discoid
         private int tail;
         private int count;
 
-        public CircularBuffer(int capacity)
+        public OverwriteCircularBuffer(int capacity)
         {
             this.capacity = capacity;
             buffer = new T[capacity];
@@ -29,25 +29,30 @@ namespace Piot.Discoid
 
         public void Enqueue(T item)
         {
-            if (count == capacity)
-            {
-                throw new InvalidOperationException("Queue is full");
-            }
-
             buffer[tail] = item;
             tail = (tail + 1) % capacity;
-            count++;
+            if (count < capacity)
+            {
+                count++;
+            }
+            else
+            {
+                head = (head + 1) % capacity;
+            }
         }
 
         public ref T EnqueueRef()
         {
-            if (count == capacity)
-            {
-                throw new InvalidOperationException("Queue is full");
-            }
             var oldTail = tail;
             tail = (tail + 1) % capacity;
-            count++;
+            if (count < capacity)
+            {
+                count++;
+            }
+            else
+            {
+                head = (head + 1) % capacity;
+            }
 
             return ref buffer[oldTail];
         }
@@ -126,8 +131,6 @@ namespace Piot.Discoid
 
         public bool IsEmpty => count == 0;
 
-        public bool IsFull => count == capacity;
-
         public IEnumerator<T> GetEnumerator()
         {
             return new Enumerator(this);
@@ -146,11 +149,11 @@ namespace Piot.Discoid
 
         private class Enumerator : IEnumerator<T>
         {
-            private readonly CircularBuffer<T> queue;
+            private readonly OverwriteCircularBuffer<T> queue;
             private int currentIndex;
             private int itemsEnumerated;
 
-            public Enumerator(CircularBuffer<T> queue)
+            public Enumerator(OverwriteCircularBuffer<T> queue)
             {
                 this.queue = queue;
                 currentIndex = queue.head - 1;
@@ -186,13 +189,13 @@ namespace Piot.Discoid
 
         private class RangeEnumerator : IEnumerator<T>
         {
-            private readonly CircularBuffer<T> queue;
+            private readonly OverwriteCircularBuffer<T> queue;
             private int currentIndex;
             private uint itemsEnumerated;
             private readonly uint targetCount;
             private readonly int startIndex;
 
-            public RangeEnumerator(CircularBuffer<T> queue, uint index, uint count)
+            public RangeEnumerator(OverwriteCircularBuffer<T> queue, uint index, uint count)
             {
                 this.queue = queue;
                 startIndex = (int)index;
