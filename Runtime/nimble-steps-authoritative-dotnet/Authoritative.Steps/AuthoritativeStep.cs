@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Piot.Nimble.Steps;
 using Piot.Tick;
-using UnityEngine;
 
 #nullable enable
 
@@ -51,32 +48,6 @@ namespace Nimble.Authoritative.Steps
 			return $"{appliedAtTickId}: {AuthoritativeStepsToString(authoritativeSteps)}";
 		}
 	}
-
-	/*
-	public class CombinedAuthoritativeSteps
-	{
-		private IEnumerable<CombinedAuthoritativeStep> steps;
-		private TickIdRange range;
-
-		public CombinedAuthoritativeSteps(IEnumerable<CombinedAuthoritativeStep> steps, TickIdRange range)
-		{
-			this.steps = steps;
-			this.range = range;
-		}
-
-		public IReadOnlyCollection<CombinedAuthoritativeStep> FromRange(TickIdRange filterRange)
-		{
-			if(!filterRange.Contains(filterRange))
-			{
-				throw new Exception($"can not query {filterRange} from {range}");
-			}
-
-			var startIndex = range.Offset(filterRange);
-
-			return steps.Skip((int)startIndex).Take((int)filterRange.Length).ToArray();
-		}
-	}
-*/
 
 	public readonly struct AuthoritativeStep
 	{

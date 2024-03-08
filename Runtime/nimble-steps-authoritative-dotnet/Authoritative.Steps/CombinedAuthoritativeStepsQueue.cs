@@ -5,11 +5,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using JetBrains.Annotations;
 using Piot.Discoid;
 using Piot.Tick;
-using UnityEngine;
 
 namespace Nimble.Authoritative.Steps
 {
@@ -61,34 +58,6 @@ namespace Nimble.Authoritative.Steps
         {
             queue.Clear();
         }
-
-        /*
-        public bool HasInputForTickId(TickId tickId)
-        {
-            if (queue.Count == 0)
-            {
-                return false;
-            }
-
-            var firstTickId = queue.Peek().appliedAtTickId.tickId;
-            var lastTick = waitingForTickId.tickId - 1;
-
-            return tickId.tickId >= firstTickId && tickId.tickId <= lastTick;
-        }
-
-        public CombinedAuthoritativeStep GetInputFromTickId(TickId tickId)
-        {
-            foreach (var input in queue)
-            {
-                if (input.appliedAtTickId == tickId)
-                {
-                    return input;
-                }
-            }
-
-            throw new ArgumentOutOfRangeException(nameof(tickId), "tick id is not found in queue");
-        }
-        */
 
         public void DiscardUpToAndExcluding(TickId tickId)
         {
