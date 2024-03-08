@@ -8,7 +8,7 @@ namespace Nimble.Authoritative.Steps
 {
 	public class CombinedRangesWriter
 	{
-		public static void Write(CombinedAuthoritativeSteps combinedAuthoritativeSteps, TickIdRanges ranges,
+		public static void Write(CombinedAuthoritativeStepsQueue combinedAuthoritativeSteps, TickIdRanges ranges,
 			IOctetWriter outStream, ILog log)
 		{
 			//TickIdWriter.Write(outStream, ranges.ranges[0].startTickId);
@@ -19,16 +19,22 @@ namespace Nimble.Authoritative.Steps
 				log.Debug("writing combined authoritative range {Range}", range);
 				TickIdRangeWriter.Write(outStream, range);
 
-				var rangeCombinedAuthoritativeSteps = combinedAuthoritativeSteps.FromRange(range);
-				if(rangeCombinedAuthoritativeSteps.Count != range.Length)
+				if (range.Length == 0)
 				{
-					throw new Exception($"internal error in CombinedRangesWriter. Passed in range {range}, but received {rangeCombinedAuthoritativeSteps.Count}");
+					throw new Exception($"internal error");
 				}
-
+				var rangeCombinedAuthoritativeSteps = combinedAuthoritativeSteps.FromRange(range);
+				var count = 0u;
 				foreach (var combinedAuthoritativeStep in rangeCombinedAuthoritativeSteps)
 				{
 	//				log.Debug("writing combined authoritative step {{CombinedAuthoritativeStep}}", combinedAuthoritativeStep);
 					CombinedWriter.Write(combinedAuthoritativeStep, outStream);
+					count++;
+				}
+
+				if (count != range.Length)
+				{
+					throw new Exception($"internal error, enumerator {count} is not same length as range {range.Length}");
 				}
 			}
 		}

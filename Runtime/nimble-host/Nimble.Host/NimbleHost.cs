@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using Nimble.Authoritative.Steps;
 using Piot.Clog;
 using Piot.Datagram;
+using Piot.Discoid;
 using Piot.Flood;
 using Piot.Nimble.Steps.Serialization;
 using Piot.Tick;
@@ -9,121 +11,117 @@ using UnityEngine;
 
 namespace Piot.Nimble.Host
 {
-	public class NimbleHost
-	{
-		public CombinedAuthoritativeStepProducer authoritativeStepProducer;
-		public Participants participants = new();
-		public HostConnections hostConnections = new();
-		private List<HostDatagram> outDatagrams = new();
-		private OctetWriter outWriter = new(1024);
+    public class NimbleHost
+    {
+        public CombinedAuthoritativeStepProducer authoritativeStepProducer;
+        public Participants participants;
+        public HostConnections hostConnections = new();
+        private const int MaximumOutDatagramCount = 16 * 3;
+        private CircularBuffer<HostDatagram> outDatagrams = new(MaximumOutDatagramCount);
+        private OctetWriter outWriter = new(1024);
 
-		private ILog log;
+        private ILog log;
 
-		public NimbleHost(TickId startId, ILog log)
-		{
-			authoritativeStepProducer = new CombinedAuthoritativeStepProducer(startId, participants, log);
-			this.log = log;
-		}
+        public NimbleHost(TickId startId, ILog log)
+        {
+            participants = new Participants(log);
+            authoritativeStepProducer = new CombinedAuthoritativeStepProducer(startId, participants, log);
+            this.log = log;
+        }
 
-		public void ReceiveDatagram(in HostDatagram datagram)
-		{
-			log.DebugLowLevel("receive datagram {OctetCount} from {Connection}", datagram.payload.Length,
-				datagram.connection);
-			var hostConnection = hostConnections.GetOrCreateConnection(datagram.connection);
+        public void ReceiveDatagram(in HostDatagram datagram)
+        {
+//            log.Warn("receive datagram {OctetCount} from {Connection}", datagram.payload.Length,
+  //              datagram.connection);
+            var hostConnection = hostConnections.GetOrCreateConnection(datagram.connection);
 
-			var reader = new OctetReader(datagram.payload.Span);
+            var reader = new OctetReader(datagram.payload.Span);
 
-			var predictedStepsForAllLocalPlayers = PredictedStepsDeserialize.Deserialize(reader, log);
+            var predictedStepsForAllLocalPlayers = PredictedStepsDeserialize.Deserialize(reader, log);
 
-			log.DebugLowLevel("received predicted steps {PredictedStepsFromClient}", predictedStepsForAllLocalPlayers);
+      //      log.Warn("received predicted steps {PredictedStepsFromClient}", predictedStepsForAllLocalPlayers);
 
-			foreach (var predictedStepsForPlayer in predictedStepsForAllLocalPlayers.stepsForEachPlayerInSequence)
-			{
-				var hasExistingParticipant =
-					hostConnection.connectionToParticipants.TryGetParticipantConnectionFromLocalPlayer(
-						predictedStepsForPlayer
-							.localPlayerIndex, out var participant);
-				if(!hasExistingParticipant)
-				{
-					participant = participants.CreateParticipant(datagram.connection,
-						predictedStepsForPlayer.localPlayerIndex);
+            foreach (var predictedStepsForPlayer in predictedStepsForAllLocalPlayers.stepsForEachPlayerInSequence)
+            {
+                var hasExistingParticipant =
+                    hostConnection.connectionToParticipants.TryGetParticipantConnectionFromLocalPlayer(
+                        predictedStepsForPlayer
+                            .localPlayerIndex, out var participant);
+                if (!hasExistingParticipant)
+                {
+                    participant = participants.CreateParticipant(datagram.connection,
+                        predictedStepsForPlayer.localPlayerIndex);
 
-					log.Info("detect new local player index, creating a new {Participant} for {Connection} and {LocalIndex}",
-						participant, hostConnection, predictedStepsForPlayer.localPlayerIndex);
-					hostConnection.connectionToParticipants.Add(predictedStepsForPlayer.localPlayerIndex,
-						participant);
-				}
+                    log.Info(
+                        "detect new local player index, creating a new {Participant} for {Connection} and {LocalIndex}",
+                        participant, hostConnection, predictedStepsForPlayer.localPlayerIndex);
+                    hostConnection.connectionToParticipants.Add(predictedStepsForPlayer.localPlayerIndex,
+                        participant);
+                }
 
-				foreach (var predictedStep in predictedStepsForPlayer.steps)
-				{
-					if(predictedStep.appliedAtTickId < participant.incomingSteps.WaitingForTickId)
-					{
-						continue;
-					}
+                foreach (var predictedStep in predictedStepsForPlayer.steps)
+                {
+                    if (predictedStep.appliedAtTickId < participant.incomingSteps.WaitingForTickId)
+                    {
+                        //log.Warn("skipping {PredictedTickId} since waiting for {WaitingForTickId}",
+                          //  predictedStep.appliedAtTickId, participant.incomingSteps.WaitingForTickId);
+                        continue;
+                    }
 
-				//	log.Warn("adding incoming predicted step {Participant} {PredictedStepTick}",
-				//		participant, predictedStep.appliedAtTickId);
-					participant.incomingSteps.AddPredictedStep(predictedStep);
-				}
-			}
-		}
+//                    log.Warn("adding incoming predicted step {Participant} {PredictedStepTick}",
+  //                      participant, predictedStep.appliedAtTickId);
+                    participant.incomingSteps.AddPredictedStep(predictedStep);
+                }
+            }
+        }
 
-		public void Tick(TickId simulationTickId)
-		{
-			authoritativeStepProducer.Tick();
+        public void Tick(TickId simulationTickId)
+        {
+            var authoritativeStepsQueue = authoritativeStepProducer.AuthoritativeStepsQueue;
+            var maximumAuthoritativeSteps = authoritativeStepsQueue.Capacity / 2;
+            // HACK: For now just send the last authoritative steps
+            if (authoritativeStepsQueue.Count > maximumAuthoritativeSteps)
+            {
+                var diff = authoritativeStepsQueue.Count - maximumAuthoritativeSteps;
+                var oldestTickId = authoritativeStepsQueue.Peek().appliedAtTickId;
+        //        log.Warn("Too many authoritative steps composed, discarding from {TickID} {Count}", oldestTickId,
+          //          diff);
+                authoritativeStepsQueue.DiscardUpToAndExcluding(
+                    new((uint)(oldestTickId.tickId + diff)));
+            }
 
-			outDatagrams.Clear();
+            authoritativeStepProducer.Tick();
 
-			var authoritativeStepsQueue = authoritativeStepProducer.AuthoritativeStepsQueue;
 
-			const uint MaximumAuthoritativeSteps = 32;
-			// HACK: For now just send the last authoritative steps
-			if(authoritativeStepsQueue.Count > MaximumAuthoritativeSteps)
-			{
-				var diff = authoritativeStepsQueue.Count - MaximumAuthoritativeSteps;
-				var oldestTickId = authoritativeStepsQueue.Peek().appliedAtTickId;
-				log.Debug("Too many authoritative steps composed, discarding from {TickID} {Count}", oldestTickId,
-					diff);
-				authoritativeStepsQueue.DiscardUpToAndExcluding(
-					new((uint)(oldestTickId.tickId + diff)));
-			}
+            if (authoritativeStepsQueue.IsEmpty)
+            {
+                return;
+            }
 
-			var allAuthoritativeSteps = authoritativeStepsQueue.Collection;
-			if(allAuthoritativeSteps.Length == 0)
-			{
-				return;
-			}
+            var range = authoritativeStepsQueue.Range;
+//            log.Warn("total authoritative steps in NimbleHost {Range}", range);
 
-			var range = new TickIdRange(allAuthoritativeSteps[0].appliedAtTickId,
-				allAuthoritativeSteps[^1].appliedAtTickId);
-			log.DebugLowLevel("total authoritative steps in NimbleHost {Range}", range);
+            outDatagrams.Clear();
+            foreach (var (connectionId, hostConnection) in hostConnections.connections)
+            {
+                // TODO: Find out range for host connection
+                var hostRanges = new List<TickIdRange> { range };
 
-			var combinedSteps = new CombinedAuthoritativeSteps(allAuthoritativeSteps);
+  //              log.Warn("decision is to send combined authoritative step range {Range}", range);
+                var hostConnectionRange = new TickIdRanges { ranges = hostRanges };
 
-			foreach (var (connectionId, hostConnection) in hostConnections.connections)
-			{
-				// TODO: Find out range for host connection
-				var hostRanges = new List<TickIdRange> { range };
+                outWriter.Reset();
 
-				log.Debug("decision is to send combined authoritative step range {Range}", range);
-				var hostConnectionRange = new TickIdRanges { ranges = hostRanges };
+                CombinedRangesWriter.Write(authoritativeStepsQueue, hostConnectionRange, outWriter, log);
 
-				outWriter.Reset();
+    //            log.Warn("combined authoritative step range {OctetSize}", outWriter.Position);
 
-				CombinedRangesWriter.Write(combinedSteps, hostConnectionRange, outWriter, log);
+                ref var outDatagram = ref outDatagrams.EnqueueRef();
+                outDatagram.connection = connectionId;
+                outDatagram.payload = outWriter.Octets.ToArray();
+            }
+        }
 
-				log.Debug("combined authoritative step range {OctetSize}", outWriter.Position);
-
-				var outDatagram = new HostDatagram
-				{
-					connection = connectionId,
-					payload = outWriter.Octets.ToArray()
-				};
-
-				outDatagrams.Add(outDatagram);
-			}
-		}
-
-		public IEnumerable<HostDatagram> DatagramsToSend => outDatagrams;
-	}
+        public IEnumerable<HostDatagram> DatagramsToSend => outDatagrams;
+    }
 }

@@ -57,7 +57,7 @@ public class AuthoritativeStepsTests
 
 		var startId = new TickId(13);
 
-		var participantConnections = new Participants();
+		var participantConnections = new Participants(log);
 
 		const int NUMBER_OF_PARTICIPANTS = 3;
 		for (var playerIndex = 0; playerIndex < NUMBER_OF_PARTICIPANTS; ++playerIndex)

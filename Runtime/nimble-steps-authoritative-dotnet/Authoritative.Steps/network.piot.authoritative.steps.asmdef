@@ -6,6 +6,7 @@
     "network.piot.monotonic-time",
     "network.piot.clog",
     "network.piot.monotonic-time.lower-bits",
-    "network.piot.nimble.steps"
+    "network.piot.nimble.steps",
+    "network.piot.discoid"
   ]
 }

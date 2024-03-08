@@ -131,8 +131,14 @@ namespace Piot.Nimble.Steps
 
 		public override string ToString()
 		{
+			byte debugByte = 0;
+			
+			if (payload.Length > 9)
+			{
+				debugByte = payload.Span[9];
+			}
 			return
-				$"[PredictedStep TickId:{appliedAtTickId} octetSize:{payload.Length}]";
+				$"[PredictedStep TickId:{appliedAtTickId} octetSize:{payload.Length} debug:{debugByte}]";
 		}
 	}
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Piot.Clog;
 using Piot.Nimble.Steps;
 using Piot.Tick;
 
@@ -8,7 +9,12 @@ namespace Nimble.Authoritative.Steps
     public class Participants
     {
         public readonly Dictionary<byte, Participant> participants = new();
+        private readonly ILog log;
 
+        public Participants(ILog log)
+        {
+            this.log = log;
+        }
         public Participant CreateParticipant(byte connectionId, LocalPlayerIndex localPlayerIndex)
         {
             var newParticipantId = GetFreeParticipantId();
@@ -54,6 +60,7 @@ namespace Nimble.Authoritative.Steps
         {
             if (participants.Count == 0)
             {
+                //log.Warn("no participants at all");
                 return false;
             }
 
@@ -64,6 +71,8 @@ namespace Nimble.Authoritative.Steps
             {
                 if (participant.incomingSteps.IsEmpty)
                 {
+  //                  log.Warn("{Participant} could not contribute, buffer is empty", participant);
+
                     connectionCountThatCouldNotContribute++;
                     continue;
                 }
@@ -71,6 +80,7 @@ namespace Nimble.Authoritative.Steps
                 // Is there a gap
                 if (participant.incomingSteps.Peek().appliedAtTickId > tickId)
                 {
+//                    log.Warn("{Participant} first step is at a gap, {TickID}. Wanted to compose {ComposeTickID}", participant, participant.incomingSteps.Peek().appliedAtTickId, tickId);
                     connectionCountThatCouldNotContribute++;
                     continue;
                 }
@@ -78,16 +88,23 @@ namespace Nimble.Authoritative.Steps
                 var delta = (long)participant.incomingSteps.Last.appliedAtTickId.tickId - (long)tickId.tickId;
                 if (delta > maxCount)
                 {
+      //              log.Warn("{Participant} is the best contributor with {Delta} steps", participant, delta);
                     maxCount = (uint)delta;
+                }
+                else
+                {
+    //                log.Warn("{Participant} was not a great contributor {Delta}. {First} {Last}", participant, delta, participant.incomingSteps.Peek().appliedAtTickId,  participant.incomingSteps.Last.appliedAtTickId);
                 }
             }
 
             switch (maxCount)
             {
                 case > 15: // It is so much ahead, that we simply must do it
+  //                  log.Warn($"best contributor is so far ahead, that we MUST make a new step");
                     return true;
 
-                case > 5:
+                case >= 1:
+//                    log.Warn("{CountThatCouldNotContribute}", connectionCountThatCouldNotContribute);
                     return connectionCountThatCouldNotContribute == 0;
             }
 

@@ -6,158 +6,231 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 
 namespace Piot.Discoid
 {
-	public class CircularBuffer<T> : IEnumerable<T>
-	{
-		private readonly T[] buffer;
-		private readonly int capacity;
-		private int head;
-		private int tail;
-		private int count;
+    public class CircularBuffer<T> : IEnumerable<T>
+    {
+        private readonly T[] buffer;
+        private readonly int capacity;
+        private int head;
+        private int tail;
+        private int count;
 
-		public CircularBuffer(int capacity)
-		{
-			this.capacity = capacity;
-			buffer = new T[capacity];
-			head = 0;
-			tail = 0;
-			count = 0;
-		}
+        public CircularBuffer(int capacity)
+        {
+            this.capacity = capacity;
+            buffer = new T[capacity];
+            head = 0;
+            tail = 0;
+            count = 0;
+        }
 
-		public void Enqueue(T item)
-		{
-			if(count == capacity)
-			{
-				throw new InvalidOperationException("Queue is full");
-			}
+        public void Enqueue(T item)
+        {
+            if (count == capacity)
+            {
+                throw new InvalidOperationException("Queue is full");
+            }
 
-			buffer[tail] = item;
-			tail = (tail + 1) % capacity;
-			count++;
-		}
+            buffer[tail] = item;
+            tail = (tail + 1) % capacity;
+            count++;
+        }
 
-		public T Dequeue()
-		{
-			if(count == 0)
-			{
-				throw new InvalidOperationException("Queue is empty");
-			}
+        public ref T EnqueueRef()
+        {
+            var oldTail = tail;
+            tail = (tail + 1) % capacity;
+            count++;
+            
+            return ref buffer[oldTail];
+        }
 
-			var dequeuedItem = buffer[head];
-			head = (head + 1) % capacity;
-			count--;
-			return dequeuedItem;
-		}
+        public T Dequeue()
+        {
+            if (count == 0)
+            {
+                throw new InvalidOperationException("Queue is empty");
+            }
 
-		public void Discard(uint discardCount)
-		{
-			if(discardCount > count)
-			{
-				throw new InvalidOperationException("Not enough items to discard");
-			}
+            var dequeuedItem = buffer[head];
+            head = (head + 1) % capacity;
+            count--;
+            return dequeuedItem;
+        }
 
-			head = (head + (int)discardCount) % capacity;
-			count -= (int)discardCount;
-		}
+        public void Discard(uint discardCount)
+        {
+            if (discardCount > count)
+            {
+                throw new InvalidOperationException("Not enough items to discard");
+            }
 
-		public void Clear()
-		{
-			head = 0;
-			tail = 0;
-			count = 0;
-		}
+            head = (head + (int)discardCount) % capacity;
+            count -= (int)discardCount;
+        }
 
-		public T Peek()
-		{
-			if(count == 0)
-			{
-				throw new InvalidOperationException("Queue is empty");
-			}
+        public void Clear()
+        {
+            head = 0;
+            tail = 0;
+            count = 0;
+        }
 
-			return buffer[head];
-		}
+        public T Peek()
+        {
+            if (count == 0)
+            {
+                throw new InvalidOperationException("Queue is empty");
+            }
 
-		public T Peek(uint index)
-		{
-			if(index >= count)
-			{
-				throw new IndexOutOfRangeException("peek is out of range");
-			}
+            return buffer[head];
+        }
 
-			int bufferIndex = (head + (int)index) % capacity;
-			return buffer[bufferIndex];
-		}
+        public T Peek(uint index)
+        {
+            if (index >= count)
+            {
+                throw new IndexOutOfRangeException("peek is out of range");
+            }
 
-		public T this[int index]
-		{
-			get
-			{
-				if(index < 0 || index >= count)
-				{
-					throw new IndexOutOfRangeException("Index is out of range");
-				}
+            int bufferIndex = (head + (int)index) % capacity;
+            return buffer[bufferIndex];
+        }
 
-				int bufferIndex = (head + index) % capacity;
-				return buffer[bufferIndex];
-			}
-		}
+        public T Last => buffer[(tail - 1 + capacity) % capacity];
 
-		public int Count => count;
+        public T this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= count)
+                {
+                    throw new IndexOutOfRangeException("Index is out of range");
+                }
 
-		public bool IsEmpty => count == 0;
+                int bufferIndex = (head + index) % capacity;
+                return buffer[bufferIndex];
+            }
+        }
 
-		public bool IsFull => count == capacity;
+        public int Count => count;
 
-		public IEnumerator<T> GetEnumerator()
-		{
-			return new Enumerator(this);
-		}
+        public int Capacity => capacity;
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
+        public bool IsEmpty => count == 0;
 
-		private class Enumerator : IEnumerator<T>
-		{
-			private readonly CircularBuffer<T> queue;
-			private int currentIndex;
-			private int itemsEnumerated;
+        public bool IsFull => count == capacity;
 
-			public Enumerator(CircularBuffer<T> queue)
-			{
-				this.queue = queue;
-				currentIndex = queue.head - 1;
-				itemsEnumerated = 0;
-			}
+        public IEnumerator<T> GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
 
-			public T Current => queue.buffer[currentIndex];
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+        
+        public IEnumerator<T> GetRangeEnumerator(uint offset, uint itemCountToEnumerate)
+        {
+            return new RangeEnumerator(this, (uint)((head+offset) % capacity), itemCountToEnumerate);
+        }
 
-			object IEnumerator.Current => Current;
 
-			public void Dispose()
-			{
-			}
+        private class Enumerator : IEnumerator<T>
+        {
+            private readonly CircularBuffer<T> queue;
+            private int currentIndex;
+            private int itemsEnumerated;
 
-			public bool MoveNext()
-			{
-				if(itemsEnumerated >= queue.count)
-				{
-					return false;
-				}
+            public Enumerator(CircularBuffer<T> queue)
+            {
+                this.queue = queue;
+                currentIndex = queue.head - 1;
+                itemsEnumerated = 0;
+            }
 
-				currentIndex = (currentIndex + 1) % queue.capacity;
-				itemsEnumerated++;
-				return true;
-			}
+            public T Current => queue.buffer[currentIndex];
 
-			public void Reset()
-			{
-				currentIndex = queue.head - 1;
-				itemsEnumerated = 0;
-			}
-		}
-	}
+            object IEnumerator.Current => Current;
+
+            public void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                if (itemsEnumerated >= queue.count)
+                {
+                    return false;
+                }
+
+                currentIndex = (currentIndex + 1) % queue.capacity;
+                itemsEnumerated++;
+                return true;
+            }
+
+            public void Reset()
+            {
+                currentIndex = queue.head - 1;
+                itemsEnumerated = 0;
+            }
+        }
+
+        private class RangeEnumerator : IEnumerator<T>
+        {
+            private readonly CircularBuffer<T> queue;
+            private int currentIndex;
+            private uint itemsEnumerated;
+            private readonly uint targetCount;
+            private readonly int startIndex;
+
+            public RangeEnumerator(CircularBuffer<T> queue, uint index, uint count)
+            {
+                this.queue = queue;
+                startIndex = (int)index;
+                currentIndex = (int)index - 1;
+                itemsEnumerated = 0;
+                targetCount = count;
+                if (index >= queue.capacity)
+                {
+                    throw new ArgumentException("out of bounds", nameof(index));
+                }
+
+                if (count > queue.count)
+                {
+                    throw new ArgumentException("out of bounds", nameof(count));
+                }
+            }
+
+            public T Current => queue.buffer[currentIndex];
+
+            object IEnumerator.Current => Current;
+
+            public void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                if (itemsEnumerated >= targetCount)
+                {
+                    return false;
+                }
+
+                currentIndex = (currentIndex + 1) % queue.capacity;
+                itemsEnumerated++;
+                return true;
+            }
+
+            public void Reset()
+            {
+                currentIndex = startIndex - 1;
+                itemsEnumerated = 0;
+            }
+        }
+    }
 }

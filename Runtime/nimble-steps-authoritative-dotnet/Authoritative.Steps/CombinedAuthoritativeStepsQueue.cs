@@ -6,101 +6,134 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
+using Piot.Discoid;
 using Piot.Tick;
+using UnityEngine;
 
 namespace Nimble.Authoritative.Steps
 {
-	/// <summary>
-	/// </summary>
-	public sealed class CombinedAuthoritativeStepsQueue
-	{
-		readonly Queue<CombinedAuthoritativeStep> queue = new();
+    /// <summary>
+    /// </summary>
+    public sealed class CombinedAuthoritativeStepsQueue
+    {
+        readonly CircularBuffer<CombinedAuthoritativeStep> queue = new(60);
 
-		TickId waitingForTickId;
+        TickId waitingForTickId;
 
-		public CombinedAuthoritativeStep[] Collection => queue.ToArray();
+        public IEnumerable<CombinedAuthoritativeStep> Collection => queue;
 
-		public int Count => queue.Count;
+        public int Count => queue.Count;
 
-		public bool IsEmpty => Count == 0;
+        public int Capacity => queue.Capacity;
 
-		public TickId WaitingForTickId => waitingForTickId;
+        public bool IsEmpty => Count == 0;
 
-		public CombinedAuthoritativeStep Last => queue.Last();
+        public TickId WaitingForTickId => waitingForTickId;
 
-		public CombinedAuthoritativeStep Peek()
-		{
-			return queue.Peek();
-		}
+        public CombinedAuthoritativeStep Last => queue.Last;
 
-		public CombinedAuthoritativeStepsQueue(TickId tickId)
-		{
-			waitingForTickId = tickId;
-		}
+        public TickIdRange Range => new(queue.Peek().appliedAtTickId, queue.Last.appliedAtTickId);
 
-		public void Add(CombinedAuthoritativeStep authoritativeStep)
-		{
-			if(authoritativeStep.appliedAtTickId != waitingForTickId)
-			{
-				throw new Exception(
-					$"authoritative steps can not have gaps. waiting for {waitingForTickId}, but received {authoritativeStep.appliedAtTickId}");
-			}
+        public CombinedAuthoritativeStep Peek()
+        {
+            return queue.Peek();
+        }
 
-			queue.Enqueue(authoritativeStep);
-			waitingForTickId = new(authoritativeStep.appliedAtTickId.tickId + 1);
-		}
+        public CombinedAuthoritativeStepsQueue(TickId tickId)
+        {
+            waitingForTickId = tickId;
+        }
 
-		public void Reset()
-		{
-			queue.Clear();
-		}
+        public void Add(CombinedAuthoritativeStep authoritativeStep)
+        {
+            if (authoritativeStep.appliedAtTickId != waitingForTickId)
+            {
+                throw new Exception(
+                    $"authoritative steps can not have gaps. waiting for {waitingForTickId}, but received {authoritativeStep.appliedAtTickId}");
+            }
 
-		/*
-		public bool HasInputForTickId(TickId tickId)
-		{
-		    if (queue.Count == 0)
-		    {
-		        return false;
-		    }
+            queue.Enqueue(authoritativeStep);
+            waitingForTickId = new(authoritativeStep.appliedAtTickId.tickId + 1);
+        }
 
-		    var firstTickId = queue.Peek().appliedAtTickId.tickId;
-		    var lastTick = waitingForTickId.tickId - 1;
+        public void Reset()
+        {
+            queue.Clear();
+        }
 
-		    return tickId.tickId >= firstTickId && tickId.tickId <= lastTick;
-		}
+        /*
+        public bool HasInputForTickId(TickId tickId)
+        {
+            if (queue.Count == 0)
+            {
+                return false;
+            }
 
-		public CombinedAuthoritativeStep GetInputFromTickId(TickId tickId)
-		{
-		    foreach (var input in queue)
-		    {
-		        if (input.appliedAtTickId == tickId)
-		        {
-		            return input;
-		        }
-		    }
+            var firstTickId = queue.Peek().appliedAtTickId.tickId;
+            var lastTick = waitingForTickId.tickId - 1;
 
-		    throw new ArgumentOutOfRangeException(nameof(tickId), "tick id is not found in queue");
-		}
-		*/
+            return tickId.tickId >= firstTickId && tickId.tickId <= lastTick;
+        }
 
-		public void DiscardUpToAndExcluding(TickId tickId)
-		{
-			while (queue.Count > 0)
-			{
-				if(queue.Peek().appliedAtTickId.tickId < tickId.tickId)
-				{
-					queue.Dequeue();
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
+        public CombinedAuthoritativeStep GetInputFromTickId(TickId tickId)
+        {
+            foreach (var input in queue)
+            {
+                if (input.appliedAtTickId == tickId)
+                {
+                    return input;
+                }
+            }
 
-		public CombinedAuthoritativeStep Dequeue()
-		{
-			return queue.Dequeue();
-		}
-	}
+            throw new ArgumentOutOfRangeException(nameof(tickId), "tick id is not found in queue");
+        }
+        */
+
+        public void DiscardUpToAndExcluding(TickId tickId)
+        {
+            while (queue.Count > 0)
+            {
+                if (queue.Peek().appliedAtTickId.tickId < tickId.tickId)
+                {
+                    queue.Discard(1);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        public CombinedAuthoritativeStep Dequeue()
+        {
+            return queue.Dequeue();
+        }
+
+        public IEnumerable<CombinedAuthoritativeStep> FromRange(TickIdRange range)
+        {
+            if (queue.IsEmpty)
+            {
+                return default;
+            }
+
+            var startTickId = queue.Peek().appliedAtTickId.tickId;
+            var startOffset = range.startTickId.tickId - startTickId;
+            if (startOffset >= queue.Count)
+            {
+                throw new Exception($"startOffset is too big");
+            }
+
+            var endOffset = range.lastTickId.tickId - startTickId;
+            if (endOffset >= queue.Count)
+            {
+                throw new Exception($"startOffset is too big");
+            }
+
+            var count = endOffset - startOffset + 1;
+
+            var enumerator = queue.GetRangeEnumerator(startOffset, count);
+            return new EnumeratorWrapper<CombinedAuthoritativeStep>(enumerator);
+        }
+    }
 }

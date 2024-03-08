@@ -1,6 +1,7 @@
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Tick;
+using UnityEngine;
 
 namespace Nimble.Authoritative.Steps
 {
@@ -32,6 +33,7 @@ namespace Nimble.Authoritative.Steps
 					participantId = combinedParticipantIdAndMask;
 					var octetLength = inStream.ReadUInt8();
 					var octets = inStream.ReadOctets(octetLength);
+
 					step = new AuthoritativeStep(tickIdToCompose, octets);
 				}
 

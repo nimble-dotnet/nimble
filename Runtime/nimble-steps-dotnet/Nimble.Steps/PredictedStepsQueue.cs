@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Piot.Discoid;
 using Piot.Tick;
 
 namespace Piot.Nimble.Steps
@@ -15,21 +16,24 @@ namespace Piot.Nimble.Steps
 	/// </summary>
 	public sealed class PredictedStepsQueue
 	{
-		readonly Queue<PredictedStep> queue = new();
+		readonly CircularBuffer<PredictedStep> queue = new(48);
 
 		TickId waitingForTickId;
 
-		public PredictedStep[] Collection => queue.ToArray();
+		public IEnumerable<PredictedStep> Collection => queue;
 
 		public int Count => queue.Count;
 
-		public bool IsEmpty => queue.Count == 0;
+		public bool IsEmpty => queue.IsEmpty;
+
+		public bool IsFull => queue.IsFull;
 
 		public TickId WaitingForTickId => waitingForTickId;
 
 		public bool IsInitialized { get; private set; }
 
-		public PredictedStep Last => queue.Last();
+		public PredictedStep Last => queue.Last;
+		public TickIdRange Range => new TickIdRange(queue.Peek().appliedAtTickId, queue.Last.appliedAtTickId);
 
 		public PredictedStep Peek()
 		{
@@ -59,7 +63,6 @@ namespace Piot.Nimble.Steps
 				}
 			}
 
-
 			queue.Enqueue(predictedStep);
 			waitingForTickId = new(predictedStep.appliedAtTickId.tickId + 1);
 		}
@@ -80,18 +83,6 @@ namespace Piot.Nimble.Steps
 			var lastTick = waitingForTickId.tickId - 1;
 
 			return tickId.tickId >= firstTickId && tickId.tickId <= lastTick;
-		}
-
-		public bool HasStepForAtLeastTickId(TickId tickId)
-		{
-			if(queue.Count == 0)
-			{
-				return false;
-			}
-
-			var lastTick = (int)waitingForTickId.tickId - 1;
-
-			return lastTick >= tickId.tickId;
 		}
 
 		public PredictedStep GetInputFromTickId(TickId tickId)
@@ -120,11 +111,6 @@ namespace Piot.Nimble.Steps
 					break;
 				}
 			}
-		}
-
-		public PredictedStep Dequeue()
-		{
-			return queue.Dequeue();
 		}
 
 		public override string ToString()

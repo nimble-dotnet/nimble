@@ -36,6 +36,7 @@ namespace Nimble.Authoritative.Steps
             var isAnyoneAhead = participants.IsAnyoneAheadOfTheRequestedTickId(tickId);
             if (!isAnyoneAhead)
             {
+//                log.Warn("no connection is ahead, can not produce authoritative input {TickID}", tickId);
                 return false;
             }
             

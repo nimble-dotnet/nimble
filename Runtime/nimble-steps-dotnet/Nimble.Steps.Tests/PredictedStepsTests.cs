@@ -46,7 +46,7 @@ public class PredictedStepsTests
 		var log = new Log(outputLogger);
 
 		var playerId = new LocalPlayerIndex(ExpectedLocalPlayerIndexValue);
-		var forOnePlayer = new PredictedStepsForPlayer(playerId, queue.Collection);
+		var forOnePlayer = new PredictedStepsForPlayer(playerId, queue.Collection.ToArray());
 		var allLocalPlayers = new PredictedStepsForAllLocalPlayers(new[] { forOnePlayer });
 		PredictedStepsSerialize.Serialize(writer, allLocalPlayers, log);
 
