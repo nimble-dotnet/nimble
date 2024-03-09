@@ -1,0 +1,15 @@
+{
+  "name": "network.piot.stats.tests",
+  "references": [
+    "network.piot.stats",
+    "UnityEditor.TestRunner",
+    "network.piot.clog",
+    "network.piot.monotonic-time"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ]
+}

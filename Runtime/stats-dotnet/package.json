@@ -1,0 +1,16 @@
+{
+    "name": "network.piot.stats",
+    "version": "0.0.1",
+    "description": "Stats",
+    "displayName": "Stats",
+    "unity": "2021.3",
+    "author": {
+      "name": "Peter Bjorklund",
+      "email": "piot@hotmail.com",
+      "url": "https://github.com/piot"
+    },
+    "dependencies": {
+      "network.piot.clog": "0.0.1"
+    },
+    "license": "MIT"
+  }
