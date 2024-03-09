@@ -22,9 +22,9 @@ namespace Piot.MonotonicTimeLowerBits
             }
 
             var diff = (ulong)now.ms - receivedMonotonic;
-            if (diff > 3000)
+            if (diff > 16000)
             {
-                throw new($"suspicious time lower bits diff {diff}");
+                throw new($"suspicious time lower bits diff {diff}, was application paused?");
             }
 
             return new((long)receivedMonotonic);
