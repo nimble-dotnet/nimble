@@ -5,43 +5,41 @@
 
 using System.Diagnostics;
 using NUnit.Framework;
-using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Stats;
 
 [SetUpFixture]
 public class SetupTrace
 {
-    [OneTimeSetUp]
-    public void StartTest()
-    {
-        Trace.Listeners.Add(new ConsoleTraceListener());
-    }
+	[OneTimeSetUp]
+	public void StartTest()
+	{
+		Trace.Listeners.Add(new ConsoleTraceListener());
+	}
 
-    [OneTimeTearDown]
-    public void EndTest()
-    {
-        Trace.Flush();
-    }
+	[OneTimeTearDown]
+	public void EndTest()
+	{
+		Trace.Flush();
+	}
 }
 
 [TestFixture]
 public class StatsTests
 {
-    [Test]
-    public void VerifyStatsCalculation()
-    {
+	[Test]
+	public void VerifyStatsCalculation()
+	{
 //        var outputLogger = new ConsoleOutputWithoutColorLogger();
-  //      var log = new Log(outputLogger);
+		//      var log = new Log(outputLogger);
 
-        var now = new TimeMs(10);
-        var minimumAverageTime = new TimeMs(1);
+		var now = new TimeMs(1000);
+		var minimumAverageTime = new TimeMs(1);
 
-        var after = new TimeMs(20);
-
-        var x = new StatPerSecond(now, minimumAverageTime);
-        x.Add(10);
-        x.Update(after);
-        Assert.AreEqual(10, x.Stat.average);
-    }
+		var x = new StatPerSecond(now, minimumAverageTime);
+		x.Add(10);
+		var after = now + new FixedDeltaTimeMs(500);
+		x.Update(after);
+		Assert.AreEqual(20, x.Stat.average);
+	}
 }

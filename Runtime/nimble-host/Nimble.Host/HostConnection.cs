@@ -1,3 +1,5 @@
+using Piot.MonotonicTimeLowerBits;
+
 namespace Nimble.Authoritative.Steps
 {
     public class HostConnection
@@ -5,6 +7,7 @@ namespace Nimble.Authoritative.Steps
         public ConnectionToParticipants connectionToParticipants = new();
 
         private byte connectionId;
+        public MonotonicTimeLowerBits lastReceivedMonotonicLowerBits;
 
         public HostConnection(byte connectionId)
         {

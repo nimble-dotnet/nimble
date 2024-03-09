@@ -6,11 +6,14 @@ using Piot.Nimble.Steps;
 using Piot.Datagram;
 using Piot.Discoid;
 using Piot.Flood;
+using Piot.MonotonicTime;
+using Piot.MonotonicTimeLowerBits;
 using Piot.Nimble.Steps.Serialization;
 using Constants = Piot.Datagram.Constants;
 
 namespace Piot.Nimble.Client
 {
+    
     public sealed class NimbleSendClient
     {
         public const uint MaxOctetSize = 1024;
@@ -29,11 +32,14 @@ namespace Piot.Nimble.Client
         public IEnumerable<ClientDatagram> OutDatagrams => clientOutDatagrams;
 
 
-        public void Tick()
+        public void Tick(TimeMs now)
         {
             var filteredOutPredictedStepsForLocalPlayers = FilterOutStepsToSend();
 
             octetWriter.Reset();
+            
+            MonotonicTimeLowerBitsWriter.Write(
+                new((ushort)(now.ms & 0xffff)), octetWriter);
             PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);
 
 
