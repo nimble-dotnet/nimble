@@ -11,7 +11,7 @@ namespace Piot.Stats
 {
     public sealed class StatPerSecond
     {
-        readonly TimeMs minimumAverageTime;
+        readonly FixedDeltaTimeMs minimumAverageTime;
         uint averageCount;
         uint count;
         bool isInitialized;
@@ -21,7 +21,7 @@ namespace Piot.Stats
         Stat stat;
         long total;
 
-        public StatPerSecond(TimeMs now, TimeMs minimumAverageTime)
+        public StatPerSecond(TimeMs now, FixedDeltaTimeMs minimumAverageTime)
         {
             Reset(now);
 

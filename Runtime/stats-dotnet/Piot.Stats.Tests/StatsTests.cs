@@ -34,7 +34,7 @@ public class StatsTests
 		//      var log = new Log(outputLogger);
 
 		var now = new TimeMs(1000);
-		var minimumAverageTime = new TimeMs(1);
+		var minimumAverageTime = new FixedDeltaTimeMs(1);
 
 		var x = new StatPerSecond(now, minimumAverageTime);
 		x.Add(10);

@@ -9,116 +9,134 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
 using Piot.Nimble.Steps.Serialization;
+using Piot.Stats;
 using Constants = Piot.Datagram.Constants;
 
 namespace Piot.Nimble.Client
 {
-    
-    public sealed class NimbleSendClient
-    {
-        public const uint MaxOctetSize = 1024;
-        public PredictedStepsLocalPlayers predictedSteps;
-        private ILog log;
-        private OctetWriter octetWriter = new(1024);
-        private const int MaximumClientOutDatagramCount = 4;
-        private CircularBuffer<ClientDatagram> clientOutDatagrams = new(MaximumClientOutDatagramCount);
+	public sealed class NimbleSendClient
+	{
+		public const uint MaxOctetSize = 1024;
+		public readonly PredictedStepsLocalPlayers predictedSteps;
+		private readonly ILog log;
+		private readonly OctetWriter octetWriter = new(1024);
+		private const int MaximumClientOutDatagramCount = 4;
+		private readonly CircularBuffer<ClientDatagram> clientOutDatagrams = new(MaximumClientOutDatagramCount);
 
-        public NimbleSendClient(ILog log)
-        {
-            this.log = log;
-            predictedSteps = new PredictedStepsLocalPlayers();
-        }
+		private readonly StatPerSecond datagramCountPerSecond;
+		private readonly StatPerSecond datagramBitsPerSecond;
 
-        public IEnumerable<ClientDatagram> OutDatagrams => clientOutDatagrams;
+		public FormattedStat DatagramCountPerSecond =>
+			new(StandardFormatterPerSecond.Format, datagramCountPerSecond.Stat);
+
+		public FormattedStat DatagramBitsPerSecond =>
+			new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
+
+		public NimbleSendClient(TimeMs now, ILog log)
+		{
+			this.log = log;
+			datagramCountPerSecond = new StatPerSecond(now, new(500));
+			datagramBitsPerSecond = new StatPerSecond(now, new(500));
+			predictedSteps = new PredictedStepsLocalPlayers();
+		}
+
+		public IEnumerable<ClientDatagram> OutDatagrams => clientOutDatagrams;
 
 
-        public void Tick(TimeMs now)
-        {
-            var filteredOutPredictedStepsForLocalPlayers = FilterOutStepsToSend();
+		public void Tick(TimeMs now)
+		{
+			var filteredOutPredictedStepsForLocalPlayers = FilterOutStepsToSend();
 
-            octetWriter.Reset();
-            
-            MonotonicTimeLowerBitsWriter.Write(
-                new((ushort)(now.ms & 0xffff)), octetWriter);
-            PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);
+			octetWriter.Reset();
+
+			MonotonicTimeLowerBitsWriter.Write(
+				new((ushort)(now.ms & 0xffff)), octetWriter);
+			PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);
 
 
 //			log.Warn($"decision to send predicted steps to send to the host {filteredOutPredictedStepsForLocalPlayers} {{OctetCount}}", octetWriter.Position);
 
-            clientOutDatagrams.Clear();
+			clientOutDatagrams.Clear();
 
-            if (octetWriter.Position > Constants.MaxDatagramOctetSize)
-            {
-                throw new Exception($"too many predicted steps to serialize");
-            }
+			if(octetWriter.Position > Constants.MaxDatagramOctetSize)
+			{
+				throw new Exception($"too many predicted steps to serialize");
+			}
 
-            ref var datagram = ref clientOutDatagrams.EnqueueRef();
-            datagram.payload = octetWriter.Octets.ToArray();
-        }
+			ref var datagram = ref clientOutDatagrams.EnqueueRef();
+			datagram.payload = octetWriter.Octets.ToArray();
 
-        private PredictedStepsForAllLocalPlayers FilterOutStepsToSend()
-        {
-            var predictedStepsForPlayers = new List<PredictedStepsForPlayer>();
-            var localPlayerCount = predictedSteps.predictedStepsQueues.Count;
-            if (localPlayerCount == 0)
-            {
-                return default;
-            }
+			datagramCountPerSecond.Add(1);
+			datagramBitsPerSecond.Add(datagram.payload.Length * 8);
 
-            var maxOctetSizePerPlayer = MaxOctetSize / localPlayerCount;
-            foreach (var (playerIndex, predictedStepsQueue) in predictedSteps.predictedStepsQueues)
-            {
-                // HACK, Make sure predicted queues aren't too big
-                if (predictedStepsQueue.Count > 25)
-                {
-                    var diff = predictedStepsQueue.Count - 25;
-                    predictedStepsQueue.DiscardUpToAndExcluding(new(
-                        (uint)(predictedStepsQueue.Peek().appliedAtTickId.tickId +
-                               diff)));
-                }
+			datagramCountPerSecond.Update(now);
+			datagramBitsPerSecond.Update(now);
+		}
 
-                if (predictedStepsQueue.IsEmpty)
-                {
-                    continue;
-                }
+		private PredictedStepsForAllLocalPlayers FilterOutStepsToSend()
+		{
+			var predictedStepsForPlayers = new List<PredictedStepsForPlayer>();
+			var localPlayerCount = predictedSteps.predictedStepsQueues.Count;
+			if(localPlayerCount == 0)
+			{
+				return default;
+			}
 
-                var allPredictedSteps = predictedStepsQueue.Collection;
+			var maxOctetSizePerPlayer = MaxOctetSize / localPlayerCount;
+			foreach (var (playerIndex, predictedStepsQueue) in predictedSteps.predictedStepsQueues)
+			{
+				// HACK, Make sure predicted queues aren't too big
+				if(predictedStepsQueue.Count > 25)
+				{
+					var diff = predictedStepsQueue.Count - 25;
+					predictedStepsQueue.DiscardUpToAndExcluding(new(
+						(uint)(predictedStepsQueue.Peek().appliedAtTickId.tickId +
+						       diff)));
+				}
 
-                //		log.Debug("prepare predictedStep for {{PlayerIndex}}", playerIndex);
-                
-                var octetCount = 0;
-                var stepCount = 0;
-                foreach (var predictedStep in allPredictedSteps)
-                {
+				if(predictedStepsQueue.IsEmpty)
+				{
+					continue;
+				}
+
+				var allPredictedSteps = predictedStepsQueue.Collection;
+
+				//		log.Debug("prepare predictedStep for {{PlayerIndex}}", playerIndex);
+
+				var octetCount = 0;
+				var stepCount = 0;
+				foreach (var predictedStep in allPredictedSteps)
+				{
 //					log.Debug($"prepare predictedStep: {{PlayerIndex}} {{TickID}}", playerIndex,
 //						predictedStep.appliedAtTickId);
-                    octetCount += predictedStep.payload.Length + 2;
-                    if (octetCount > maxOctetSizePerPlayer)
-                    {
-                        log.Debug("we reached our limit, break here {OctetCount} {MaxOctetSizePerPlayer}", octetCount,
-                            maxOctetSizePerPlayer);
-                        break;
-                    }
+					octetCount += predictedStep.payload.Length + 2;
+					if(octetCount > maxOctetSizePerPlayer)
+					{
+						log.Debug("we reached our limit, break here {OctetCount} {MaxOctetSizePerPlayer}", octetCount,
+							maxOctetSizePerPlayer);
+						break;
+					}
 
-                    stepCount++;
-                }
+					stepCount++;
+				}
 
-                if (stepCount == 0)
-                {
-                    log.Notice("didnt have room to add a single step into the buffer {MaxOctetSizePerPlayer}",
-                        maxOctetSizePerPlayer);
-                }
+				if(stepCount == 0)
+				{
+					log.Notice("didnt have room to add a single step into the buffer {MaxOctetSizePerPlayer}",
+						maxOctetSizePerPlayer);
+				}
 
 
-                var filteredOutSteps = allPredictedSteps.Take(stepCount);
+				var filteredOutSteps = allPredictedSteps.Take(stepCount);
 
-                var predictedStepsForOnePlayer = new PredictedStepsForPlayer(new(playerIndex), filteredOutSteps.ToArray());
-                predictedStepsForPlayers.Add(predictedStepsForOnePlayer);
-            }
+				var predictedStepsForOnePlayer =
+					new PredictedStepsForPlayer(new(playerIndex), filteredOutSteps.ToArray());
+				predictedStepsForPlayers.Add(predictedStepsForOnePlayer);
+			}
 
-            var allPlayers = new PredictedStepsForAllLocalPlayers(predictedStepsForPlayers.ToArray());
+			var allPlayers = new PredictedStepsForAllLocalPlayers(predictedStepsForPlayers.ToArray());
 
-            return allPlayers;
-        }
-    }
+			return allPlayers;
+		}
+	}
 }

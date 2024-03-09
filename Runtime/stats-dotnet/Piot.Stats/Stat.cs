@@ -18,6 +18,11 @@ namespace Piot.Stats
 			this.stat = stat;
 		}
 
+		public string ToMinimalString()
+		{
+			return $"[{formatter(stat.average)}]";
+		}
+
 		public override string ToString()
 		{
 			return $"[{formatter(stat.average)} min:{formatter(stat.min)}, max:{formatter(stat.max)}]";
