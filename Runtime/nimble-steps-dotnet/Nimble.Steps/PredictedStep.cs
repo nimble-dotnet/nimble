@@ -32,6 +32,27 @@ namespace Piot.Nimble.Steps
 		{
 			predictedStepsQueues.Add(playerIndex.Value, new PredictedStepsQueue());
 		}
+
+		public void DiscardUpToAndExcluding(TickId tickIdNext)
+		{
+			foreach (var (_, queue) in predictedStepsQueues)
+			{
+				queue.DiscardUpToAndExcluding(tickIdNext);
+			}
+		}
+
+		public TickIdRange Range()
+		{
+			var range = new TickIdRange();
+			
+			foreach (var (_, queue) in predictedStepsQueues)
+			{
+				// TODO:
+				range = queue.Range;
+			}
+
+			return range;
+		}
 	}
 
 	public readonly struct PredictedStepsForAllLocalPlayers

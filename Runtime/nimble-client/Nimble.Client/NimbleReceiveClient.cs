@@ -28,9 +28,12 @@ namespace Piot.Nimble.Client
 		public FormattedStat DatagramBitsPerSecond =>
 			new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
 
-		public NimbleReceiveClient(TickId tickId, TimeMs now, ILog log)
+		private NimbleSendClient sendClient;
+
+		public NimbleReceiveClient(TickId tickId, TimeMs now, NimbleSendClient sendClient, ILog log)
 		{
 			this.log = log;
+			this.sendClient = sendClient;
 			datagramBitsPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(500));
 			receiveStats = new NimbleClientReceiveStats(now);
 			combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
@@ -60,9 +63,24 @@ namespace Piot.Nimble.Client
 			var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
 			CombinedRangesReader.Read(combinedAuthoritativeStepsQueue, reader, log);
 
+			if(!combinedAuthoritativeStepsQueue.IsEmpty)
+			{
+				var last = combinedAuthoritativeStepsQueue.Last.appliedAtTickId;
+				sendClient.OnLatestAuthoritativeTickId(last);
+			}
+
 			receiveStats.ReceivedPongTime(now, pongTimeLowerBits);
 
 			datagramBitsPerSecond.Update(now);
+		}
+
+		public TickIdRange AuthoritativeRange()
+		{
+			if(combinedAuthoritativeStepsQueue.IsEmpty)
+			{
+				return default;
+			}
+			return combinedAuthoritativeStepsQueue.Range;
 		}
 	}
 }

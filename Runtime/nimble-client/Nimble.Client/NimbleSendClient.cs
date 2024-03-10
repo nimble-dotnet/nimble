@@ -11,6 +11,7 @@ using Piot.MonotonicTimeLowerBits;
 using Piot.Nimble.Steps.Serialization;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
+using Piot.Tick;
 using Constants = Piot.Datagram.Constants;
 
 namespace Piot.Nimble.Client
@@ -54,7 +55,7 @@ namespace Piot.Nimble.Client
 
 			OrderedDatagramsSequenceIdWriter.Write(octetWriter, datagramSequenceId);
 			datagramSequenceId.Next();
-			
+
 			MonotonicTimeLowerBitsWriter.Write(
 				new((ushort)(now.ms & 0xffff)), octetWriter);
 			PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);
@@ -79,6 +80,11 @@ namespace Piot.Nimble.Client
 			datagramBitsPerSecond.Update(now);
 		}
 
+		public void OnLatestAuthoritativeTickId(TickId tickId)
+		{
+			predictedSteps.DiscardUpToAndExcluding(tickId.Next);
+		}
+
 		private PredictedStepsForAllLocalPlayers FilterOutStepsToSend()
 		{
 			var predictedStepsForPlayers = new List<PredictedStepsForPlayer>();
@@ -91,15 +97,6 @@ namespace Piot.Nimble.Client
 			var maxOctetSizePerPlayer = MaxOctetSize / localPlayerCount;
 			foreach (var (playerIndex, predictedStepsQueue) in predictedSteps.predictedStepsQueues)
 			{
-				// HACK, Make sure predicted queues aren't too big
-				if(predictedStepsQueue.Count > 25)
-				{
-					var diff = predictedStepsQueue.Count - 25;
-					predictedStepsQueue.DiscardUpToAndExcluding(new(
-						(uint)(predictedStepsQueue.Peek().appliedAtTickId.tickId +
-						       diff)));
-				}
-
 				if(predictedStepsQueue.IsEmpty)
 				{
 					continue;
