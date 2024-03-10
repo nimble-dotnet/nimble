@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Nimble.Authoritative.Steps;
 using Piot.Clog;
 using Piot.Flood;
@@ -21,6 +22,8 @@ namespace Piot.Nimble.Client
 		public FormattedStat DatagramCountPerSecond => receiveStats.DatagramCountPerSecond;
 
 		private readonly StatPerSecond datagramBitsPerSecond;
+
+		public IEnumerable<int> RoundTripTimes => receiveStats.roundTripTimes;
 
 		public FormattedStat DatagramBitsPerSecond =>
 			new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
