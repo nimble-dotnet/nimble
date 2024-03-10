@@ -1,0 +1,193 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+#nullable enable
+using System;
+using Piot.Flood;
+using Piot.MonotonicTime;
+using Piot.MonotonicTimeLowerBits;
+using Piot.Raff.Stream;
+using Piot.SerializableVersion;
+using Piot.SerializableVersion.Serialization;
+using Piot.Tick;
+using Piot.Tick.Serialization;
+
+
+namespace Piot.Replay.Serialization
+{
+	public sealed class ReplayReader
+	{
+		readonly CompleteStateEntry[] completeStateEntries;
+		readonly ReplayFileSerializationInfo info;
+		readonly RaffReader raffReader;
+		readonly IOctetReaderWithSeekAndSkip readerWithSeek;
+		TimeMs lastReadTimeMs;
+		TimeMs lastTimeMsFromDeltaState;
+
+		public ReplayReader(SemanticVersion expectedApplicationVersion, ReplayFileSerializationInfo info,
+			IOctetReaderWithSeekAndSkip readerWithSeek)
+		{
+			this.info = info;
+			this.readerWithSeek = readerWithSeek;
+			raffReader = new(readerWithSeek);
+			ReadVersionInfo();
+
+			if(!expectedApplicationVersion.IsEqualDisregardSuffix(ApplicationVersion))
+			{
+				throw new(
+					$"version mismatch, can not use this replay file {ApplicationVersion} vs expected {expectedApplicationVersion}");
+			}
+
+			var positionBefore = readerWithSeek.Position;
+
+			completeStateEntries =
+				CompleteStateScanner.ScanForAllCompleteStatePositions(raffReader, readerWithSeek,
+					info.CompleteStateInfo);
+
+			Range = new(new(completeStateEntries[0].tickId), new(completeStateEntries[^1].tickId));
+
+			readerWithSeek.Seek(positionBefore);
+		}
+
+		public TickIdRange Range { get; }
+
+		public SemanticVersion ApplicationVersion { get; private set; }
+
+		public SemanticVersion StateSerializationVersion { get; private set; }
+
+		public TickId FirstCompleteStateTickId => new(completeStateEntries[0].tickId);
+
+		void ReadVersionInfo()
+		{
+			var versionPack = raffReader.ReadExpectedChunk(info.FileInfo.Icon, info.FileInfo.Name);
+			var reader = new OctetReader(versionPack);
+			ApplicationVersion = VersionReader.Read(reader);
+			StateSerializationVersion = VersionReader.Read(reader);
+		}
+
+
+		CompleteStateEntry FindClosestEntry(TickId tickId)
+		{
+			var tickIdValue = tickId.tickId;
+			if(completeStateEntries.Length == 0)
+			{
+				throw new("unexpected that no complete states are found");
+			}
+
+			var left = 0;
+			var right = completeStateEntries.Length - 1;
+
+			var tryCount = 0;
+			while (left != right && Math.Abs(left - right) >= 1 && tryCount < 20)
+			{
+				tryCount++;
+				var middle = (left + right) / 2;
+				var middleEntry = completeStateEntries[middle];
+				if(tickIdValue == middleEntry.tickId)
+				{
+					return middleEntry;
+				}
+
+				if(tickIdValue < middleEntry.tickId)
+				{
+					right = middle;
+				}
+				else
+				{
+					left = middle;
+				}
+			}
+
+			var closest = completeStateEntries[left];
+			if(closest.tickId <= tickIdValue)
+			{
+				return closest;
+			}
+
+			if(left < 1)
+			{
+				return closest;
+			}
+
+			var previous = completeStateEntries[left - 1];
+			if(previous.tickId > tickIdValue)
+			{
+				throw new("strange state in replay");
+			}
+
+			return previous;
+		}
+
+		public CompleteState Seek(TickId closestToTick)
+		{
+			var findClosestEntry = FindClosestEntry(closestToTick);
+			readerWithSeek.Seek(findClosestEntry.streamPosition);
+
+			return ReadCompleteState();
+		}
+
+		public DeltaState? ReadDeltaState()
+		{
+			while (true)
+			{
+				var octetLength = raffReader.ReadChunkHeader(out var icon, out var name);
+				if(icon.Value == 0 && name.Value == 0)
+				{
+					return null;
+				}
+
+				if(icon.Value == info.CompleteStateInfo.Icon.Value)
+				{
+					// Skip complete states, we only need the delta state
+					readerWithSeek.Seek(readerWithSeek.Position + octetLength);
+					continue;
+				}
+
+				var beforePosition = readerWithSeek.Position;
+
+				var type = readerWithSeek.ReadUInt8();
+				if(type != 01)
+				{
+					throw new($"desync {type}");
+				}
+
+				var timeLowerBits = MonotonicTimeLowerBitsReader.Read(readerWithSeek);
+				lastTimeMsFromDeltaState =
+					LowerBitsToMonotonic.LowerBitsToPastMonotonicMs(lastTimeMsFromDeltaState, timeLowerBits);
+				var tickIdRange = TickIdRangeReader.Read(readerWithSeek);
+
+				var afterPosition = readerWithSeek.Position;
+				var headerOctetCount = (int)(afterPosition - beforePosition);
+
+				return new(lastTimeMsFromDeltaState, tickIdRange,
+					readerWithSeek.ReadOctets((int)octetLength - headerOctetCount));
+			}
+		}
+
+		CompleteState ReadCompleteState()
+		{
+			var octetLength =
+				raffReader.ReadExpectedChunkHeader(info.CompleteStateInfo.Icon, info.CompleteStateInfo.Name);
+			var beforePosition = readerWithSeek.Position;
+
+			var type = readerWithSeek.ReadUInt8();
+			if(type != 02)
+			{
+				throw new("desync");
+			}
+
+			var time = new TimeMs((long)readerWithSeek.ReadUInt64());
+			lastReadTimeMs = time;
+			lastTimeMsFromDeltaState = time;
+			var tickId = TickIdReader.Read(readerWithSeek);
+
+			var afterPosition = readerWithSeek.Position;
+
+			var headerOctetCount = (int)(afterPosition - beforePosition);
+
+			return new(time, tickId, readerWithSeek.ReadOctets((int)octetLength - headerOctetCount));
+		}
+	}
+}

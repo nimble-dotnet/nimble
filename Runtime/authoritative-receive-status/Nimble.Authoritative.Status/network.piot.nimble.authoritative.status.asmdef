@@ -1,0 +1,7 @@
+{
+  "name": "network.piot.nimble.authoritative.status",
+  "references": [
+    "network.piot.flood",
+    "network.piot.tick"
+  ]
+}

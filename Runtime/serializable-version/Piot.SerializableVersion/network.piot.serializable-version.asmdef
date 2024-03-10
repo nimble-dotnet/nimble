@@ -1,0 +1,6 @@
+{
+  "name": "network.piot.serializable-version",
+  "references": [
+    "network.piot.flood"
+  ]
+}

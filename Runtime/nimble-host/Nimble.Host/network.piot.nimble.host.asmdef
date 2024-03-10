@@ -10,6 +10,7 @@
     "network.piot.nimble.authoritative.steps",
     "network.piot.datagram",
     "network.piot.discoid",
-    "network.piot.ordered-datagrams"
+    "network.piot.ordered-datagrams",
+    "network.piot.nimble.authoritative.status"
   ]
 }

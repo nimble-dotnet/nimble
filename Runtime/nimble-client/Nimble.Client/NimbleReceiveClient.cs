@@ -5,6 +5,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
+using Piot.Nimble.AuthoritativeReceiveStatus;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Piot.Tick;
@@ -28,7 +29,7 @@ namespace Piot.Nimble.Client
 		public FormattedStat DatagramBitsPerSecond =>
 			new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
 
-		private NimbleSendClient sendClient;
+		private readonly NimbleSendClient sendClient;
 
 		public NimbleReceiveClient(TickId tickId, TimeMs now, NimbleSendClient sendClient, ILog log)
 		{
@@ -61,12 +62,14 @@ namespace Piot.Nimble.Client
 			}
 
 			var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
+
+
 			CombinedRangesReader.Read(combinedAuthoritativeStepsQueue, reader, log);
 
 			if(!combinedAuthoritativeStepsQueue.IsEmpty)
 			{
 				var last = combinedAuthoritativeStepsQueue.Last.appliedAtTickId;
-				sendClient.OnLatestAuthoritativeTickId(last);
+				sendClient.OnLatestAuthoritativeTickId(last, 0);
 			}
 
 			receiveStats.ReceivedPongTime(now, pongTimeLowerBits);
@@ -80,6 +83,7 @@ namespace Piot.Nimble.Client
 			{
 				return default;
 			}
+
 			return combinedAuthoritativeStepsQueue.Range;
 		}
 	}

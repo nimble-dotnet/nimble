@@ -8,6 +8,7 @@ using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
+using Piot.Nimble.AuthoritativeReceiveStatus;
 using Piot.Nimble.Steps.Serialization;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
@@ -35,6 +36,7 @@ namespace Piot.Nimble.Client
 			new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
 
 		private OrderedDatagramsSequenceId datagramSequenceId;
+		private TickId expectingAuthoritativeTickId;
 
 		public NimbleSendClient(TimeMs now, ILog log)
 		{
@@ -58,6 +60,9 @@ namespace Piot.Nimble.Client
 
 			MonotonicTimeLowerBitsWriter.Write(
 				new((ushort)(now.ms & 0xffff)), octetWriter);
+
+			StatusWriter.Write(octetWriter, expectingAuthoritativeTickId, 0);
+
 			PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);
 
 
@@ -80,9 +85,10 @@ namespace Piot.Nimble.Client
 			datagramBitsPerSecond.Update(now);
 		}
 
-		public void OnLatestAuthoritativeTickId(TickId tickId)
+		public void OnLatestAuthoritativeTickId(TickId tickId, uint droppedCount)
 		{
 			predictedSteps.DiscardUpToAndExcluding(tickId.Next);
+			expectingAuthoritativeTickId = tickId.Next;
 		}
 
 		private PredictedStepsForAllLocalPlayers FilterOutStepsToSend()

@@ -1,4 +1,5 @@
 using Piot.MonotonicTimeLowerBits;
+using Piot.Tick;
 
 namespace Nimble.Authoritative.Steps
 {
@@ -8,6 +9,8 @@ namespace Nimble.Authoritative.Steps
 
         private byte connectionId;
         public MonotonicTimeLowerBits lastReceivedMonotonicLowerBits;
+        public TickId expectingAuthoritativeTickId;
+        public byte dropppedAuthoritativeAfterExpecting;
 
         public HostConnection(byte connectionId)
         {

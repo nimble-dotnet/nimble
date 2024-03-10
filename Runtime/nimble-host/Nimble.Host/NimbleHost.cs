@@ -6,6 +6,7 @@ using Piot.Datagram;
 using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTimeLowerBits;
+using Piot.Nimble.AuthoritativeReceiveStatus;
 using Piot.Nimble.Steps.Serialization;
 using Piot.OrderedDatagrams;
 using Piot.Tick;
@@ -43,6 +44,11 @@ namespace Piot.Nimble.Host
 			OrderedDatagramsSequenceIdReader.Read(reader);
 
 			hostConnection.lastReceivedMonotonicLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
+
+			StatusReader.Read(reader, out var expectingTickId, out var droppedTicksAfterThat);
+			hostConnection.expectingAuthoritativeTickId = expectingTickId;
+			hostConnection.dropppedAuthoritativeAfterExpecting = droppedTicksAfterThat;
+
 
 			var predictedStepsForAllLocalPlayers = PredictedStepsDeserialize.Deserialize(reader, log);
 
@@ -88,20 +94,39 @@ namespace Piot.Nimble.Host
 
 			authoritativeStepProducer.Tick();
 
-
 			if(authoritativeStepsQueue.IsEmpty)
 			{
 				return;
 			}
 
-			var range = authoritativeStepsQueue.Range;
+			var authoritativeRangeInBuffer = authoritativeStepsQueue.Range;
 //            log.Warn("total authoritative steps in NimbleHost {Range}", range);
 
 			outDatagrams.Clear();
 			foreach (var (connectionId, hostConnection) in hostConnections.connections)
 			{
-				// TODO: Find out range for host connection
-				var hostRanges = new List<TickIdRange> { range };
+				if(hostConnection.expectingAuthoritativeTickId < authoritativeRangeInBuffer.startTickId)
+				{
+					log.Notice("{Connection} is way behind, it wants {TickID}", hostConnection,
+						hostConnection.expectingAuthoritativeTickId);
+				}
+
+				var startId = hostConnection.expectingAuthoritativeTickId;
+				var lastAuthoritativeTickId = hostConnection.expectingAuthoritativeTickId + 20;
+				if(lastAuthoritativeTickId > authoritativeRangeInBuffer.Last)
+				{
+					lastAuthoritativeTickId = authoritativeRangeInBuffer.Last;
+				}
+
+				if(startId > lastAuthoritativeTickId)
+				{
+					startId = lastAuthoritativeTickId;
+				}
+
+				var specialRange =
+					new TickIdRange(startId, lastAuthoritativeTickId);
+
+				var hostRanges = new List<TickIdRange> { specialRange };
 
 				//              log.Warn("decision is to send combined authoritative step range {Range}", range);
 				var hostConnectionRange = new TickIdRanges { ranges = hostRanges };

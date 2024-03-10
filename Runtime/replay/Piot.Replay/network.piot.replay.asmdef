@@ -1,0 +1,11 @@
+{
+  "name": "network.piot.replay",
+  "references": [
+    "network.piot.flood",
+    "network.piot.raff",
+    "network.piot.monotonic-time",
+    "network.piot.tick",
+    "network.piot.serializable-version",
+    "network.piot.monotonic-time.lower-bits"
+  ]
+}
