@@ -9,6 +9,7 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
 using Piot.Nimble.Steps.Serialization;
+using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Constants = Piot.Datagram.Constants;
 
@@ -32,6 +33,8 @@ namespace Piot.Nimble.Client
 		public FormattedStat DatagramBitsPerSecond =>
 			new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
 
+		private OrderedDatagramsSequenceId datagramSequenceId;
+
 		public NimbleSendClient(TimeMs now, ILog log)
 		{
 			this.log = log;
@@ -49,6 +52,9 @@ namespace Piot.Nimble.Client
 
 			octetWriter.Reset();
 
+			OrderedDatagramsSequenceIdWriter.Write(octetWriter, datagramSequenceId);
+			datagramSequenceId.Next();
+			
 			MonotonicTimeLowerBitsWriter.Write(
 				new((ushort)(now.ms & 0xffff)), octetWriter);
 			PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);

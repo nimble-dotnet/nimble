@@ -33,5 +33,13 @@ namespace Piot.Nimble.Client
 			ref var roundTripTimeRef = ref roundTripTimes.EnqueueRef();
 			roundTripTimeRef = (int)roundTripTimeMs;
 		}
+
+		public void DroppedPackets(uint packetCount)
+		{
+			for (var i = 0; i < packetCount; ++i)
+			{
+				roundTripTimes.Enqueue(-1);
+			}
+		}
 	}
 }

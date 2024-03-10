@@ -7,6 +7,7 @@ using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTimeLowerBits;
 using Piot.Nimble.Steps.Serialization;
+using Piot.OrderedDatagrams;
 using Piot.Tick;
 using UnityEngine;
 
@@ -20,6 +21,7 @@ namespace Piot.Nimble.Host
 		private const int MaximumOutDatagramCount = 16 * 3;
 		private CircularBuffer<HostDatagram> outDatagrams = new(MaximumOutDatagramCount);
 		private OctetWriter outWriter = new(1024);
+		private OrderedDatagramsSequenceId datagramSequenceIdOut;
 
 		private ILog log;
 
@@ -37,6 +39,8 @@ namespace Piot.Nimble.Host
 			var hostConnection = hostConnections.GetOrCreateConnection(datagram.connection);
 
 			var reader = new OctetReader(datagram.payload.Span);
+
+			OrderedDatagramsSequenceIdReader.Read(reader);
 
 			hostConnection.lastReceivedMonotonicLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
 
@@ -104,6 +108,8 @@ namespace Piot.Nimble.Host
 
 				outWriter.Reset();
 
+				OrderedDatagramsSequenceIdWriter.Write(outWriter, datagramSequenceIdOut);
+				datagramSequenceIdOut.Next();
 				MonotonicTimeLowerBitsWriter.Write(hostConnection.lastReceivedMonotonicLowerBits, outWriter);
 				CombinedRangesWriter.Write(authoritativeStepsQueue, hostConnectionRange, outWriter, log);
 

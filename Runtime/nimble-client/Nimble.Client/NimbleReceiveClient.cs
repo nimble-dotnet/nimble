@@ -4,6 +4,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
+using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Piot.Tick;
 
@@ -14,6 +15,7 @@ namespace Piot.Nimble.Client
 		public readonly CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
 		private readonly ILog log;
 		private readonly NimbleClientReceiveStats receiveStats;
+		private OrderedDatagramsInChecker orderedDatagramsInChecker = new();
 
 		public FormattedStat RoundTripTime => receiveStats.RoundTripTime;
 		public FormattedStat DatagramCountPerSecond => receiveStats.DatagramCountPerSecond;
@@ -38,6 +40,19 @@ namespace Piot.Nimble.Client
 			datagramBitsPerSecond.Add(payload.Length * 8);
 
 			var reader = new OctetReader(payload);
+
+			bool wasOk = orderedDatagramsInChecker.ReadAndCheck(reader, out var diffPackets);
+			if(!wasOk)
+			{
+				log.Notice("unordered packet {Diff}", diffPackets);
+				return;
+			}
+
+			if(diffPackets > 1)
+			{
+				log.Notice("dropped {PacketCount}", diffPackets - 1);
+				receiveStats.DroppedPackets(diffPackets - 1);
+			}
 
 			var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
 			CombinedRangesReader.Read(combinedAuthoritativeStepsQueue, reader, log);
