@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Nimble.Authoritative.Steps;
 using Piot.Clog;
 using Piot.Datagram;
@@ -10,7 +9,6 @@ using Piot.Nimble.AuthoritativeReceiveStatus;
 using Piot.Nimble.Steps.Serialization;
 using Piot.OrderedDatagrams;
 using Piot.Tick;
-using UnityEngine;
 
 namespace Piot.Nimble.Host
 {
