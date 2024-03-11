@@ -47,6 +47,10 @@ namespace Piot.Nimble.Steps
 			
 			foreach (var (_, queue) in predictedStepsQueues)
 			{
+				if(queue.IsEmpty)
+				{
+					continue;
+				}
 				// TODO:
 				range = queue.Range;
 			}

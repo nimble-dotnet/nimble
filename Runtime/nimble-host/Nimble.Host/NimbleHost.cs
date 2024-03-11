@@ -118,21 +118,12 @@ namespace Piot.Nimble.Host
 				}
 
 				var startId = hostConnection.expectingAuthoritativeTickId;
-				var lastAuthoritativeTickId = hostConnection.expectingAuthoritativeTickId + 20;
-				if(lastAuthoritativeTickId > authoritativeRangeInBuffer.Last)
-				{
-					lastAuthoritativeTickId = authoritativeRangeInBuffer.Last;
-				}
+				var lastAuthoritativeTickId = startId + 40;
+				var requestedRange = new TickIdRange(startId, lastAuthoritativeTickId);
 
-				if(startId > lastAuthoritativeTickId)
-				{
-					startId = lastAuthoritativeTickId;
-				}
+				var rangeToSend = authoritativeRangeInBuffer.Satisfy(requestedRange);
 
-				var specialRange =
-					new TickIdRange(startId, lastAuthoritativeTickId);
-
-				var hostRanges = new List<TickIdRange> { specialRange };
+				var hostRanges = new List<TickIdRange> { rangeToSend };
 
 				//              log.Warn("decision is to send combined authoritative step range {Range}", range);
 				var hostConnectionRange = new TickIdRanges { ranges = hostRanges };

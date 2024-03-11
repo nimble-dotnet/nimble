@@ -81,7 +81,7 @@ namespace Nimble.Authoritative.Steps
                 if (participant.incomingSteps.Peek().appliedAtTickId > tickId)
                 {
 //                    log.Warn("{Participant} first step is at a gap, {TickID}. Wanted to compose {ComposeTickID}", participant, participant.incomingSteps.Peek().appliedAtTickId, tickId);
-                    connectionCountThatCouldNotContribute++;
+                    //connectionCountThatCouldNotContribute++;
                 }
 
                 var delta = (long)participant.incomingSteps.Last.appliedAtTickId.tickId - (long)tickId.tickId;
@@ -98,9 +98,6 @@ namespace Nimble.Authoritative.Steps
 
             switch (maxCount)
             {
-                case > 4: // Minimum prediction count. It is so much ahead, that we simply must do it
-  //                  log.Warn($"best contributor is so far ahead, that we MUST make a new step");
-                    return true;
 
                 case >= 1:
 //                    log.Warn("{CountThatCouldNotContribute}", connectionCountThatCouldNotContribute);
