@@ -51,7 +51,9 @@ namespace Piot.Nimble.Client
                     return 2;
                 }
 
-                return (uint)(16 / receiveStats.RoundTripTime.stat.average + 2);
+                var bufferDiffAgainstTarget = bufferDiff.Stat.average - 2;
+                
+                return (uint)(16 / receiveStats.RoundTripTime.stat.average + 2 - bufferDiffAgainstTarget);
             }
         }
 
