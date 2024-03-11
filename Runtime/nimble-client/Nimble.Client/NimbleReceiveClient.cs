@@ -31,6 +31,19 @@ namespace Piot.Nimble.Client
 
 		private readonly NimbleSendClient sendClient;
 
+		public uint TargetPredictStepCount
+		{
+			get
+			{
+				if(receiveStats.RoundTripTime.stat.average == 0)
+				{
+					return 2;
+				}
+
+				return (uint)(16 / receiveStats.RoundTripTime.stat.average + 2);
+			}
+		}
+
 		public NimbleReceiveClient(TickId tickId, TimeMs now, NimbleSendClient sendClient, ILog log)
 		{
 			this.log = log;

@@ -28,6 +28,7 @@ namespace Piot.Nimble.Client
 
 		private readonly StatPerSecond datagramCountPerSecond;
 		private readonly StatPerSecond datagramBitsPerSecond;
+		
 
 		public FormattedStat DatagramCountPerSecond =>
 			new(StandardFormatterPerSecond.Format, datagramCountPerSecond.Stat);

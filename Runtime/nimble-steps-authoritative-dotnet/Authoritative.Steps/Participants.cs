@@ -99,7 +99,7 @@ namespace Nimble.Authoritative.Steps
 
             switch (maxCount)
             {
-                case > 15: // It is so much ahead, that we simply must do it
+                case > 4: // Minimum prediction count. It is so much ahead, that we simply must do it
   //                  log.Warn($"best contributor is so far ahead, that we MUST make a new step");
                     return true;
 

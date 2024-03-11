@@ -21,11 +21,14 @@ namespace Piot.Nimble.Host
 		private CircularBuffer<HostDatagram> outDatagrams = new(MaximumOutDatagramCount);
 		private OctetWriter outWriter = new(1024);
 		private OrderedDatagramsSequenceId datagramSequenceIdOut;
-
 		private ILog log;
 
+		public TickId WaitingToComposeTickId => authoritativeStepProducer.AuthoritativeStepsQueue.WaitingForTickId;
+
+		
 		public NimbleHost(TickId startId, ILog log)
 		{
+			//
 			participants = new Participants(log);
 			authoritativeStepProducer = new CombinedAuthoritativeStepProducer(startId, participants, log);
 			this.log = log;
