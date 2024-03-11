@@ -82,7 +82,6 @@ namespace Nimble.Authoritative.Steps
                 {
 //                    log.Warn("{Participant} first step is at a gap, {TickID}. Wanted to compose {ComposeTickID}", participant, participant.incomingSteps.Peek().appliedAtTickId, tickId);
                     connectionCountThatCouldNotContribute++;
-                    continue;
                 }
 
                 var delta = (long)participant.incomingSteps.Last.appliedAtTickId.tickId - (long)tickId.tickId;

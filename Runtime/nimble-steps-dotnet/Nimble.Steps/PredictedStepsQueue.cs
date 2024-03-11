@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using Piot.Discoid;
 using Piot.Tick;
+using UnityEngine;
 
 namespace Piot.Nimble.Steps
 {
@@ -32,15 +33,16 @@ namespace Piot.Nimble.Steps
 		public bool IsInitialized { get; private set; }
 
 		public PredictedStep Last => queue.Last;
-		public TickIdRange Range => new TickIdRange(queue.Peek().appliedAtTickId, queue.Last.appliedAtTickId);
+		public TickIdRange Range => new (queue.Peek().appliedAtTickId, queue.Last.appliedAtTickId);
 
 		public PredictedStep Peek()
 		{
 			return queue.Peek();
 		}
 
-		public void AddPredictedStep(PredictedStep predictedStep)
+		public bool AddPredictedStep(PredictedStep predictedStep)
 		{
+			var wasReset = false;
 			if(!IsInitialized)
 			{
 				waitingForTickId = predictedStep.appliedAtTickId;
@@ -58,12 +60,15 @@ namespace Piot.Nimble.Steps
 				{
 					// TickId can only go up, so it means that we have dropped inputs at previous ticks
 					// We can only remove all inputs and add this one
+					
 					Reset();
+					wasReset = true;
 				}
 			}
 
 			queue.Enqueue(predictedStep);
 			waitingForTickId = new(predictedStep.appliedAtTickId.tickId + 1);
+			return wasReset;
 		}
 
 		public void Reset()

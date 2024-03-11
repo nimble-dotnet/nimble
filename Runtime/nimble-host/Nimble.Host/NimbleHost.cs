@@ -25,7 +25,7 @@ namespace Piot.Nimble.Host
 
 		public TickId WaitingToComposeTickId => authoritativeStepProducer.AuthoritativeStepsQueue.WaitingForTickId;
 
-		
+
 		public NimbleHost(TickId startId, ILog log)
 		{
 			//
@@ -84,7 +84,12 @@ namespace Piot.Nimble.Host
 
 //                    log.Warn("adding incoming predicted step {Participant} {PredictedStepTick}",
 					//                      participant, predictedStep.appliedAtTickId);
-					participant.incomingSteps.AddPredictedStep(predictedStep);
+					var wasReset = participant.incomingSteps.AddPredictedStep(predictedStep);
+					if(wasReset)
+					{
+						log.Warn("incoming queue was reset: {PredictedStep} for {Participant} {LocalPlayerIndex}",
+							predictedStep, participant, predictedStepsForPlayer.localPlayerIndex);
+					}
 				}
 			}
 		}
@@ -137,6 +142,9 @@ namespace Piot.Nimble.Host
 				OrderedDatagramsSequenceIdWriter.Write(outWriter, datagramSequenceIdOut);
 				datagramSequenceIdOut.Next();
 				MonotonicTimeLowerBitsWriter.Write(hostConnection.lastReceivedMonotonicLowerBits, outWriter);
+
+				WriteParticipantInfo(hostConnection, outWriter);
+
 				CombinedRangesWriter.Write(authoritativeStepsQueue, hostConnectionRange, outWriter, log);
 
 				//            log.Warn("combined authoritative step range {OctetSize}", outWriter.Position);
@@ -144,6 +152,17 @@ namespace Piot.Nimble.Host
 				ref var outDatagram = ref outDatagrams.EnqueueRef();
 				outDatagram.connection = connectionId;
 				outDatagram.payload = outWriter.Octets.ToArray();
+			}
+		}
+
+		static void WriteParticipantInfo(HostConnection hostConnection, OctetWriter writer)
+		{
+			var connectionParticipants = hostConnection.connectionToParticipants.connections;
+			writer.WriteUInt8((byte)connectionParticipants.Count);
+			foreach (var (localPlayerIndex, participant) in connectionParticipants)
+			{
+				writer.WriteUInt8(localPlayerIndex.Value);
+				writer.WriteUInt8(participant.participantId.id);
 			}
 		}
 

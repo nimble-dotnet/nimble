@@ -6,6 +6,7 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
 using Piot.Nimble.AuthoritativeReceiveStatus;
+using Piot.Nimble.Steps;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Piot.Tick;
@@ -30,6 +31,8 @@ namespace Piot.Nimble.Client
 			new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
 
 		private readonly NimbleSendClient sendClient;
+
+		public readonly Dictionary<byte, byte> localIndexToParticipant = new();
 
 		public uint TargetPredictStepCount
 		{
@@ -76,6 +79,7 @@ namespace Piot.Nimble.Client
 
 			var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
 
+			ReadParticipantInfo(reader);
 
 			CombinedRangesReader.Read(combinedAuthoritativeStepsQueue, reader, log);
 
@@ -88,6 +92,20 @@ namespace Piot.Nimble.Client
 			receiveStats.ReceivedPongTime(now, pongTimeLowerBits);
 
 			datagramBitsPerSecond.Update(now);
+		}
+
+		// TODO: Optimize this
+		void ReadParticipantInfo(IOctetReader reader)
+		{
+			localIndexToParticipant.Clear();
+			var count = reader.ReadUInt8();
+			for (var i = 0; i < count; ++i)
+			{
+				var localPlayerIndex = reader.ReadUInt8();
+				var participantId = reader.ReadUInt8();
+
+				localIndexToParticipant.Add(localPlayerIndex, participantId);
+			}
 		}
 
 		public TickIdRange AuthoritativeRange()
