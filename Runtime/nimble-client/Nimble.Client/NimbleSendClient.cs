@@ -28,7 +28,7 @@ namespace Piot.Nimble.Client
 
 		private readonly StatPerSecond datagramCountPerSecond;
 		private readonly StatPerSecond datagramBitsPerSecond;
-		
+		private readonly StatPerSecond predictedStepsSentPerSecond;
 
 		public FormattedStat DatagramCountPerSecond =>
 			new(StandardFormatterPerSecond.Format, datagramCountPerSecond.Stat);
@@ -38,12 +38,18 @@ namespace Piot.Nimble.Client
 
 		private OrderedDatagramsSequenceId datagramSequenceId;
 		private TickId expectingAuthoritativeTickId;
-
+		private TickId lastSentPredictedTickId;
+		private TickId lastSentPredictedTickIdAddedToStats;
+		
+		public FormattedStat PredictedStepsSentPerSecond =>
+			new(StandardFormatterPerSecond.Format, predictedStepsSentPerSecond.Stat);
+		
 		public NimbleSendClient(TimeMs now, ILog log)
 		{
 			this.log = log;
 			datagramCountPerSecond = new StatPerSecond(now, new(500));
 			datagramBitsPerSecond = new StatPerSecond(now, new(500));
+			predictedStepsSentPerSecond = new StatPerSecond(now, new(500));
 			predictedSteps = new PredictedStepsLocalPlayers();
 		}
 
@@ -79,11 +85,19 @@ namespace Piot.Nimble.Client
 			ref var datagram = ref clientOutDatagrams.EnqueueRef();
 			datagram.payload = octetWriter.Octets.ToArray();
 
+			var diff = lastSentPredictedTickId.tickId - lastSentPredictedTickIdAddedToStats.tickId;
+			if (diff > 0)
+			{
+				predictedStepsSentPerSecond.Add((int)diff);
+			}
+			lastSentPredictedTickIdAddedToStats = lastSentPredictedTickId;
+
 			datagramCountPerSecond.Add(1);
 			datagramBitsPerSecond.Add(datagram.payload.Length * 8);
 
 			datagramCountPerSecond.Update(now);
 			datagramBitsPerSecond.Update(now);
+			predictedStepsSentPerSecond.Update(now);
 		}
 
 		public void OnLatestAuthoritativeTickId(TickId tickId, uint droppedCount)
@@ -138,9 +152,14 @@ namespace Piot.Nimble.Client
 
 
 				var filteredOutSteps = allPredictedSteps.Take(stepCount);
+				var array = filteredOutSteps.ToArray();
 
+				if (array.Length > 0)
+				{
+					lastSentPredictedTickId = array[^1].appliedAtTickId;
+				}
 				var predictedStepsForOnePlayer =
-					new PredictedStepsForPlayer(new(playerIndex), filteredOutSteps.ToArray());
+					new PredictedStepsForPlayer(new(playerIndex), array);
 				predictedStepsForPlayers.Add(predictedStepsForOnePlayer);
 			}
 

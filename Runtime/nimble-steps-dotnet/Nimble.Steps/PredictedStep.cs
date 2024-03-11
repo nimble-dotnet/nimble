@@ -63,15 +63,6 @@ namespace Piot.Nimble.Steps
 	{
 		public readonly PredictedStepsForPlayer[] stepsForEachPlayerInSequence;
 
-		public TickId debugFirstId => stepsForEachPlayerInSequence.Length == 0 ||
-		                              stepsForEachPlayerInSequence[0].steps.Length == 0
-			? default
-			: stepsForEachPlayerInSequence[0].steps[0].appliedAtTickId;
-
-		public TickId debugLastId => stepsForEachPlayerInSequence.Length == 0 ||
-		                             stepsForEachPlayerInSequence[0].steps.Length == 0
-			? default
-			: stepsForEachPlayerInSequence[0].steps[^1].appliedAtTickId;
 
 		public PredictedStepsForAllLocalPlayers(PredictedStepsForPlayer[] stepsForEachPlayerInSequence)
 		{

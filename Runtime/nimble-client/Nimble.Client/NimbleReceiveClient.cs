@@ -13,109 +13,127 @@ using Piot.Tick;
 
 namespace Piot.Nimble.Client
 {
-	public sealed class NimbleReceiveClient
-	{
-		public readonly CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
-		private readonly ILog log;
-		private readonly NimbleClientReceiveStats receiveStats;
-		private OrderedDatagramsInChecker orderedDatagramsInChecker = new();
+    public sealed class NimbleReceiveClient
+    {
+        public readonly CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
+        private readonly ILog log;
+        private readonly NimbleClientReceiveStats receiveStats;
+        private OrderedDatagramsInChecker orderedDatagramsInChecker = new();
 
-		public FormattedStat RoundTripTime => receiveStats.RoundTripTime;
-		public FormattedStat DatagramCountPerSecond => receiveStats.DatagramCountPerSecond;
+        public FormattedStat RoundTripTime => receiveStats.RoundTripTime;
+        public FormattedStat DatagramCountPerSecond => receiveStats.DatagramCountPerSecond;
 
-		private readonly StatPerSecond datagramBitsPerSecond;
+        private readonly StatPerSecond datagramBitsPerSecond;
 
-		public IEnumerable<int> RoundTripTimes => receiveStats.roundTripTimes;
+        public IEnumerable<int> RoundTripTimes => receiveStats.roundTripTimes;
 
-		public FormattedStat DatagramBitsPerSecond =>
-			new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
+        public FormattedStat DatagramBitsPerSecond =>
+            new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
 
-		private readonly NimbleSendClient sendClient;
+        private readonly NimbleSendClient sendClient;
 
-		public readonly Dictionary<byte, byte> localIndexToParticipant = new();
+        public readonly Dictionary<byte, byte> localIndexToParticipant = new();
 
-		public uint TargetPredictStepCount
-		{
-			get
-			{
-				if(receiveStats.RoundTripTime.stat.average == 0)
-				{
-					return 2;
-				}
+        public StatCountThreshold bufferDiff = new(15);
+        public StatPerSecond authoritativeTicksPerSecond;
+        
+        public FormattedStat AuthoritativeTicksPerSecond =>
+            new(StandardFormatterPerSecond.Format, authoritativeTicksPerSecond.Stat);
 
-				return (uint)(16 / receiveStats.RoundTripTime.stat.average + 2);
-			}
-		}
+        public int RemotePredictedBufferDiff => bufferDiff.Stat.average;
 
-		public NimbleReceiveClient(TickId tickId, TimeMs now, NimbleSendClient sendClient, ILog log)
-		{
-			this.log = log;
-			this.sendClient = sendClient;
-			datagramBitsPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(500));
-			receiveStats = new NimbleClientReceiveStats(now);
-			combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
-		}
+        public uint TargetPredictStepCount
+        {
+            get
+            {
+                if (receiveStats.RoundTripTime.stat.average == 0)
+                {
+                    return 2;
+                }
 
-		public void ReceiveDatagram(TimeMs now, ReadOnlySpan<byte> payload)
-		{
-			log.Debug("Received datagram of {Size}", payload.Length);
+                return (uint)(16 / receiveStats.RoundTripTime.stat.average + 2);
+            }
+        }
 
-			datagramBitsPerSecond.Add(payload.Length * 8);
+        public NimbleReceiveClient(TickId tickId, TimeMs now, NimbleSendClient sendClient, ILog log)
+        {
+            this.log = log;
+            this.sendClient = sendClient;
+            datagramBitsPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(500));
+            authoritativeTicksPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(250));
+            receiveStats = new NimbleClientReceiveStats(now);
+            combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
+        }
 
-			var reader = new OctetReader(payload);
+        public void ReceiveDatagram(TimeMs now, ReadOnlySpan<byte> payload)
+        {
+            log.Debug("Received datagram of {Size}", payload.Length);
 
-			bool wasOk = orderedDatagramsInChecker.ReadAndCheck(reader, out var diffPackets);
-			if(!wasOk)
-			{
-				log.Notice("unordered packet {Diff}", diffPackets);
-				return;
-			}
+            datagramBitsPerSecond.Add(payload.Length * 8);
 
-			if(diffPackets > 1)
-			{
-				log.Notice("dropped {PacketCount}", diffPackets - 1);
-				receiveStats.DroppedPackets(diffPackets - 1);
-			}
+            var reader = new OctetReader(payload);
 
-			var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
+            var wasOk = orderedDatagramsInChecker.ReadAndCheck(reader, out var diffPackets);
+            if (!wasOk)
+            {
+                log.Notice("unordered packet {Diff}", diffPackets);
+                return;
+            }
 
-			ReadParticipantInfo(reader);
+            if (diffPackets > 1)
+            {
+                log.Notice("dropped {PacketCount}", diffPackets - 1);
+                receiveStats.DroppedPackets(diffPackets - 1);
+            }
 
-			CombinedRangesReader.Read(combinedAuthoritativeStepsQueue, reader, log);
+            var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
 
-			if(!combinedAuthoritativeStepsQueue.IsEmpty)
-			{
-				var last = combinedAuthoritativeStepsQueue.Last.appliedAtTickId;
-				sendClient.OnLatestAuthoritativeTickId(last, 0);
-			}
+            ReadParticipantInfo(reader);
+            ReadBufferInfo(reader);
 
-			receiveStats.ReceivedPongTime(now, pongTimeLowerBits);
+            var addedAuthoritativeCount = CombinedRangesReader.Read(combinedAuthoritativeStepsQueue, reader, log);
+            authoritativeTicksPerSecond.Add((int)addedAuthoritativeCount);
 
-			datagramBitsPerSecond.Update(now);
-		}
+            if (!combinedAuthoritativeStepsQueue.IsEmpty)
+            {
+                var last = combinedAuthoritativeStepsQueue.Last.appliedAtTickId;
+                sendClient.OnLatestAuthoritativeTickId(last, 0);
+            }
 
-		// TODO: Optimize this
-		void ReadParticipantInfo(IOctetReader reader)
-		{
-			localIndexToParticipant.Clear();
-			var count = reader.ReadUInt8();
-			for (var i = 0; i < count; ++i)
-			{
-				var localPlayerIndex = reader.ReadUInt8();
-				var participantId = reader.ReadUInt8();
+            receiveStats.ReceivedPongTime(now, pongTimeLowerBits);
 
-				localIndexToParticipant.Add(localPlayerIndex, participantId);
-			}
-		}
+            datagramBitsPerSecond.Update(now);
+            authoritativeTicksPerSecond.Update(now);
+        }
 
-		public TickIdRange AuthoritativeRange()
-		{
-			if(combinedAuthoritativeStepsQueue.IsEmpty)
-			{
-				return default;
-			}
+        private void ReadBufferInfo(OctetReader reader)
+        {
+            var diff = reader.ReadInt8();
+            bufferDiff.Add(diff);
+        }
 
-			return combinedAuthoritativeStepsQueue.Range;
-		}
-	}
+        // TODO: Optimize this
+        void ReadParticipantInfo(IOctetReader reader)
+        {
+            localIndexToParticipant.Clear();
+            var count = reader.ReadUInt8();
+            for (var i = 0; i < count; ++i)
+            {
+                var localPlayerIndex = reader.ReadUInt8();
+                var participantId = reader.ReadUInt8();
+
+                localIndexToParticipant.Add(localPlayerIndex, participantId);
+            }
+        }
+
+        public TickIdRange AuthoritativeRange()
+        {
+            if (combinedAuthoritativeStepsQueue.IsEmpty)
+            {
+                return default;
+            }
+
+            return combinedAuthoritativeStepsQueue.Range;
+        }
+    }
 }

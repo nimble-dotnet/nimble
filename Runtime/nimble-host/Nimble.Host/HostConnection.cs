@@ -11,6 +11,7 @@ namespace Nimble.Authoritative.Steps
         public MonotonicTimeLowerBits lastReceivedMonotonicLowerBits;
         public TickId expectingAuthoritativeTickId;
         public byte dropppedAuthoritativeAfterExpecting;
+        public TickId lastReceivedPredictedTickId;
 
         public HostConnection(byte connectionId)
         {
