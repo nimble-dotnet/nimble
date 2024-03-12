@@ -36,7 +36,7 @@ namespace Piot.Nimble.Client
 
         public StatCountThreshold bufferDiff = new(15);
         public StatPerSecond authoritativeTicksPerSecond;
-        
+
         public FormattedStat AuthoritativeTicksPerSecond =>
             new(StandardFormatterPerSecond.Format, authoritativeTicksPerSecond.Stat);
 
@@ -51,9 +51,11 @@ namespace Piot.Nimble.Client
                     return 2;
                 }
 
-                var bufferDiffAgainstTarget = bufferDiff.Stat.average - 2;
-                
-                return (uint)(16 / receiveStats.RoundTripTime.stat.average + 2 - bufferDiffAgainstTarget);
+                var tickCountAheadOnHost = bufferDiff.Stat.average - 2;
+                const int safetyMeasure = 2;
+
+                var target = (16 / receiveStats.RoundTripTime.stat.average + safetyMeasure - tickCountAheadOnHost);
+                return (uint)Math.Clamp(target, 1, 20);
             }
         }
 
