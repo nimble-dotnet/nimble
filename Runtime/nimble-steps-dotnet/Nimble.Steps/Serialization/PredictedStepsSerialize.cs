@@ -29,7 +29,7 @@ namespace Piot.Nimble.Steps.Serialization
 
 			if(inputsForLocalPlayers.stepsForEachPlayerInSequence.Length == 0)
 			{
-				log.Notice("no input to serialize!");
+				log.Notice("no predicted steps to send");
 			}
 
 			writer.WriteUInt8((byte)inputsForLocalPlayers.stepsForEachPlayerInSequence.Length);

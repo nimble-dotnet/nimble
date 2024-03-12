@@ -35,14 +35,14 @@ namespace Nimble.Authoritative.Steps
             var isAnyoneAhead = participants.IsAnyoneAheadOfTheRequestedTickId(tickId);
             if (!isAnyoneAhead)
             {
-                log.Warn("no connection is ahead, can not produce authoritative input {TickID}", tickId);
+                //log.DebugLowLevel("no connection is ahead, can not produce authoritative input {TickID}", tickId);
                 foreach (var (_, participant) in participants.participants)
                 {
                     if(participant.incomingSteps.IsEmpty)
                     {
                         continue;
                     }
-                    log.Warn("{Participant} is at {TickIdRange}", participant, participant.incomingSteps.Range);
+                    //log.DebugLowLevel("{Participant} is at {TickIdRange}", participant, participant.incomingSteps.Range);
                 }
                 return false;
             }
@@ -53,7 +53,7 @@ namespace Nimble.Authoritative.Steps
                 {
                     continue;
                 }
-                log.Warn("..Composing a step: {TickID} {Participant} is at {TickIdRange}", tickId, participant, participant.incomingSteps.Range);
+                //log.DebugLowLevel("..Composing a step: {TickID} {Participant} is at {TickIdRange}", tickId, participant, participant.incomingSteps.Range);
             }
             ComposeOneStep();
 

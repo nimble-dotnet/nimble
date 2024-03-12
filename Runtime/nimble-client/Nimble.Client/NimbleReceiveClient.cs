@@ -84,7 +84,7 @@ namespace Piot.Nimble.Client
 
         public void ReceiveDatagram(TimeMs now, ReadOnlySpan<byte> payload)
         {
-            log.Debug("Received datagram of {Size}", payload.Length);
+            //log.DebugLowLevel("Received datagram of {Size}", payload.Length);
 
             datagramBitsPerSecond.Add(payload.Length * 8);
 

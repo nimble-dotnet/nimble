@@ -43,20 +43,20 @@ namespace Nimble.Authoritative.Steps
 
 				if(!incomingPredictedSteps.HasStepForTickId(tickIdToCompose))
 				{
-					log.Warn("participant {ParticipantId} did not have a step for {tickIdToCompose} {Queue}", participantId,
-						tickIdToCompose, incomingPredictedSteps);
+					//log.DebugLowLevel("participant {ParticipantId} did not have a step for {tickIdToCompose} {Queue}", participantId,
+					//	tickIdToCompose, incomingPredictedSteps);
 					connectState = SerializeProviderConnectState.StepNotProvidedInTime;
 					foundStep = new AuthoritativeStep(tickIdToCompose, connectState);
 				}
 				else
 				{
-					log.Warn("participant {ParticipantId} did actually have a step for {tickIdToCompose}", participantId,
-						tickIdToCompose);
+					//log.DebugLowLevel("participant {ParticipantId} did actually have a step for {tickIdToCompose}", participantId,
+					//	tickIdToCompose);
 					var predictedStep = incomingPredictedSteps.GetInputFromTickId(tickIdToCompose);
 					foundStep = new AuthoritativeStep(tickIdToCompose, predictedStep.payload.Span);
 				}
 
-				log.Warn("discarding input up to (excluding) {TickID}", tickIdToCompose.Next);
+				//log.DebugLowLevel("discarding input up to (excluding) {TickID}", tickIdToCompose.Next);
 				incomingPredictedSteps.DiscardUpToAndExcluding(tickIdToCompose.Next);
 
 				combined.authoritativeSteps.Add(new(participantId), foundStep);

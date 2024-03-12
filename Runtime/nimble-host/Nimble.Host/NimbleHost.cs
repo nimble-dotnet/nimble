@@ -92,7 +92,7 @@ namespace Piot.Nimble.Host
                     var wasReset = participant.incomingSteps.AddPredictedStep(predictedStep);
                     if (wasReset)
                     {
-                        log.Warn("incoming queue was reset: {PredictedStep} for {Participant} {LocalPlayerIndex}",
+                        log.Notice("incoming queue was reset: {PredictedStep} for {Participant} {LocalPlayerIndex}",
                             predictedStep, participant, predictedStepsForPlayer.localPlayerIndex);
                     }
                 }

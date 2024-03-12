@@ -26,7 +26,7 @@ namespace Piot.Nimble.Steps.Serialization
 			var localPlayerCount = reader.ReadUInt8();
 			if(localPlayerCount == 0)
 			{
-				log.Notice("no player count");
+				log.Notice("no predicted steps from client");
 				return new(Array.Empty<PredictedStepsForPlayer>());
 			}
 

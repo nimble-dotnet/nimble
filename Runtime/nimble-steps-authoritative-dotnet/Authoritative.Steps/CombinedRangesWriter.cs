@@ -16,7 +16,7 @@ namespace Nimble.Authoritative.Steps
 
 			foreach (var range in ranges.ranges)
 			{
-				log.Debug("writing combined authoritative range {Range}", range);
+				//log.DebugLowLevel("writing combined authoritative range {Range}", range);
 				TickIdRangeWriter.Write(outStream, range);
 
 				if (range.Length == 0)
