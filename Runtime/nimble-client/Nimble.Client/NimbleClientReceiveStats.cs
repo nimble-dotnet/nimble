@@ -8,7 +8,7 @@ namespace Piot.Nimble.Client
 	public class NimbleClientReceiveStats
 	{
 		public DeltaTimeMs lastReceivedRoundTripDeltaTime;
-		private readonly StatCountThreshold statsRoundTripTime = new(20);
+		private readonly StatCountThreshold statsRoundTripTime = new(50);
 		private readonly StatPerSecond datagramCountPerSecond;
 		public readonly OverwriteCircularBuffer<int> roundTripTimes = new(120);
 

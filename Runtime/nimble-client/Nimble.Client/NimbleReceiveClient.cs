@@ -34,7 +34,7 @@ namespace Piot.Nimble.Client
 
         public readonly Dictionary<byte, byte> localIndexToParticipant = new();
 
-        public StatCountThreshold bufferDiff = new(15);
+        public StatCountThreshold bufferDiff = new(30);
         public StatPerSecond authoritativeTicksPerSecond;
 
         public FormattedStat AuthoritativeTicksPerSecond =>
@@ -51,10 +51,23 @@ namespace Piot.Nimble.Client
                     return 2;
                 }
 
-                var tickCountAheadOnHost = bufferDiff.Stat.average - 2;
-                const int safetyMeasure = 2;
+                var tickCountAheadOnHost = bufferDiff.Stat.average;
+                var adjustmentForBufferOnHost = 0;
+                const int lowerThreshold = 3;
+                const int higherThreshold = 6;
+                if (tickCountAheadOnHost <= lowerThreshold)
+                {
+                    adjustmentForBufferOnHost = -(tickCountAheadOnHost - lowerThreshold);
+                }
+                else if (tickCountAheadOnHost > higherThreshold)
+                {
+                    adjustmentForBufferOnHost = -(tickCountAheadOnHost - higherThreshold);
+                }
 
-                var target = (16 / receiveStats.RoundTripTime.stat.average + safetyMeasure - tickCountAheadOnHost);
+                const int accountForMissingTheTick = 2;
+
+                var target = (16 / receiveStats.RoundTripTime.stat.average + adjustmentForBufferOnHost +
+                              accountForMissingTheTick);
                 return (uint)Math.Clamp(target, 1, 20);
             }
         }
