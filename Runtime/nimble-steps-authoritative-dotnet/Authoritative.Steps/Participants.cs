@@ -6,9 +6,10 @@ using Piot.Tick;
 
 namespace Nimble.Authoritative.Steps
 {
-    const uint MaxParticipants = 32;
     public class Participants
     {
+        const uint MaxParticipants = 32;
+
         public readonly Dictionary<byte, Participant> participants = new();
         private readonly ILog log;
 
