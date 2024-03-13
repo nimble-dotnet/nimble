@@ -21,6 +21,7 @@ namespace Nimble.Authoritative.Steps
         {
             var newParticipantId = GetFreeParticipantId();
             var newConnection = new Participant(newParticipantId, localPlayerIndex);
+            log.Debug("add participant {ParticipantID} for {ConnectionID} {LocalPlayerIndex}", newParticipantId, connectionId, localPlayerIndex);
 
             participants.Add(newParticipantId.id, newConnection);
 
@@ -79,20 +80,24 @@ namespace Nimble.Authoritative.Steps
                     //connectionCountThatCouldNotContribute++;
                 }
 
-                var delta = (long)participant.incomingSteps.Last.appliedAtTickId.tickId - (long)tickId.tickId;
-                if (delta > maxCount)
+                var stepCountThatCanBeContributed = (long)participant.incomingSteps.Last.appliedAtTickId.tickId - (long)tickId.tickId + 1;
+                if (stepCountThatCanBeContributed > maxCount)
                 {
                     //              log.Warn("{Participant} is the best contributor with {Delta} steps", participant, delta);
-                    maxCount = (uint)delta;
+                    maxCount = (uint)stepCountThatCanBeContributed;
                 }
                 else
                 {
                     //                log.Warn("{Participant} was not a great contributor {Delta}. {First} {Last}", participant, delta, participant.incomingSteps.Peek().appliedAtTickId,  participant.incomingSteps.Last.appliedAtTickId);
                 }
             }
+            
+           // log.DebugLowLevel("IsAhead {MaxCount} {ConnectionCountThatCouldNotContribute}", maxCount, connectionCountThatCouldNotContribute);
 
             switch (maxCount)
             {
+                case >= 4:
+                    return connectionCountThatCouldNotContribute <= participants.Count / 2;
 
                 case >= 1:
                     //                    log.Warn("{CountThatCouldNotContribute}", connectionCountThatCouldNotContribute);

@@ -14,6 +14,7 @@ namespace Piot.Nimble.Steps.Serialization
 {
 	public static class PredictedStepsDeserialize
 	{
+		public const byte MaxPredictedStepOctetCount = 64;
 		/// <summary>
 		///     Deserializes game specific steps arriving on the host from the client.
 		/// </summary>
@@ -49,7 +50,7 @@ namespace Piot.Nimble.Steps.Serialization
 				{
 					OctetMarker.AssertMarker(reader, Constants.PredictedStepsPayloadHeaderMarker);
 					var payloadOctetCount = reader.ReadUInt8();
-					if(payloadOctetCount > 20)
+					if(payloadOctetCount > MaxPredictedStepOctetCount)
 					{
 						throw new($"suspicious step predicted step octet count {payloadOctetCount}");
 					}

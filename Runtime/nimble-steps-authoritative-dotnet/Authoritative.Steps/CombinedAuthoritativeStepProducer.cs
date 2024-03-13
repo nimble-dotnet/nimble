@@ -35,26 +35,32 @@ namespace Nimble.Authoritative.Steps
             var isAnyoneAhead = participants.IsAnyoneAheadOfTheRequestedTickId(tickId);
             if (!isAnyoneAhead)
             {
-                //log.DebugLowLevel("no connection is ahead, can not produce authoritative input {TickID}", tickId);
+                /*
+                log.DebugLowLevel("no connection is ahead, can not produce authoritative input {TickID}", tickId);
+
                 foreach (var (_, participant) in participants.participants)
                 {
                     if(participant.incomingSteps.IsEmpty)
                     {
+                        log.DebugLowLevel("{Participant} is empty {TickID}", participant, participant.incomingSteps.WaitingForTickId);
                         continue;
                     }
-                    //log.DebugLowLevel("{Participant} is at {TickIdRange}", participant, participant.incomingSteps.Range);
+                    log.DebugLowLevel("{Participant} is at {TickIdRange}", participant, participant.incomingSteps.Range);
                 }
+                */
                 return false;
             }
             
+            /*
             foreach (var (_, participant) in participants.participants)
             {
                 if(participant.incomingSteps.IsEmpty)
                 {
                     continue;
                 }
-                //log.DebugLowLevel("..Composing a step: {TickID} {Participant} is at {TickIdRange}", tickId, participant, participant.incomingSteps.Range);
+                log.DebugLowLevel("..Composing a step: {TickID} {Participant} is at {TickIdRange}", tickId, participant, participant.incomingSteps.Range);
             }
+            */
             ComposeOneStep();
 
             return true;
@@ -62,10 +68,10 @@ namespace Nimble.Authoritative.Steps
 
         public void Tick()
         {
-            var stepsComposedCount = 0u;
+            //var stepsComposedCount = 0u;
             while (TryToComposeOneStep())
             {
-                stepsComposedCount++;
+              //  stepsComposedCount++;
             }
             
 //            log.Warn("steps composed in one tick {StepsComposedCount}", stepsComposedCount);
