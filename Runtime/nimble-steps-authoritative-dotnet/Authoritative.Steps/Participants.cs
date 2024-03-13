@@ -6,6 +6,7 @@ using Piot.Tick;
 
 namespace Nimble.Authoritative.Steps
 {
+    const uint MaxParticipants = 32;
     public class Participants
     {
         public readonly Dictionary<byte, Participant> participants = new();
@@ -38,22 +39,15 @@ namespace Nimble.Authoritative.Steps
 
         public ParticipantId GetFreeParticipantId()
         {
-            for (var i = (byte)0; i < 64; ++i)
+            for (var i = (byte)0; i < MaxParticipants; ++i)
             {
                 if (!participants.ContainsKey(i))
                 {
-                    // HACK:
-
-                    if (i > 3)
-                    {
-                        throw new Exception($"only 0-3 are valid numbers in this nimble version {i}");
-                    }
-
                     return new ParticipantId(i);
                 }
             }
 
-            throw new Exception("out of participant Ids");
+            throw new Exception($"out of participant Ids {participants.Count}/{MaxParticipants}");
         }
 
         public bool IsAnyoneAheadOfTheRequestedTickId(TickId tickId)
@@ -71,7 +65,7 @@ namespace Nimble.Authoritative.Steps
             {
                 if (participant.incomingSteps.IsEmpty)
                 {
-  //                  log.Warn("{Participant} could not contribute, buffer is empty", participant);
+                    //                  log.Warn("{Participant} could not contribute, buffer is empty", participant);
 
                     connectionCountThatCouldNotContribute++;
                     continue;
@@ -80,19 +74,19 @@ namespace Nimble.Authoritative.Steps
                 // Is there a gap
                 if (participant.incomingSteps.Peek().appliedAtTickId > tickId)
                 {
-//                    log.Warn("{Participant} first step is at a gap, {TickID}. Wanted to compose {ComposeTickID}", participant, participant.incomingSteps.Peek().appliedAtTickId, tickId);
+                    //                    log.Warn("{Participant} first step is at a gap, {TickID}. Wanted to compose {ComposeTickID}", participant, participant.incomingSteps.Peek().appliedAtTickId, tickId);
                     //connectionCountThatCouldNotContribute++;
                 }
 
                 var delta = (long)participant.incomingSteps.Last.appliedAtTickId.tickId - (long)tickId.tickId;
                 if (delta > maxCount)
                 {
-      //              log.Warn("{Participant} is the best contributor with {Delta} steps", participant, delta);
+                    //              log.Warn("{Participant} is the best contributor with {Delta} steps", participant, delta);
                     maxCount = (uint)delta;
                 }
                 else
                 {
-    //                log.Warn("{Participant} was not a great contributor {Delta}. {First} {Last}", participant, delta, participant.incomingSteps.Peek().appliedAtTickId,  participant.incomingSteps.Last.appliedAtTickId);
+                    //                log.Warn("{Participant} was not a great contributor {Delta}. {First} {Last}", participant, delta, participant.incomingSteps.Peek().appliedAtTickId,  participant.incomingSteps.Last.appliedAtTickId);
                 }
             }
 
@@ -100,7 +94,7 @@ namespace Nimble.Authoritative.Steps
             {
 
                 case >= 1:
-//                    log.Warn("{CountThatCouldNotContribute}", connectionCountThatCouldNotContribute);
+                    //                    log.Warn("{CountThatCouldNotContribute}", connectionCountThatCouldNotContribute);
                     return connectionCountThatCouldNotContribute == 0;
             }
 
