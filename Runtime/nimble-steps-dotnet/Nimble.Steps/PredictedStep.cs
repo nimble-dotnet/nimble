@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using Piot.Clog;
 using Piot.Tick;
 
 
@@ -23,18 +24,28 @@ namespace Piot.Nimble.Steps
 	{
 		public Dictionary<byte, PredictedStepsQueue> predictedStepsQueues = new();
 
-		public PredictedStepsQueue GetStepsQueueForLocalPlayer(LocalPlayerIndex playerIndex)
+		private ILog log;
+		public PredictedStepsLocalPlayers(ILog log)
 		{
-			return predictedStepsQueues[playerIndex.Value];
+			this.log = log;
 		}
 
-		public void CreateLocalPlayer(LocalPlayerIndex playerIndex)
+		public PredictedStepsQueue GetStepsQueueForLocalPlayer(LocalPlayerIndex playerIndex)
 		{
-			predictedStepsQueues.Add(playerIndex.Value, new PredictedStepsQueue());
+			var queue = predictedStepsQueues[playerIndex.Value];
+			log.DebugLowLevel("get queue for {LocalPlayerIndex} {queue}", playerIndex, queue);
+			return queue;
+		}
+
+		public void CreateLocalPlayer(LocalPlayerIndex playerIndex, TickId waitingForTickId)
+		{
+			log.DebugLowLevel("create local player {LocalPlayerIndex}", playerIndex);
+			predictedStepsQueues.Add(playerIndex.Value, new PredictedStepsQueue(waitingForTickId));
 		}
 
 		public void DiscardUpToAndExcluding(TickId tickIdNext)
 		{
+			log.DebugLowLevel("discard up to and excluding {TickId}", tickIdNext);
 			foreach (var (_, queue) in predictedStepsQueues)
 			{
 				queue.DiscardUpToAndExcluding(tickIdNext);

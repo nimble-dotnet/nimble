@@ -118,8 +118,8 @@ namespace Piot.Nimble.Host
             {
                 if (hostConnection.expectingAuthoritativeTickId < authoritativeRangeInBuffer.startTickId)
                 {
-                    log.Notice("{Connection} is way behind, it wants {TickID}", hostConnection,
-                        hostConnection.expectingAuthoritativeTickId);
+                    log.Notice("{Connection} is way behind, it is waiting for {TickID} and authoritative buffer only has {Range}", hostConnection,
+                        hostConnection.expectingAuthoritativeTickId, authoritativeRangeInBuffer);
                 }
 
                 var startId = hostConnection.expectingAuthoritativeTickId;

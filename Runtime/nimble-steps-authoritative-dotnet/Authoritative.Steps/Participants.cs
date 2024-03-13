@@ -60,52 +60,58 @@ namespace Nimble.Authoritative.Steps
                 return false;
             }
 
-            var maxCount = 0u;
-            var connectionCountThatCouldNotContribute = 0u;
-
+            var couldAnyoneContributeNow = false;
             foreach (var participant in participants.Values)
             {
                 if (participant.incomingSteps.IsEmpty)
                 {
                     //                  log.Warn("{Participant} could not contribute, buffer is empty", participant);
 
-                    connectionCountThatCouldNotContribute++;
                     continue;
                 }
 
-                // Is there a gap
-                if (participant.incomingSteps.Peek().appliedAtTickId > tickId)
+                if (participant.incomingSteps.Peek().appliedAtTickId == tickId)
                 {
-                    //                    log.Warn("{Participant} first step is at a gap, {TickID}. Wanted to compose {ComposeTickID}", participant, participant.incomingSteps.Peek().appliedAtTickId, tickId);
-                    //connectionCountThatCouldNotContribute++;
-                }
-
-                var stepCountThatCanBeContributed = (long)participant.incomingSteps.Last.appliedAtTickId.tickId - (long)tickId.tickId + 1;
-                if (stepCountThatCanBeContributed > maxCount)
-                {
-                    //              log.Warn("{Participant} is the best contributor with {Delta} steps", participant, delta);
-                    maxCount = (uint)stepCountThatCanBeContributed;
+                    log.DebugLowLevel("We have at least one {Participant} that can contribute now and {Delta} steps", participant, participant.incomingSteps.Count);
+                    couldAnyoneContributeNow = true;
+                    break;
                 }
                 else
                 {
-                    //                log.Warn("{Participant} was not a great contributor {Delta}. {First} {Last}", participant, delta, participant.incomingSteps.Peek().appliedAtTickId,  participant.incomingSteps.Last.appliedAtTickId);
+                    log.DebugLowLevel("We have at least one {Participant} that CAN NOT {TickId} {Range}", participant, tickId, participant.incomingSteps.Range);
+                    
                 }
             }
-            
-           // log.DebugLowLevel("IsAhead {MaxCount} {ConnectionCountThatCouldNotContribute}", maxCount, connectionCountThatCouldNotContribute);
 
-            switch (maxCount)
+            if (!couldAnyoneContributeNow)
             {
-                case >= 4:
-                    return connectionCountThatCouldNotContribute <= participants.Count / 2;
-
-                case >= 1:
-                    //                    log.Warn("{CountThatCouldNotContribute}", connectionCountThatCouldNotContribute);
-                    return connectionCountThatCouldNotContribute == 0;
+                return false;
             }
 
+            var couldEveryoneContributeNowOrInTheFuture = true;
+            
+            // Someone can contribute to the current step, add penalty for anyone that can not contribute now or at least in the future
+            foreach (var participant in participants.Values)
+            {
+                if (participant.incomingSteps.IsEmpty || participant.incomingSteps.Last.appliedAtTickId < tickId)
+                {
+                    couldEveryoneContributeNowOrInTheFuture = false;
+                    participant.AddPenalty();
+                    log.DebugLowLevel("{Participant} can not contribute now or in the future", participant);
+                    if (participant.Penalty > 50)
+                    {
+                        log.Warn("should disconnect {Participant}", participant);
+                    }
+                }
+                else
+                {
+                    participant.ClearPenalty();
+                }
+            }
 
-            return false;
+            log.DebugLowLevel("IsAhead {AllowedToAdvance}", couldEveryoneContributeNowOrInTheFuture);
+
+           return couldEveryoneContributeNowOrInTheFuture;
         }
     }
 }

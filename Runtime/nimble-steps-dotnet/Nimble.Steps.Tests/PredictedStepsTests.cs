@@ -40,7 +40,7 @@ public class PredictedStepsTests
 
 		var writer = new OctetWriter(1024);
 		var oneStep = new PredictedStep(new TickId(ExpectedTickIdValue), ExpectedStepPayload);
-		var queue = new PredictedStepsQueue();
+		var queue = new PredictedStepsQueue(new(0));
 		queue.AddPredictedStep(oneStep);
 		var outputLogger = new ConsoleOutputWithoutColorLogger();
 		var log = new Log(outputLogger);

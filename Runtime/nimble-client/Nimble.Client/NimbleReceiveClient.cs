@@ -90,6 +90,7 @@ namespace Piot.Nimble.Client
 
             var reader = new OctetReader(payload);
 
+            var before = orderedDatagramsInChecker.LastValue;
             var wasOk = orderedDatagramsInChecker.ReadAndCheck(reader, out var diffPackets);
             if (!wasOk)
             {
@@ -99,7 +100,8 @@ namespace Piot.Nimble.Client
 
             if (diffPackets > 1)
             {
-                log.Notice("dropped {PacketCount}", diffPackets - 1);
+                log.Notice("dropped {PacketCount} encountered {DatagramID} and last accepted was {LastValue} ",
+                    diffPackets - 1, orderedDatagramsInChecker.LastValue, before);
                 receiveStats.DroppedPackets(diffPackets - 1);
             }
 

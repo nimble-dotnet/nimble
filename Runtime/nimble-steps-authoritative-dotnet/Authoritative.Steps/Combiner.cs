@@ -34,6 +34,7 @@ namespace Nimble.Authoritative.Steps
 		{
 			var combined = new CombinedAuthoritativeStep(tickIdToCompose);
 
+			log.DebugLowLevel("composing step {TickID}", tickIdToCompose);
 			foreach (var (participantId, participantConnection) in connections.participants)
 			{
 				var incomingPredictedSteps = participantConnection.incomingSteps;
@@ -43,15 +44,15 @@ namespace Nimble.Authoritative.Steps
 
 				if(!incomingPredictedSteps.HasStepForTickId(tickIdToCompose))
 				{
-					//log.DebugLowLevel("participant {ParticipantId} did not have a step for {tickIdToCompose} {Queue}", participantId,
-					//	tickIdToCompose, incomingPredictedSteps);
+					log.DebugLowLevel("participant {ParticipantId} did not have a step for {tickIdToCompose} {Queue}", participantId,
+						tickIdToCompose, incomingPredictedSteps);
 					connectState = SerializeProviderConnectState.StepNotProvidedInTime;
 					foundStep = new AuthoritativeStep(tickIdToCompose, connectState);
 				}
 				else
 				{
-					//log.DebugLowLevel("participant {ParticipantId} did actually have a step for {tickIdToCompose}", participantId,
-					//	tickIdToCompose);
+					log.DebugLowLevel("participant {ParticipantId} did actually have a step for {tickIdToCompose}", participantId,
+						tickIdToCompose);
 					var predictedStep = incomingPredictedSteps.GetInputFromTickId(tickIdToCompose);
 					foundStep = new AuthoritativeStep(tickIdToCompose, predictedStep.payload.Span);
 				}

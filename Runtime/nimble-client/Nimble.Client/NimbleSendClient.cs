@@ -50,7 +50,7 @@ namespace Piot.Nimble.Client
 			datagramCountPerSecond = new StatPerSecond(now, new(500));
 			datagramBitsPerSecond = new StatPerSecond(now, new(500));
 			predictedStepsSentPerSecond = new StatPerSecond(now, new(500));
-			predictedSteps = new PredictedStepsLocalPlayers();
+			predictedSteps = new PredictedStepsLocalPlayers(log.SubLog("PredictedStepsLocalPlayers"));
 		}
 
 		public IEnumerable<ClientDatagram> OutDatagrams => clientOutDatagrams;
