@@ -20,7 +20,6 @@ namespace Piot.Nimble.Host
         private const int MaximumOutDatagramCount = 16 * 3;
         private CircularBuffer<HostDatagram> outDatagrams = new(MaximumOutDatagramCount);
         private OctetWriter outWriter = new(1024);
-        private OrderedDatagramsSequenceId datagramSequenceIdOut;
         private ILog log;
 
         public TickId WaitingToComposeTickId => authoritativeStepProducer.AuthoritativeStepsQueue.WaitingForTickId;
@@ -135,8 +134,8 @@ namespace Piot.Nimble.Host
 
                 outWriter.Reset();
 
-                OrderedDatagramsSequenceIdWriter.Write(outWriter, datagramSequenceIdOut);
-                datagramSequenceIdOut.Next();
+                OrderedDatagramsSequenceIdWriter.Write(outWriter, hostConnection.datagramSequenceIdOut);
+                hostConnection.datagramSequenceIdOut.Next();
                 MonotonicTimeLowerBitsWriter.Write(hostConnection.lastReceivedMonotonicLowerBits, outWriter);
                 WriteParticipantInfo(hostConnection, outWriter);
                 WriteBufferInfo(hostConnection, outWriter);

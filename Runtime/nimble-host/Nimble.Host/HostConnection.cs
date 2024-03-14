@@ -1,4 +1,5 @@
 using Piot.MonotonicTimeLowerBits;
+using Piot.OrderedDatagrams;
 using Piot.Tick;
 
 namespace Nimble.Authoritative.Steps
@@ -12,6 +13,8 @@ namespace Nimble.Authoritative.Steps
         public TickId expectingAuthoritativeTickId;
         public byte dropppedAuthoritativeAfterExpecting;
         public TickId lastReceivedPredictedTickId;
+        public OrderedDatagramsSequenceId datagramSequenceIdOut;
+
 
         public HostConnection(byte connectionId)
         {
