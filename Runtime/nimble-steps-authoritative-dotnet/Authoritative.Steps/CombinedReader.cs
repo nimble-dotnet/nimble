@@ -13,7 +13,6 @@ namespace Nimble.Authoritative.Steps
 			var combinedAuthoritativeStep = new CombinedAuthoritativeStep(tickIdToCompose);
 			var queueCount = inStream.ReadUInt8();
 
-
 			for (var i = 0; i < queueCount; ++i)
 			{
 				var combinedParticipantIdAndMask = inStream.ReadUInt8();

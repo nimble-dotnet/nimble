@@ -9,7 +9,7 @@ namespace Nimble.Authoritative.Steps
 	public class CombinedRangesWriter
 	{
 		public static void Write(CombinedAuthoritativeStepsQueue combinedAuthoritativeSteps, TickIdRanges ranges,
-			IOctetWriter outStream, ILog log)
+			OctetWriter outStream, ILog log)
 		{
 			//TickIdWriter.Write(outStream, ranges.ranges[0].startTickId);
 			outStream.WriteUInt8((byte)ranges.ranges.Count);

@@ -111,6 +111,7 @@ namespace Piot.Nimble.Client
             ReadBufferInfo(reader);
 
             var addedAuthoritativeCount = CombinedRangesReader.Read(combinedAuthoritativeStepsQueue, reader, log);
+            log.DebugLowLevel("added {TickCount} authoritative steps", addedAuthoritativeCount);
             authoritativeTicksPerSecond.Add((int)addedAuthoritativeCount);
 
             if (!combinedAuthoritativeStepsQueue.IsEmpty)

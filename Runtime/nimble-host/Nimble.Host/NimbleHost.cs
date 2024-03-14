@@ -6,7 +6,6 @@ using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTimeLowerBits;
 using Piot.Nimble.AuthoritativeReceiveStatus;
-using Piot.Nimble.Steps.Serialization;
 using Piot.OrderedDatagrams;
 using Piot.Tick;
 
@@ -35,8 +34,8 @@ namespace Piot.Nimble.Host
 
         public void ReceiveDatagram(in HostDatagram datagram)
         {
-//            log.Warn("receive datagram {OctetCount} from {Connection}", datagram.payload.Length,
-            //              datagram.connection);
+            log.DebugLowLevel("receive datagram {OctetCount} from {Connection}", datagram.payload.Length,
+                datagram.connection);
             var hostConnection = hostConnections.GetOrCreateConnection(datagram.connection);
 
             var reader = new OctetReader(datagram.payload.Span);
@@ -49,53 +48,9 @@ namespace Piot.Nimble.Host
             hostConnection.expectingAuthoritativeTickId = expectingTickId;
             hostConnection.dropppedAuthoritativeAfterExpecting = droppedTicksAfterThat;
 
-
-            var predictedStepsForAllLocalPlayers = PredictedStepsDeserialize.Deserialize(reader, log);
-
-            //      log.Warn("received predicted steps {PredictedStepsFromClient}", predictedStepsForAllLocalPlayers);
-
-            foreach (var predictedStepsForPlayer in predictedStepsForAllLocalPlayers.stepsForEachPlayerInSequence)
-            {
-                var hasExistingParticipant =
-                    hostConnection.connectionToParticipants.TryGetParticipantConnectionFromLocalPlayer(
-                        predictedStepsForPlayer
-                            .localPlayerIndex, out var participant);
-                if (!hasExistingParticipant)
-                {
-                    participant = participants.CreateParticipant(datagram.connection,
-                        predictedStepsForPlayer.localPlayerIndex);
-
-                    log.Info(
-                        "detect new local player index, creating a new {Participant} for {Connection} and {LocalIndex}",
-                        participant, hostConnection, predictedStepsForPlayer.localPlayerIndex);
-                    hostConnection.connectionToParticipants.Add(predictedStepsForPlayer.localPlayerIndex,
-                        participant);
-                }
-
-                foreach (var predictedStep in predictedStepsForPlayer.steps)
-                {
-                    if (predictedStep.appliedAtTickId < participant.incomingSteps.WaitingForTickId)
-                    {
-                        //log.Warn("skipping {PredictedTickId} since waiting for {WaitingForTickId}",
-                        //  predictedStep.appliedAtTickId, participant.incomingSteps.WaitingForTickId);
-                        continue;
-                    }
-
-//                    log.Warn("adding incoming predicted step {Participant} {PredictedStepTick}",
-                    //                      participant, predictedStep.appliedAtTickId);
-                    if (predictedStep.appliedAtTickId > hostConnection.lastReceivedPredictedTickId)
-                    {
-                        hostConnection.lastReceivedPredictedTickId = predictedStep.appliedAtTickId;
-                    }
-
-                    var wasReset = participant.incomingSteps.AddPredictedStep(predictedStep);
-                    if (wasReset)
-                    {
-                        log.Notice("incoming queue was reset: {PredictedStep} for {Participant} {LocalPlayerIndex}",
-                            predictedStep, participant, predictedStepsForPlayer.localPlayerIndex);
-                    }
-                }
-            }
+            hostConnection.lastReceivedPredictedTickId = PredictedStepsDeserialize.Deserialize(reader,
+                hostConnection.connectionId,
+                hostConnection.connectionToParticipants, participants, log);
         }
 
         public void Tick(TickId simulationTickId)
@@ -117,7 +72,9 @@ namespace Piot.Nimble.Host
             {
                 if (hostConnection.expectingAuthoritativeTickId < authoritativeRangeInBuffer.startTickId)
                 {
-                    log.Notice("{Connection} is way behind, it is waiting for {TickID} and authoritative buffer only has {Range}", hostConnection,
+                    log.Notice(
+                        "{Connection} is way behind, it is waiting for {TickID} and authoritative buffer only has {Range}",
+                        hostConnection,
                         hostConnection.expectingAuthoritativeTickId, authoritativeRangeInBuffer);
                 }
 

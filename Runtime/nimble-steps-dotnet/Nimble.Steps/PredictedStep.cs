@@ -70,64 +70,6 @@ namespace Piot.Nimble.Steps
 		}
 	}
 
-	public readonly struct PredictedStepsForAllLocalPlayers
-	{
-		public readonly PredictedStepsForPlayer[] stepsForEachPlayerInSequence;
-
-
-		public PredictedStepsForAllLocalPlayers(PredictedStepsForPlayer[] stepsForEachPlayerInSequence)
-		{
-			this.stepsForEachPlayerInSequence = stepsForEachPlayerInSequence;
-		}
-
-		private static string PredictedStepsForPlayers(PredictedStepsForPlayer[] stepsForEachPlayerInSequence)
-		{
-			var s = "";
-
-			foreach (var stepsForPlayer in stepsForEachPlayerInSequence)
-			{
-				s += $"\n  {stepsForPlayer}";
-			}
-
-			return s;
-		}
-
-		public override string ToString()
-		{
-			return $"[PredictedFromLocalPlayers {PredictedStepsForPlayers(stepsForEachPlayerInSequence)}";
-		}
-	}
-
-	public struct PredictedStepsForPlayer
-	{
-		public PredictedStep[] steps;
-		public LocalPlayerIndex localPlayerIndex;
-
-		public PredictedStepsForPlayer(LocalPlayerIndex localPlayerIndex,
-			PredictedStep[] steps)
-		{
-			this.localPlayerIndex = localPlayerIndex;
-			this.steps = steps;
-		}
-
-		private static string PredictedStepsToString(PredictedStep[] predictedSteps)
-		{
-			var s = "";
-
-			foreach (var predictedStep in predictedSteps)
-			{
-				s += $"\n  {predictedStep}";
-			}
-
-			return s;
-		}
-
-		public override string ToString()
-		{
-			return $"[PredictedStepsForPlayer {localPlayerIndex}: {PredictedStepsToString(steps)}]";
-		}
-	}
-
 
 	/// <summary>
 	///     Serialized Game specific input step in the <see cref="PredictedStep.payload" />.

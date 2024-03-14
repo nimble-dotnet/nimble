@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------------------*/
 
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Piot.Clog;
 using Piot.Flood;
@@ -10,76 +11,97 @@ using Piot.Tick.Serialization;
 
 namespace Piot.Nimble.Steps.Serialization
 {
-	public static class Constants
-	{
-		public const byte PredictedStepsHeaderMarker = 0xdb;
-		public const byte PredictedStepsPayloadHeaderMarker = 0xdc;
-	}
+    public static class Constants
+    {
+        public const byte PredictedStepsHeaderMarker = 0xdb;
+        public const byte PredictedStepsPayloadHeaderMarker = 0xdc;
+    }
 
-	public static class PredictedStepsSerialize
-	{
-		/// <summary>
-		///     Serializing the game specific inputs to be sent from the client to the authoritative host.
-		/// </summary>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Serialize(IOctetWriter writer, PredictedStepsForAllLocalPlayers inputsForLocalPlayers,
-			ILog log)
-		{
-			OctetMarker.WriteMarker(writer, Constants.PredictedStepsHeaderMarker);
+    public static class PredictedStepsSerialize
+    {
+        /// <summary>
+        ///     Serializing the game specific inputs to be sent from the client to the authoritative host.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Serialize(OctetWriter writer, PredictedStepsLocalPlayers inputsForLocalPlayers,
+            ILog log)
+        {
+            OctetMarker.WriteMarker(writer, Constants.PredictedStepsHeaderMarker);
+            var localPlayerCount = inputsForLocalPlayers.predictedStepsQueues.Count;
+            writer.WriteUInt8((byte)localPlayerCount);
 
-			if(inputsForLocalPlayers.stepsForEachPlayerInSequence.Length == 0)
-			{
-				//log.Notice("no predicted steps to send");
-			}
+            if (localPlayerCount == 0)
+            {
+                return;
+            }
 
-			writer.WriteUInt8((byte)inputsForLocalPlayers.stepsForEachPlayerInSequence.Length);
+            var octetBudget = writer.OctetsLeft / localPlayerCount;
+            var totalEndPosition = writer.Size - 10;
 
-			foreach (var stepsForPlayer in inputsForLocalPlayers.stepsForEachPlayerInSequence)
-			{
-				var tickCount = stepsForPlayer.steps.Length;
-				if(tickCount > 255)
-				{
-					throw new("too many inputs to serialize");
-				}
+            log.DebugLowLevel("{OctetBudget} for each participant {LocalPlayerCount}", octetBudget, localPlayerCount);
 
-				if(tickCount == 0)
-				{
-					log.Notice("no input (tickCount is zero) to serialize!");
-				}
+            foreach (var (localPlayerIndex, predictedStepsQueue) in inputsForLocalPlayers.predictedStepsQueues)
+            {
+                var endPosition = writer.Position + octetBudget;
+                if (endPosition >= totalEndPosition)
+                {
+                    endPosition = totalEndPosition;
+                }
+
+                writer.WriteUInt8(localPlayerIndex);
+                var positionBeforeTickCount = writer.Tell;
+                writer.WriteUInt8(0);
+
+                var tickCount = predictedStepsQueue.Count;
+                if (tickCount == 0)
+                {
+                    //log.Notice("no predicted steps to send");
+                    continue;
+                }
+
+                if (tickCount > 255)
+                {
+                    throw new("too many inputs to serialize");
+                }
 
 
-				writer.WriteUInt8((byte)tickCount);
-				if(tickCount == 0)
-				{
-					continue;
-				}
-
-				writer.WriteUInt8(stepsForPlayer.localPlayerIndex.Value);
-
-				var first = stepsForPlayer.steps[0];
-				TickIdWriter.Write(writer, first.appliedAtTickId);
+                var first = predictedStepsQueue.Peek();
+                TickIdWriter.Write(writer, first.appliedAtTickId);
 //				log.Notice("first {TickCount} {LocalPlayerID}  {TickID}", tickCount,
 //					stepsForPlayer.localPlayerIndex, first.appliedAtTickId);
-				var expectedTickIdValue = first.appliedAtTickId.tickId;
+                var expectedTickIdValue = first.appliedAtTickId.tickId;
 
-				foreach (var predictedStep in stepsForPlayer.steps)
-				{
-					if(predictedStep.appliedAtTickId.tickId != expectedTickIdValue)
-					{
-						throw new(
-							$"predicted step in wrong order in collection. Expected {expectedTickIdValue} but received {predictedStep.appliedAtTickId.tickId}");
-					}
+                var wroteTickCount = 0;
+                foreach (var predictedStep in predictedStepsQueue.Collection)
+                {
+                    if (predictedStep.appliedAtTickId.tickId != expectedTickIdValue)
+                    {
+                        throw new(
+                            $"predicted step in wrong order in collection. Expected {expectedTickIdValue} but received {predictedStep.appliedAtTickId.tickId}");
+                    }
 
-					OctetMarker.WriteMarker(writer, Constants.PredictedStepsPayloadHeaderMarker);
+                    OctetMarker.WriteMarker(writer, Constants.PredictedStepsPayloadHeaderMarker);
+
+                    if (writer.Position + predictedStep.payload.Length + 1 + 4 >= endPosition)
+                    {
+                        break;
+                    }
 
 //					log.Debug("writing predicted step {{TickID}} {{PayloadLength}}", predictedStep.appliedAtTickId,
 //						(byte)predictedStep.payload.Length);
-					writer.WriteUInt8((byte)predictedStep.payload.Length);
-					writer.WriteOctets(predictedStep.payload.Span);
+                    writer.WriteUInt8((byte)predictedStep.payload.Length);
+                    writer.WriteOctets(predictedStep.payload.Span);
 
-					expectedTickIdValue++;
-				}
-			}
-		}
-	}
+                    wroteTickCount++;
+                    expectedTickIdValue++;
+                }
+                
+                log.DebugLowLevel("Wrote predicted {FirstTickID} {StepCount} to datagram for {LocalPlayerIndex}", first, wroteTickCount, localPlayerIndex);
+                var seekBack = writer.Tell;
+                writer.Seek(positionBeforeTickCount);
+                writer.WriteUInt8((byte)wroteTickCount);
+                writer.Seek(seekBack);
+            }
+        }
+    }
 }

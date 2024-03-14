@@ -8,7 +8,7 @@ namespace Nimble.Authoritative.Steps
     {
         public ConnectionToParticipants connectionToParticipants = new();
 
-        private byte connectionId;
+        public byte connectionId;
         public MonotonicTimeLowerBits lastReceivedMonotonicLowerBits;
         public TickId expectingAuthoritativeTickId;
         public byte dropppedAuthoritativeAfterExpecting;

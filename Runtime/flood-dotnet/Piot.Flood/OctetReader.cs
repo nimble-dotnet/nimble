@@ -10,74 +10,132 @@ namespace Piot.Flood
 {
     public sealed class OctetReader : IOctetReaderWithSeekAndSkip
     {
-        readonly ReadOnlyMemory<byte> array;
-        int pos;
+        readonly byte[] array;
+        private int pos;
+        private int size;
 
         public OctetReader(ReadOnlySpan<byte> span)
         {
             array = span.ToArray();
+            size = array.Length;
         }
 
         public byte ReadUInt8()
         {
-            return array.Span[pos++];
+            if (pos + 1 > size)
+            {
+                throw new Exception($"ReadUInt8: read too far {pos} out of {size}");
+            }
+
+            return array[pos++];
         }
 
         public sbyte ReadInt8()
         {
-            return (sbyte)array.Span[pos++];
+            if (pos + 1 > size)
+            {
+                throw new Exception($"ReadUInt8: read too far {pos} out of {size}");
+            }
+
+            return (sbyte)array[pos++];
         }
 
         public ushort ReadUInt16()
         {
             pos += 2;
-            return BinaryPrimitives.ReadUInt16BigEndian(array.Span.Slice(pos - 2, 2));
+            if (pos > size)
+            {
+                throw new Exception($"ReadUInt16: read too far {pos} out of {size}");
+            }
+
+            return (ushort)((array[pos - 2] << 8) | array[pos - 1]);
         }
 
         public short ReadInt16()
         {
             pos += 2;
-            return BinaryPrimitives.ReadInt16BigEndian(array.Span.Slice(pos - 2, 2));
+            if (pos > size)
+            {
+                throw new Exception($"ReadInt16: read too far {pos} out of {size}");
+            }
+
+            return (short)((array[pos - 2] << 8) | array[pos - 1]);
         }
 
         public uint ReadUInt32()
         {
             pos += 4;
-            return BinaryPrimitives.ReadUInt32BigEndian(array.Span.Slice(pos - 4, 4));
+            if (pos > size)
+            {
+                throw new Exception($"ReadUInt32: read too far {pos} out of {size}");
+            }
+
+            return ((uint)array[pos - 4] << 24) | ((uint)array[pos - 3] << 16) | ((uint)array[pos - 2] << 8) |
+                   array[pos - 1];
         }
 
         public int ReadInt32()
         {
             pos += 4;
-            return BinaryPrimitives.ReadInt32BigEndian(array.Span.Slice(pos - 4, 4));
+            if (pos > size)
+            {
+                throw new Exception($"ReadInt32: read too far {pos} out of {size}");
+            }
+
+            return (array[pos - 4] << 24) | (array[pos - 3] << 16) | (array[pos - 2] << 8) |
+                   array[pos - 1];
         }
 
 
         public ulong ReadUInt64()
         {
             pos += 8;
-            return BinaryPrimitives.ReadUInt64BigEndian(array.Span.Slice(pos - 8, 8));
+
+            if (pos > size)
+            {
+                throw new Exception($"ReadUInt64: read too far {pos} out of {size}");
+            }
+
+            return ((ulong)array[pos - 8] << 56) | ((ulong)array[pos - 7] << 48) | ((ulong)array[pos - 6] << 40) |
+                   ((ulong)array[pos - 5] << 32) |
+                   ((ulong)array[pos - 4] << 24) | ((ulong)array[pos - 3] << 16) | ((ulong)array[pos - 2] << 8) |
+                   array[pos - 1];
         }
 
         public long ReadInt64()
         {
             pos += 8;
-            return BinaryPrimitives.ReadInt64BigEndian(array.Span.Slice(pos - 8, 8));
+
+            if (pos > size)
+            {
+                throw new Exception($"ReadUInt64: read too far {pos} out of {size}");
+            }
+
+            return ((long)array[pos - 8] << 56) | ((long)array[pos - 7] << 48) | ((long)array[pos - 6] << 40) |
+                   ((long)array[pos - 5] << 32) |
+                   ((long)array[pos - 4] << 24) | ((long)array[pos - 3] << 16) | ((long)array[pos - 2] << 8) |
+                   array[pos - 1];
         }
 
 
         public ReadOnlySpan<byte> ReadOctets(int octetCount)
         {
             pos += octetCount;
-            return array.Span.Slice(pos - octetCount, octetCount);
+
+            if (pos > size)
+            {
+                throw new Exception($"ReadOctets: read too far {pos} {octetCount} out of {size}");
+            }
+
+            return array.AsSpan(pos - octetCount, octetCount);
         }
 
         public void Skip(int octetCount)
         {
             pos += octetCount;
-            if (pos >= array.Length)
+            if (pos > size)
             {
-                throw new("skipped too far");
+                throw new($"skipped too far {octetCount} {pos} {size}");
             }
         }
 

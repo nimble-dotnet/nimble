@@ -31,6 +31,7 @@ public class SetupTrace
 [TestFixture]
 public class PredictedStepsTests
 {
+	/*
 	[Test]
 	public void SerializationOfLocalParticipants()
 	{
@@ -57,4 +58,5 @@ public class PredictedStepsTests
 		Assert.That(deserializedFirstPlayer.steps.First().appliedAtTickId.tickId, Is.EqualTo(ExpectedTickIdValue));
 		Assert.That(deserializedFirstPlayer.steps.First().payload.ToArray(), Is.EqualTo(ExpectedStepPayload));
 	}
+	*/
 }

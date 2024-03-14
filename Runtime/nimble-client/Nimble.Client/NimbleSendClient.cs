@@ -58,8 +58,6 @@ namespace Piot.Nimble.Client
 
 		public void Tick(TimeMs now)
 		{
-			var filteredOutPredictedStepsForLocalPlayers = FilterOutStepsToSend();
-
 			octetWriter.Reset();
 
 			OrderedDatagramsSequenceIdWriter.Write(octetWriter, datagramSequenceId);
@@ -70,7 +68,7 @@ namespace Piot.Nimble.Client
 
 			StatusWriter.Write(octetWriter, expectingAuthoritativeTickId, 0);
 
-			PredictedStepsSerialize.Serialize(octetWriter, filteredOutPredictedStepsForLocalPlayers, log);
+			PredictedStepsSerialize.Serialize(octetWriter, predictedSteps, log);
 
 
 //			log.Warn($"decision to send predicted steps to send to the host {filteredOutPredictedStepsForLocalPlayers} {{OctetCount}}", octetWriter.Position);
@@ -106,66 +104,6 @@ namespace Piot.Nimble.Client
 			expectingAuthoritativeTickId = tickId.Next;
 		}
 
-		private PredictedStepsForAllLocalPlayers FilterOutStepsToSend()
-		{
-			var predictedStepsForPlayers = new List<PredictedStepsForPlayer>();
-			var localPlayerCount = predictedSteps.predictedStepsQueues.Count;
-			if(localPlayerCount == 0)
-			{
-				return default;
-			}
-
-			var maxOctetSizePerPlayer = MaxOctetSize / localPlayerCount;
-			foreach (var (playerIndex, predictedStepsQueue) in predictedSteps.predictedStepsQueues)
-			{
-				if(predictedStepsQueue.IsEmpty)
-				{
-					continue;
-				}
-
-				var allPredictedSteps = predictedStepsQueue.Collection;
-
-				//		log.Debug("prepare predictedStep for {{PlayerIndex}}", playerIndex);
-
-				var octetCount = 0;
-				var stepCount = 0;
-				foreach (var predictedStep in allPredictedSteps)
-				{
-//					log.Debug($"prepare predictedStep: {{PlayerIndex}} {{TickID}}", playerIndex,
-//						predictedStep.appliedAtTickId);
-					octetCount += predictedStep.payload.Length + 2;
-					if(octetCount > maxOctetSizePerPlayer)
-					{
-						log.Debug("we reached our limit, break here {OctetCount} {MaxOctetSizePerPlayer}", octetCount,
-							maxOctetSizePerPlayer);
-						break;
-					}
-
-					stepCount++;
-				}
-
-				if(stepCount == 0)
-				{
-					log.Notice("didnt have room to add a single step into the buffer {MaxOctetSizePerPlayer}",
-						maxOctetSizePerPlayer);
-				}
-
-
-				var filteredOutSteps = allPredictedSteps.Take(stepCount);
-				var array = filteredOutSteps.ToArray();
-
-				if (array.Length > 0)
-				{
-					lastSentPredictedTickId = array[^1].appliedAtTickId;
-				}
-				var predictedStepsForOnePlayer =
-					new PredictedStepsForPlayer(new(playerIndex), array);
-				predictedStepsForPlayers.Add(predictedStepsForOnePlayer);
-			}
-
-			var allPlayers = new PredictedStepsForAllLocalPlayers(predictedStepsForPlayers.ToArray());
-
-			return allPlayers;
-		}
+		
 	}
 }

@@ -17,7 +17,7 @@ namespace Piot.Flood
             var value = reader.ReadUInt8();
             if (value != expectedValue)
             {
-                throw new("wrong marker encountered");
+                throw new($"wrong marker encountered {expectedValue}");
             }
         }
     }
