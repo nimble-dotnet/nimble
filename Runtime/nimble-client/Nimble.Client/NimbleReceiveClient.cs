@@ -40,20 +40,24 @@ namespace Piot.Nimble.Client
         public FormattedStat AuthoritativeTicksPerSecond =>
             new(StandardFormatterPerSecond.Format, authoritativeTicksPerSecond.Stat);
 
+        private FixedDeltaTimeMs stepTimeMs;
+
         public int RemotePredictedBufferDiff => bufferDiff.Stat.average;
 
         public uint TargetPredictStepCount
         {
             get
             {
+                const int accountForMissingTheTick = 1;
+
                 if (receiveStats.RoundTripTime.stat.average == 0)
                 {
-                    return 2;
+                    return accountForMissingTheTick;
                 }
 
                 var tickCountAheadOnHost = bufferDiff.Stat.average;
                 var adjustmentForBufferOnHost = 0;
-                const int lowerThreshold = 3;
+                const int lowerThreshold = 2;
                 const int higherThreshold = 6;
                 if (tickCountAheadOnHost <= lowerThreshold)
                 {
@@ -64,18 +68,24 @@ namespace Piot.Nimble.Client
                     adjustmentForBufferOnHost = -(tickCountAheadOnHost - higherThreshold);
                 }
 
-                const int accountForMissingTheTick = 2;
-
-                var target = (16 / receiveStats.RoundTripTime.stat.average + adjustmentForBufferOnHost +
-                              accountForMissingTheTick);
+                var roundTripInStepCount = receiveStats.RoundTripTime.stat.average / stepTimeMs.ms;
+                var target = roundTripInStepCount + adjustmentForBufferOnHost +
+                             accountForMissingTheTick;
+                log.DebugLowLevel(
+                    "target {RoundTripTime} {RoundTripStepCount} {BufferAdjustment} ({TickAheadOnHost}) {AccountForMissingTheTick}",
+                    receiveStats.RoundTripTime.stat.average, roundTripInStepCount, adjustmentForBufferOnHost,
+                    tickCountAheadOnHost,
+                    accountForMissingTheTick);
                 return (uint)Math.Clamp(target, 1, 20);
             }
         }
 
-        public NimbleReceiveClient(TickId tickId, TimeMs now, NimbleSendClient sendClient, ILog log)
+        public NimbleReceiveClient(TickId tickId, TimeMs now, FixedDeltaTimeMs deltaTimeMs, NimbleSendClient sendClient,
+            ILog log)
         {
             this.log = log;
             this.sendClient = sendClient;
+            stepTimeMs = deltaTimeMs;
             datagramBitsPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(500));
             authoritativeTicksPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(250));
             receiveStats = new NimbleClientReceiveStats(now);

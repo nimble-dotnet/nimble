@@ -17,11 +17,13 @@ namespace Nimble.Authoritative.Steps
         {
             this.log = log;
         }
+
         public Participant CreateParticipant(byte connectionId, LocalPlayerIndex localPlayerIndex)
         {
             var newParticipantId = GetFreeParticipantId();
             var newConnection = new Participant(newParticipantId, localPlayerIndex);
-            log.Debug("add participant {ParticipantID} for {ConnectionID} {LocalPlayerIndex}", newParticipantId, connectionId, localPlayerIndex);
+            log.Debug("add participant {ParticipantID} for {ConnectionID} {LocalPlayerIndex}", newParticipantId,
+                connectionId, localPlayerIndex);
 
             participants.Add(newParticipantId.id, newConnection);
 
@@ -70,16 +72,17 @@ namespace Nimble.Authoritative.Steps
                     continue;
                 }
 
-                if (participant.incomingSteps.Peek().appliedAtTickId == tickId)
+                if (participant.incomingSteps.Peek().appliedAtTickId == tickId && participant.incomingSteps.Count >= 1)
                 {
-                    log.DebugLowLevel("We have at least one {Participant} that can contribute now and {Delta} steps", participant, participant.incomingSteps.Count);
+                    log.DebugLowLevel("We have at least one {Participant} that can contribute now and {Delta} steps",
+                        participant, participant.incomingSteps.Count);
                     couldAnyoneContributeNow = true;
                     break;
                 }
                 else
                 {
-                    log.DebugLowLevel("We have at least one {Participant} that CAN NOT {TickId} {Range}", participant, tickId, participant.incomingSteps.Range);
-                    
+                    log.DebugLowLevel("We have at least one {Participant} that CAN NOT {TickId} {Range}", participant,
+                        tickId, participant.incomingSteps.Range);
                 }
             }
 
@@ -89,7 +92,7 @@ namespace Nimble.Authoritative.Steps
             }
 
             var couldEveryoneContributeNowOrInTheFuture = true;
-            
+
             // Someone can contribute to the current step, add penalty for anyone that can not contribute now or at least in the future
             foreach (var participant in participants.Values)
             {
@@ -111,7 +114,7 @@ namespace Nimble.Authoritative.Steps
 
             log.DebugLowLevel("IsAhead {AllowedToAdvance}", couldEveryoneContributeNowOrInTheFuture);
 
-           return couldEveryoneContributeNowOrInTheFuture;
+            return couldEveryoneContributeNowOrInTheFuture;
         }
     }
 }
