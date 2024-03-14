@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using Piot.Discoid;
 using Piot.Tick;
-using UnityEngine;
 
 namespace Piot.Nimble.Steps
 {
@@ -58,8 +57,6 @@ namespace Piot.Nimble.Steps
             {
                 // TickId can only go up, so it means that we have dropped inputs at previous ticks
                 // We can only remove all inputs and add this one
-                Debug.LogWarning(
-                    $"reset due to incoming step {predictedStep.appliedAtTickId.tickId} was more thatn {waitingForTickId.tickId}");
                 Reset();
                 wasReset = true;
             }
