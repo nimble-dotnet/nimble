@@ -9,11 +9,11 @@ namespace Nimble.Authoritative.Steps
     public class AuthoritativeStepProducer
     {
         private Participants participants;
-        private AuthoritativeStepsQueue _authoritativeStepsQueue;
+        private AuthoritativeStepsQueue authoritativeStepsQueue;
         private TickId tickId;
         private ILog log;
 
-        public AuthoritativeStepsQueue AuthoritativeStepsQueue => _authoritativeStepsQueue;
+        public AuthoritativeStepsQueue AuthoritativeStepsQueue => authoritativeStepsQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthoritativeStepProducer"/> class.
@@ -26,7 +26,7 @@ namespace Nimble.Authoritative.Steps
             this.tickId = tickId;
             this.log = log;
             this.participants = participants;
-            _authoritativeStepsQueue = new AuthoritativeStepsQueue(tickId);
+            authoritativeStepsQueue = new AuthoritativeStepsQueue(tickId);
         }
 
         /// <summary>
@@ -38,10 +38,10 @@ namespace Nimble.Authoritative.Steps
         /// </remarks>
         private void ComposeOneStep()
         {
-            var combinedAuthoritativeStep = Combiner.ComposeOneAuthoritativeSteps(participants, tickId, log);
+            var combinedAuthoritativeStep = PredictionToAuthoritativeSplicer.SpliceOneAuthoritativeSteps(participants, tickId, log);
             tickId = tickId.Next;
 
-            _authoritativeStepsQueue.Add(combinedAuthoritativeStep);
+            authoritativeStepsQueue.Add(combinedAuthoritativeStep);
         }
 
         /// <summary>

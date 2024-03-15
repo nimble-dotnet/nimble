@@ -71,7 +71,7 @@ public class AuthoritativeStepsTests
         {
             var tooEarlyTickId = new TickId(2);
             var tooEarlyCombinedAuthoritativeStep =
-                Combiner.ComposeOneAuthoritativeSteps(participantConnections, tooEarlyTickId, log);
+                PredictionToAuthoritativeSplicer.SpliceOneAuthoritativeSteps(participantConnections, tooEarlyTickId, log);
 
             var writer = new OctetWriter(512);
             AuthoritativeStepWriter.Write(tooEarlyCombinedAuthoritativeStep, writer);
@@ -96,7 +96,7 @@ public class AuthoritativeStepsTests
         {
             var secondTickId = new TickId(14);
             var secondCombinedAuthoritativeStep =
-                Combiner.ComposeOneAuthoritativeSteps(participantConnections, secondTickId, log);
+                PredictionToAuthoritativeSplicer.SpliceOneAuthoritativeSteps(participantConnections, secondTickId, log);
 
             var writer = new OctetWriter(512);
             AuthoritativeStepWriter.Write(secondCombinedAuthoritativeStep, writer);
