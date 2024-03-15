@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Tick;
 using Piot.Tick.Serialization;
 
 namespace Piot.Nimble.Steps.Serialization
@@ -23,16 +24,18 @@ namespace Piot.Nimble.Steps.Serialization
         ///     Serializing the game specific inputs to be sent from the client to the authoritative host.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Serialize(OctetWriter writer, PredictedStepsLocalPlayers inputsForLocalPlayers,
+        public static TickId Serialize(OctetWriter writer, PredictedStepsLocalPlayers inputsForLocalPlayers,
             ILog log)
         {
             OctetMarker.WriteMarker(writer, Constants.PredictedStepsHeaderMarker);
             var localPlayerCount = inputsForLocalPlayers.predictedStepsQueues.Count;
             writer.WriteUInt8((byte)localPlayerCount);
 
+            TickId highestWrittenPredictedTickId = default;
+
             if (localPlayerCount == 0)
             {
-                return;
+                return highestWrittenPredictedTickId;
             }
 
             var octetBudget = writer.OctetsLeft / localPlayerCount;
@@ -92,16 +95,24 @@ namespace Piot.Nimble.Steps.Serialization
                     writer.WriteUInt8((byte)predictedStep.payload.Length);
                     writer.WriteOctets(predictedStep.payload.Span);
 
+                    if (predictedStep.appliedAtTickId > highestWrittenPredictedTickId)
+                    {
+                        highestWrittenPredictedTickId = predictedStep.appliedAtTickId;
+                    }
+
                     wroteTickCount++;
                     expectedTickIdValue++;
                 }
-                
-                log.DebugLowLevel("Wrote predicted {FirstTickID} {StepCount} to datagram for {LocalPlayerIndex}", first, wroteTickCount, localPlayerIndex);
+
+                log.DebugLowLevel("Wrote predicted {FirstTickID} {StepCount} to datagram for {LocalPlayerIndex}", first,
+                    wroteTickCount, localPlayerIndex);
                 var seekBack = writer.Tell;
                 writer.Seek(positionBeforeTickCount);
                 writer.WriteUInt8((byte)wroteTickCount);
                 writer.Seek(seekBack);
             }
+
+            return highestWrittenPredictedTickId;
         }
     }
 }

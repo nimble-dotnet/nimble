@@ -83,15 +83,12 @@ namespace Piot.Nimble.Host
                 }
 
                 var startId = hostConnection.expectingAuthoritativeTickId;
-                var lastAuthoritativeTickId = startId + 40;
-                var requestedRange = new TickIdRange(startId, lastAuthoritativeTickId);
-
-                var rangeToSend = authoritativeRangeInBuffer.Satisfy(requestedRange);
-
-                var hostRanges = new List<TickIdRange> { rangeToSend };
+                if (startId > authoritativeStepsQueue.Last.appliedAtTickId)
+                {
+                    startId = authoritativeStepsQueue.Last.appliedAtTickId;
+                }
 
                 //              log.Warn("decision is to send combined authoritative step range {Range}", range);
-                var hostConnectionRange = new TickIdRanges { ranges = hostRanges };
 
                 outWriter.Reset();
 
@@ -100,7 +97,7 @@ namespace Piot.Nimble.Host
                 MonotonicTimeLowerBitsWriter.Write(hostConnection.lastReceivedMonotonicLowerBits, outWriter);
                 WriteParticipantInfo(hostConnection, outWriter);
                 WriteBufferInfo(hostConnection, outWriter);
-                CombinedRangesWriter.Write(authoritativeStepsQueue, hostConnectionRange, outWriter, log);
+                CombinedRangesWriter.Write(authoritativeStepsQueue, startId, outWriter, log);
 
                 //            log.Warn("combined authoritative step range {OctetSize}", outWriter.Position);
 

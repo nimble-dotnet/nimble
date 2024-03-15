@@ -17,93 +17,96 @@ using Constants = Piot.Datagram.Constants;
 
 namespace Piot.Nimble.Client
 {
-	public sealed class NimbleSendClient
-	{
-		public const uint MaxOctetSize = 1024;
-		public readonly PredictedStepsLocalPlayers predictedSteps;
-		private readonly ILog log;
-		private readonly OctetWriter octetWriter = new(1024);
-		private const int MaximumClientOutDatagramCount = 4;
-		private readonly CircularBuffer<ClientDatagram> clientOutDatagrams = new(MaximumClientOutDatagramCount);
+    public sealed class NimbleSendClient
+    {
+        public const uint MaxOctetSize = 1024;
+        public readonly PredictedStepsLocalPlayers predictedSteps;
+        private readonly ILog log;
+        private readonly OctetWriter octetWriter = new(1024);
+        private const int MaximumClientOutDatagramCount = 4;
+        private readonly CircularBuffer<ClientDatagram> clientOutDatagrams = new(MaximumClientOutDatagramCount);
 
-		private readonly StatPerSecond datagramCountPerSecond;
-		private readonly StatPerSecond datagramBitsPerSecond;
-		private readonly StatPerSecond predictedStepsSentPerSecond;
+        private readonly StatPerSecond datagramCountPerSecond;
+        private readonly StatPerSecond datagramBitsPerSecond;
+        private readonly StatPerSecond predictedStepsSentPerSecond;
 
-		public FormattedStat DatagramCountPerSecond =>
-			new(StandardFormatterPerSecond.Format, datagramCountPerSecond.Stat);
+        public FormattedStat DatagramCountPerSecond =>
+            new(StandardFormatterPerSecond.Format, datagramCountPerSecond.Stat);
 
-		public FormattedStat DatagramBitsPerSecond =>
-			new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
+        public FormattedStat DatagramBitsPerSecond =>
+            new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
 
-		private OrderedDatagramsSequenceId datagramSequenceId;
-		private TickId expectingAuthoritativeTickId;
-		private TickId lastSentPredictedTickId;
-		private TickId lastSentPredictedTickIdAddedToStats;
-		
-		public FormattedStat PredictedStepsSentPerSecond =>
-			new(StandardFormatterPerSecond.Format, predictedStepsSentPerSecond.Stat);
-		
-		public NimbleSendClient(TimeMs now, ILog log)
-		{
-			this.log = log;
-			datagramCountPerSecond = new StatPerSecond(now, new(500));
-			datagramBitsPerSecond = new StatPerSecond(now, new(500));
-			predictedStepsSentPerSecond = new StatPerSecond(now, new(500));
-			predictedSteps = new PredictedStepsLocalPlayers(log.SubLog("PredictedStepsLocalPlayers"));
-		}
+        private OrderedDatagramsSequenceId datagramSequenceId;
+        private TickId expectingAuthoritativeTickId;
+        private TickId lastSentPredictedTickId;
+        private TickId lastSentPredictedTickIdAddedToStats;
 
-		public IEnumerable<ClientDatagram> OutDatagrams => clientOutDatagrams;
+        public FormattedStat PredictedStepsSentPerSecond =>
+            new(StandardFormatterPerSecond.Format, predictedStepsSentPerSecond.Stat);
+
+        public NimbleSendClient(TimeMs now, ILog log)
+        {
+            this.log = log;
+            datagramCountPerSecond = new StatPerSecond(now, new(500));
+            datagramBitsPerSecond = new StatPerSecond(now, new(500));
+            predictedStepsSentPerSecond = new StatPerSecond(now, new(500));
+            predictedSteps = new PredictedStepsLocalPlayers(log.SubLog("PredictedStepsLocalPlayers"));
+        }
+
+        public IEnumerable<ClientDatagram> OutDatagrams => clientOutDatagrams;
 
 
-		public void Tick(TimeMs now)
-		{
-			octetWriter.Reset();
+        public void Tick(TimeMs now)
+        {
+            octetWriter.Reset();
 
-			OrderedDatagramsSequenceIdWriter.Write(octetWriter, datagramSequenceId);
-			datagramSequenceId.Next();
+            OrderedDatagramsSequenceIdWriter.Write(octetWriter, datagramSequenceId);
+            datagramSequenceId.Next();
 
-			MonotonicTimeLowerBitsWriter.Write(
-				new((ushort)(now.ms & 0xffff)), octetWriter);
+            MonotonicTimeLowerBitsWriter.Write(
+                new((ushort)(now.ms & 0xffff)), octetWriter);
 
-			StatusWriter.Write(octetWriter, expectingAuthoritativeTickId, 0);
+            StatusWriter.Write(octetWriter, expectingAuthoritativeTickId, 0);
 
-			PredictedStepsSerialize.Serialize(octetWriter, predictedSteps, log);
+            var lastSentTickId = PredictedStepsSerialize.Serialize(octetWriter, predictedSteps, log);
+            if (lastSentTickId > lastSentPredictedTickId)
+            {
+                lastSentPredictedTickId = lastSentTickId;
+            }
 
 
 //			log.Warn($"decision to send predicted steps to send to the host {filteredOutPredictedStepsForLocalPlayers} {{OctetCount}}", octetWriter.Position);
 
-			clientOutDatagrams.Clear();
+            clientOutDatagrams.Clear();
 
-			if(octetWriter.Position > Constants.MaxDatagramOctetSize)
-			{
-				throw new Exception($"too many predicted steps to serialize");
-			}
+            if (octetWriter.Position > Constants.MaxDatagramOctetSize)
+            {
+                throw new Exception($"too many predicted steps to serialize");
+            }
 
-			ref var datagram = ref clientOutDatagrams.EnqueueRef();
-			datagram.payload = octetWriter.Octets.ToArray();
+            ref var datagram = ref clientOutDatagrams.EnqueueRef();
+            datagram.payload = octetWriter.Octets.ToArray();
 
-			var diff = lastSentPredictedTickId.tickId - lastSentPredictedTickIdAddedToStats.tickId;
-			if (diff > 0)
-			{
-				predictedStepsSentPerSecond.Add((int)diff);
-			}
-			lastSentPredictedTickIdAddedToStats = lastSentPredictedTickId;
+            var diff = lastSentPredictedTickId.tickId - lastSentPredictedTickIdAddedToStats.tickId;
+            if (diff > 0)
+            {
+                predictedStepsSentPerSecond.Add((int)diff);
+            }
 
-			datagramCountPerSecond.Add(1);
-			datagramBitsPerSecond.Add(datagram.payload.Length * 8);
+            lastSentPredictedTickIdAddedToStats = lastSentPredictedTickId;
 
-			datagramCountPerSecond.Update(now);
-			datagramBitsPerSecond.Update(now);
-			predictedStepsSentPerSecond.Update(now);
-		}
+            datagramCountPerSecond.Add(1);
+            datagramBitsPerSecond.Add(datagram.payload.Length * 8);
 
-		public void OnLatestAuthoritativeTickId(TickId tickId, uint droppedCount)
-		{
-			predictedSteps.DiscardUpToAndExcluding(tickId.Next);
-			expectingAuthoritativeTickId = tickId.Next;
-		}
+            datagramCountPerSecond.Update(now);
+            datagramBitsPerSecond.Update(now);
+            predictedStepsSentPerSecond.Update(now);
+        }
 
-		
-	}
+        public void OnLatestAuthoritativeTickId(TickId tickId, uint droppedCount)
+        {
+            predictedSteps.DiscardUpToAndExcluding(tickId.Next);
+            expectingAuthoritativeTickId = tickId.Next;
+        }
+    }
 }

@@ -6,37 +6,40 @@ using Piot.Tick.Serialization;
 
 namespace Nimble.Authoritative.Steps
 {
-	public class CombinedRangesWriter
-	{
-		public static void Write(CombinedAuthoritativeStepsQueue combinedAuthoritativeSteps, TickIdRanges ranges,
-			OctetWriter outStream, ILog log)
-		{
-			//TickIdWriter.Write(outStream, ranges.ranges[0].startTickId);
-			outStream.WriteUInt8((byte)ranges.ranges.Count);
+    public class CombinedRangesWriter
+    {
+        public static void Write(CombinedAuthoritativeStepsQueue combinedAuthoritativeSteps, TickId fromTickId,
+            OctetWriter outStream, ILog log)
+        {
+            //TickIdWriter.Write(outStream, ranges.ranges[0].startTickId);
+            //log.DebugLowLevel("writing combined authoritative range {Range}", range);
+            TickIdWriter.Write(outStream, fromTickId);
 
-			foreach (var range in ranges.ranges)
-			{
-				//log.DebugLowLevel("writing combined authoritative range {Range}", range);
-				TickIdRangeWriter.Write(outStream, range);
 
-				if (range.Length == 0)
-				{
-					throw new Exception($"internal error");
-				}
-				var rangeCombinedAuthoritativeSteps = combinedAuthoritativeSteps.FromRange(range);
-				var count = 0u;
-				foreach (var combinedAuthoritativeStep in rangeCombinedAuthoritativeSteps)
-				{
-	//				log.Debug("writing combined authoritative step {{CombinedAuthoritativeStep}}", combinedAuthoritativeStep);
-					CombinedWriter.Write(combinedAuthoritativeStep, outStream);
-					count++;
-				}
+            var countTell = outStream.Tell;
+            outStream.WriteUInt8(0);
 
-				if (count != range.Length)
-				{
-					throw new Exception($"internal error, enumerator {count} is not same length as range {range.Length}");
-				}
-			}
-		}
-	}
+            var wholeRange = new TickIdRange(fromTickId, combinedAuthoritativeSteps.Last.appliedAtTickId);
+
+            var rangeCombinedAuthoritativeSteps = combinedAuthoritativeSteps.FromRange(wholeRange);
+            var count = 0u;
+            foreach (var combinedAuthoritativeStep in rangeCombinedAuthoritativeSteps)
+            {
+                var octetCount = combinedAuthoritativeStep.OctetCount;
+                //				log.Debug("writing combined authoritative step {{CombinedAuthoritativeStep}}", combinedAuthoritativeStep);
+                if (octetCount + 30 > outStream.OctetsLeft)
+                {
+                    break;
+                }
+
+                CombinedWriter.Write(combinedAuthoritativeStep, outStream);
+                count++;
+            }
+
+            var seekBack = outStream.Tell;
+            outStream.Seek(countTell);
+            outStream.WriteUInt8((byte)count);
+            outStream.Seek(seekBack);
+        }
+    }
 }
