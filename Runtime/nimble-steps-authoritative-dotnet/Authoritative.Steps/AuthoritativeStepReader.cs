@@ -4,13 +4,13 @@ using Piot.Tick;
 
 namespace Nimble.Authoritative.Steps
 {
-	public class CombinedReader
+	public class AuthoritativeStepReader
 	{
-		public static CombinedAuthoritativeStep DeserializeCombinedAuthoritativeStep(TickId tickIdToCompose,
+		public static AuthoritativeStep ReadOneAuthoritativeStep(TickId tickIdToCompose,
 			IOctetReader inStream,
 			ILog log)
 		{
-			var combinedAuthoritativeStep = new CombinedAuthoritativeStep(tickIdToCompose);
+			var combinedAuthoritativeStep = new AuthoritativeStep(tickIdToCompose);
 			var queueCount = inStream.ReadUInt8();
 
 			for (var i = 0; i < queueCount; ++i)
@@ -18,13 +18,13 @@ namespace Nimble.Authoritative.Steps
 				var combinedParticipantIdAndMask = inStream.ReadUInt8();
 				byte participantId = (byte)0u;
 				SerializeProviderConnectState connectState;
-				AuthoritativeStep step;
+				AuthoritativeStepForOneParticipant stepForOneParticipant;
 
 				if((combinedParticipantIdAndMask & 0x80) != 0)
 				{
 					participantId = (byte)(combinedParticipantIdAndMask & 0x7f);
 					connectState = (SerializeProviderConnectState)inStream.ReadUInt8();
-					step = new AuthoritativeStep(tickIdToCompose, connectState);
+					stepForOneParticipant = new AuthoritativeStepForOneParticipant(tickIdToCompose, connectState);
 				}
 				else
 				{
@@ -32,12 +32,12 @@ namespace Nimble.Authoritative.Steps
 					var octetLength = inStream.ReadUInt8();
 					var octets = inStream.ReadOctets(octetLength);
 
-					step = new AuthoritativeStep(tickIdToCompose, octets);
+					stepForOneParticipant = new AuthoritativeStepForOneParticipant(tickIdToCompose, octets);
 				}
 
 				var participant = new ParticipantId { id = participantId };
 
-				combinedAuthoritativeStep.authoritativeSteps.Add(participant, step);
+				combinedAuthoritativeStep.authoritativeSteps.Add(participant, stepForOneParticipant);
 			}
 
 			return combinedAuthoritativeStep;

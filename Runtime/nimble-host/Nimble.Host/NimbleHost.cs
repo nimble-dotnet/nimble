@@ -11,10 +11,24 @@ using Piot.Tick;
 
 namespace Piot.Nimble.Host
 {
+    /// <summary>
+    /// Implements a Host for the Nimble protocol.
+    /// </summary>
     public class NimbleHost
     {
-        public CombinedAuthoritativeStepProducer authoritativeStepProducer;
+        /// <summary>
+        /// The authoritative step producer that combines multiple predicted steps and combines them into one.
+        /// </summary>
+        public AuthoritativeStepProducer authoritativeStepProducer;
+        
+        /// <summary>
+        /// The participants connected to the host
+        /// </summary>
         public Participants participants;
+
+        /// <summary>
+        /// The incoming connections that has been established.
+        /// </summary>
         public HostConnections hostConnections = new();
         private const int MaximumOutDatagramCount = 16 * 3;
         private CircularBuffer<HostDatagram> outDatagrams = new(MaximumOutDatagramCount);
@@ -23,15 +37,23 @@ namespace Piot.Nimble.Host
 
         public TickId WaitingToComposeTickId => authoritativeStepProducer.AuthoritativeStepsQueue.WaitingForTickId;
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NimbleHost"/> class.
+        /// </summary>
+        /// <param name="startId">The starting tick ID. The first TickID that the host and producer is waiting for.</param>
+        /// <param name="log">The log.</param>
         public NimbleHost(TickId startId, ILog log)
         {
             //
             participants = new Participants(log);
-            authoritativeStepProducer = new CombinedAuthoritativeStepProducer(startId, participants, log);
+            authoritativeStepProducer = new AuthoritativeStepProducer(startId, participants, log);
             this.log = log;
         }
 
+        /// <summary>
+        /// Receives a datagram. Fills the participants prediction buffers.
+        /// </summary>
+        /// <param name="datagram">The datagram to receive.</param>
         public void ReceiveDatagram(in HostDatagram datagram)
         {
             log.DebugLowLevel("receive datagram {OctetCount} from {Connection}", datagram.payload.Length,
@@ -57,6 +79,10 @@ namespace Piot.Nimble.Host
             }
         }
 
+        /// <summary>
+        /// Tries to produce as much authoritative ticks as possible and adds outDatagrams with outgoing authoritative steps.
+        /// </summary>
+        /// <param name="simulationTickId">The tick ID.</param>
         public void Tick(TickId simulationTickId)
         {
             var authoritativeStepsQueue = authoritativeStepProducer.AuthoritativeStepsQueue;
@@ -136,6 +162,9 @@ namespace Piot.Nimble.Host
             }
         }
 
+        /// <summary>
+        /// Gets the datagrams to send over the transport
+        /// </summary>
         public IEnumerable<HostDatagram> DatagramsToSend => outDatagrams;
     }
 }

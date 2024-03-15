@@ -8,7 +8,7 @@ namespace Nimble.Authoritative.Steps
 {
     public class AuthoritativeStepsWriter
     {
-        public static void Write(CombinedAuthoritativeStepsQueue combinedAuthoritativeSteps, TickId fromTickId,
+        public static void Write(AuthoritativeStepsQueue authoritativeSteps, TickId fromTickId,
             OctetWriter outStream, ILog log)
         {
             //TickIdWriter.Write(outStream, ranges.ranges[0].startTickId);
@@ -19,9 +19,9 @@ namespace Nimble.Authoritative.Steps
             var countTell = outStream.Tell;
             outStream.WriteUInt8(0);
 
-            var wholeRange = new TickIdRange(fromTickId, combinedAuthoritativeSteps.Last.appliedAtTickId);
+            var wholeRange = new TickIdRange(fromTickId, authoritativeSteps.Last.appliedAtTickId);
 
-            var rangeCombinedAuthoritativeSteps = combinedAuthoritativeSteps.FromRange(wholeRange);
+            var rangeCombinedAuthoritativeSteps = authoritativeSteps.FromRange(wholeRange);
             var count = 0u;
             foreach (var combinedAuthoritativeStep in rangeCombinedAuthoritativeSteps)
             {
@@ -32,7 +32,7 @@ namespace Nimble.Authoritative.Steps
                     break;
                 }
 
-                CombinedWriter.Write(combinedAuthoritativeStep, outStream);
+                AuthoritativeStepWriter.Write(combinedAuthoritativeStep, outStream);
                 count++;
             }
 

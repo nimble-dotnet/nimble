@@ -12,13 +12,13 @@ namespace Nimble.Authoritative.Steps
 {
 	/// <summary>
 	/// </summary>
-	public sealed class CombinedAuthoritativeStepsQueue
+	public sealed class AuthoritativeStepsQueue
 	{
-		readonly OverwriteCircularBuffer<CombinedAuthoritativeStep> queue = new(60);
+		readonly OverwriteCircularBuffer<AuthoritativeStep> queue = new(60);
 
 		TickId waitingForTickId;
 
-		public IEnumerable<CombinedAuthoritativeStep> Collection => queue;
+		public IEnumerable<AuthoritativeStep> Collection => queue;
 
 		public int Count => queue.Count;
 
@@ -28,21 +28,16 @@ namespace Nimble.Authoritative.Steps
 
 		public TickId WaitingForTickId => waitingForTickId;
 
-		public CombinedAuthoritativeStep Last => queue.Last;
+		public AuthoritativeStep Last => queue.Last;
 
 		public TickIdRange Range => new(queue.Peek().appliedAtTickId, queue.Last.appliedAtTickId);
-
-		public CombinedAuthoritativeStep Peek()
-		{
-			return queue.Peek();
-		}
-
-		public CombinedAuthoritativeStepsQueue(TickId tickId)
+	
+		public AuthoritativeStepsQueue(TickId tickId)
 		{
 			waitingForTickId = tickId;
 		}
 
-		public void Add(CombinedAuthoritativeStep authoritativeStep)
+		public void Add(AuthoritativeStep authoritativeStep)
 		{
 			if(authoritativeStep.appliedAtTickId != waitingForTickId)
 			{
@@ -54,32 +49,12 @@ namespace Nimble.Authoritative.Steps
 			waitingForTickId = new(authoritativeStep.appliedAtTickId.tickId + 1);
 		}
 
-		public void Reset()
-		{
-			queue.Clear();
-		}
-
-		public void DiscardUpToAndExcluding(TickId tickId)
-		{
-			while (queue.Count > 0)
-			{
-				if(queue.Peek().appliedAtTickId.tickId < tickId.tickId)
-				{
-					queue.Discard(1);
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-
-		public CombinedAuthoritativeStep Dequeue()
+		public AuthoritativeStep Dequeue()
 		{
 			return queue.Dequeue();
 		}
 
-		public IEnumerable<CombinedAuthoritativeStep> FromRange(TickIdRange range)
+		public IEnumerable<AuthoritativeStep> FromRange(TickIdRange range)
 		{
 			if(queue.IsEmpty)
 			{
@@ -96,7 +71,7 @@ namespace Nimble.Authoritative.Steps
 			var count = rangeToSend.Length;
 			var offset = rangeToSend.startTickId.tickId - startTickId.tickId;
 			var enumerator = queue.GetRangeEnumerator(offset, count);
-			return new EnumeratorWrapper<CombinedAuthoritativeStep>(enumerator);
+			return new EnumeratorWrapper<AuthoritativeStep>(enumerator);
 		}
 	}
 }

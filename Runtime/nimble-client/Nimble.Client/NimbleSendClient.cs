@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Piot.Clog;
 using Piot.Nimble.Steps;
 using Piot.Datagram;
@@ -17,22 +16,36 @@ using Constants = Piot.Datagram.Constants;
 
 namespace Piot.Nimble.Client
 {
+    /// <summary>
+    /// Client that sends data using the Nimble protocol.
+    /// </summary>
     public sealed class NimbleSendClient
     {
         public const uint MaxOctetSize = 1024;
+        
+        /// <summary>
+        /// Predicted steps for local players.
+        /// </summary>
         public readonly PredictedStepsLocalPlayers predictedSteps;
         private readonly ILog log;
         private readonly OctetWriter octetWriter = new(MaxOctetSize);
         private const int MaximumClientOutDatagramCount = 4;
         private readonly CircularBuffer<ClientDatagram> clientOutDatagrams = new(MaximumClientOutDatagramCount);
 
+ 
         private readonly StatPerSecond datagramCountPerSecond;
         private readonly StatPerSecond datagramBitsPerSecond;
         private readonly StatPerSecond predictedStepsSentPerSecond;
 
+        /// <summary>
+        /// Formatted statistic for datagram count per second.
+        /// </summary>        
         public FormattedStat DatagramCountPerSecond =>
             new(StandardFormatterPerSecond.Format, datagramCountPerSecond.Stat);
 
+        /// <summary>
+        /// Formatted statistic for datagram bits per second.
+        /// </summary>
         public FormattedStat DatagramBitsPerSecond =>
             new(BitsPerSecondFormatter.Format, datagramBitsPerSecond.Stat);
 
@@ -53,9 +66,16 @@ namespace Piot.Nimble.Client
             predictedSteps = new PredictedStepsLocalPlayers(log.SubLog("PredictedStepsLocalPlayers"));
         }
 
+        /// <summary>
+        /// Collection of outgoing datagrams.
+        /// </summary>
         public IEnumerable<ClientDatagram> OutDatagrams => clientOutDatagrams;
 
 
+        /// <summary>
+        /// Processes a tick. Fills the OutDatagrams.
+        /// </summary>
+        /// <param name="now">The current time.</param>
         public void Tick(TimeMs now)
         {
             octetWriter.Reset();
@@ -103,6 +123,11 @@ namespace Piot.Nimble.Client
             predictedStepsSentPerSecond.Update(now);
         }
 
+        /// <summary>
+        /// Updates the latest authoritative tick ID, which clears the incoming predicted step queues of steps with older TickID.
+        /// </summary>
+        /// <param name="tickId">The tick ID.</param>
+        /// <param name="droppedCount">The dropped count. Not used yet.</param>
         public void OnLatestAuthoritativeTickId(TickId tickId, uint droppedCount)
         {
             predictedSteps.DiscardUpToAndExcluding(tickId.Next);

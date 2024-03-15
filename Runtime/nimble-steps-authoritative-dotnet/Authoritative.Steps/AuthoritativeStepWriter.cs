@@ -2,9 +2,9 @@ using Piot.Flood;
 
 namespace Nimble.Authoritative.Steps
 {
-    public class CombinedWriter
+    public class AuthoritativeStepWriter
     {
-        public static void Write(CombinedAuthoritativeStep combinedAuthoritativeStep,
+        public static void Write(AuthoritativeStep combinedAuthoritativeStep,
             OctetWriter outStream)
         {
             outStream.WriteUInt8((byte)combinedAuthoritativeStep.authoritativeSteps.Count);
@@ -27,7 +27,7 @@ namespace Nimble.Authoritative.Steps
                 else
                 {
                     outStream.WriteUInt8((byte)authoritativeStep.payload.Length);
-                    outStream.WriteOctets(authoritativeStep.payload.Span);
+                    outStream.WriteOctets(authoritativeStep.payload);
                 }
             }
         }

@@ -6,7 +6,7 @@ namespace Nimble.Authoritative.Steps
 {
     public static class AuthoritativeStepsReader
     {
-        public static uint Read(CombinedAuthoritativeStepsQueue combinedAuthoritativeSteps,
+        public static uint Read(AuthoritativeStepsQueue authoritativeSteps,
             IOctetReader reader, ILog log)
         {
             //TickIdWriter.Write(outStream, ranges.ranges[0].startTickId);
@@ -21,12 +21,12 @@ namespace Nimble.Authoritative.Steps
             {
                 var tickId = startTickId + stepIndex;
                 var combinedAuthoritativeStep =
-                    CombinedReader.DeserializeCombinedAuthoritativeStep(tickId, reader, log);
+                    AuthoritativeStepReader.ReadOneAuthoritativeStep(tickId, reader, log);
                 //log.Debug("did read combined authoritative {{combinedAuthoritativeStep}}", combinedAuthoritativeStep);
-                if (tickId == combinedAuthoritativeSteps.WaitingForTickId)
+                if (tickId == authoritativeSteps.WaitingForTickId)
                 {
                     //log.Debug("adding authoritative step {AuthoritativeStep} to nimble queue", combinedAuthoritativeStep);
-                    combinedAuthoritativeSteps.Add(combinedAuthoritativeStep);
+                    authoritativeSteps.Add(combinedAuthoritativeStep);
                     addedCombinedAuthoritativeCount++;
                 }
                 else

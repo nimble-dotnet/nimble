@@ -15,15 +15,22 @@ using Piot.Tick.Serialization;
 
 namespace Nimble.Authoritative.Steps
 {
+    /// <summary>
+    /// Provides methods for deserializing predicted steps arriving on the host from the client.
+    /// </summary>
     public static class PredictedStepsReader
     {
         public const byte MaxPredictedStepOctetCount = 64;
 
         /// <summary>
-        ///     Deserializes game specific steps arriving on the host from the client.
+        /// Deserializes predicted steps arriving on the host from the client.
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns></returns>
+        /// <param name="reader">The octet reader.</param>
+        /// <param name="connectionId">The connection ID.</param>
+        /// <param name="connectionToParticipants">The connection to participants mapping.</param>
+        /// <param name="participants">The participants. Needed for if a new participant needs to be created.</param>
+        /// <param name="log">The log.</param>
+        /// <returns>The highest accepted tick ID.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TickId Read(OctetReader reader, byte connectionId,
             ConnectionToParticipants connectionToParticipants, Participants participants, ILog log)

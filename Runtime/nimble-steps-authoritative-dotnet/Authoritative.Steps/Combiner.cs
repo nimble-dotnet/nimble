@@ -29,10 +29,10 @@ namespace Nimble.Authoritative.Steps
 
 	public class Combiner
 	{
-		public static CombinedAuthoritativeStep ComposeOneAuthoritativeSteps(
+		public static AuthoritativeStep ComposeOneAuthoritativeSteps(
 			Participants connections, TickId tickIdToCompose, ILog log)
 		{
-			var combined = new CombinedAuthoritativeStep(tickIdToCompose);
+			var combined = new AuthoritativeStep(tickIdToCompose);
 
 			log.DebugLowLevel("composing step {TickID}", tickIdToCompose);
 			foreach (var (participantId, participantConnection) in connections.participants)
@@ -40,27 +40,27 @@ namespace Nimble.Authoritative.Steps
 				var incomingPredictedSteps = participantConnection.incomingSteps;
 				SerializeProviderConnectState connectState = SerializeProviderConnectState.Normal;
 
-				AuthoritativeStep foundStep = default;
+				AuthoritativeStepForOneParticipant foundStepForOneParticipant = default;
 
 				if(!incomingPredictedSteps.HasStepForTickId(tickIdToCompose))
 				{
 					log.DebugLowLevel("participant {ParticipantId} did not have a step for {tickIdToCompose} {Queue}", participantId,
 						tickIdToCompose, incomingPredictedSteps);
 					connectState = SerializeProviderConnectState.StepNotProvidedInTime;
-					foundStep = new AuthoritativeStep(tickIdToCompose, connectState);
+					foundStepForOneParticipant = new AuthoritativeStepForOneParticipant(tickIdToCompose, connectState);
 				}
 				else
 				{
 					log.DebugLowLevel("participant {ParticipantId} did actually have a step for {tickIdToCompose}", participantId,
 						tickIdToCompose);
 					var predictedStep = incomingPredictedSteps.GetInputFromTickId(tickIdToCompose);
-					foundStep = new AuthoritativeStep(tickIdToCompose, predictedStep.payload.Span);
+					foundStepForOneParticipant = new AuthoritativeStepForOneParticipant(tickIdToCompose, predictedStep.payload.Span);
 				}
 
 				//log.DebugLowLevel("discarding input up to (excluding) {TickID}", tickIdToCompose.Next);
 				incomingPredictedSteps.DiscardUpToAndExcluding(tickIdToCompose.Next);
 
-				combined.authoritativeSteps.Add(new(participantId), foundStep);
+				combined.authoritativeSteps.Add(new(participantId), foundStepForOneParticipant);
 			}
 
 			return combined;

@@ -13,7 +13,7 @@ namespace Piot.Nimble.Client
 {
     public sealed class NimbleReceiveClient
     {
-        public readonly CombinedAuthoritativeStepsQueue combinedAuthoritativeStepsQueue;
+        public readonly AuthoritativeStepsQueue AuthoritativeStepsQueue;
         private readonly ILog log;
         private readonly NimbleClientReceiveStats receiveStats;
         private OrderedDatagramsInChecker orderedDatagramsInChecker = new();
@@ -42,6 +42,14 @@ namespace Piot.Nimble.Client
 
         public int RemotePredictedBufferDiff => bufferDiff.Stat.average;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NimbleReceiveClient"/> class.
+        /// </summary>
+        /// <param name="tickId">The tick ID for the first expected tickID for the authoritative step.</param>
+        /// <param name="now">The current time.</param>
+        /// <param name="deltaTimeMs">The duration for a single step. Usually 16ms or 32ms.</param>
+        /// <param name="sendClient">The send client.</param>
+        /// <param name="log">The log.</param>
         public NimbleReceiveClient(TickId tickId, TimeMs now, FixedDeltaTimeMs deltaTimeMs, NimbleSendClient sendClient,
             ILog log)
         {
@@ -51,7 +59,7 @@ namespace Piot.Nimble.Client
             datagramBitsPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(500));
             authoritativeTicksPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(250));
             receiveStats = new NimbleClientReceiveStats(now);
-            combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
+            AuthoritativeStepsQueue = new AuthoritativeStepsQueue(tickId);
         }
         
         public uint TargetPredictStepCount
@@ -110,7 +118,7 @@ namespace Piot.Nimble.Client
             {
                 log.Notice("dropped {PacketCount} encountered {DatagramID} and last accepted was {LastValue} ",
                     diffPackets - 1, orderedDatagramsInChecker.LastValue, before);
-                receiveStats.DroppedPackets(diffPackets - 1);
+                receiveStats.DroppedDatagrams(diffPackets - 1);
             }
 
             var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
@@ -118,13 +126,13 @@ namespace Piot.Nimble.Client
             ReadParticipantInfo(reader);
             ReadBufferInfo(reader);
 
-            var addedAuthoritativeCount = AuthoritativeStepsReader.Read(combinedAuthoritativeStepsQueue, reader, log);
+            var addedAuthoritativeCount = AuthoritativeStepsReader.Read(AuthoritativeStepsQueue, reader, log);
             log.DebugLowLevel("added {TickCount} authoritative steps", addedAuthoritativeCount);
             authoritativeTicksPerSecond.Add((int)addedAuthoritativeCount);
 
-            if (!combinedAuthoritativeStepsQueue.IsEmpty)
+            if (!AuthoritativeStepsQueue.IsEmpty)
             {
-                var last = combinedAuthoritativeStepsQueue.Last.appliedAtTickId;
+                var last = AuthoritativeStepsQueue.Last.appliedAtTickId;
                 sendClient.OnLatestAuthoritativeTickId(last, 0);
             }
 
@@ -155,14 +163,18 @@ namespace Piot.Nimble.Client
             }
         }
 
+        /// <summary>
+        /// Gets the range of the tickIds for the combined authoritative steps in the incoming queue.
+        /// </summary>
+        /// <returns>The authoritative tickID range.</returns>
         public TickIdRange AuthoritativeRange()
         {
-            if (combinedAuthoritativeStepsQueue.IsEmpty)
+            if (AuthoritativeStepsQueue.IsEmpty)
             {
                 return default;
             }
 
-            return combinedAuthoritativeStepsQueue.Range;
+            return AuthoritativeStepsQueue.Range;
         }
     }
 }
