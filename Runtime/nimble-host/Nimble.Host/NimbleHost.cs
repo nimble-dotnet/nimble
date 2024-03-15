@@ -48,9 +48,13 @@ namespace Piot.Nimble.Host
             hostConnection.expectingAuthoritativeTickId = expectingTickId;
             hostConnection.dropppedAuthoritativeAfterExpecting = droppedTicksAfterThat;
 
-            hostConnection.lastReceivedPredictedTickId = PredictedStepsDeserialize.Deserialize(reader,
+            var highestTickId = PredictedStepsDeserialize.Deserialize(reader,
                 hostConnection.connectionId,
                 hostConnection.connectionToParticipants, participants, log);
+            if (highestTickId > hostConnection.lastReceivedPredictedTickId)
+            {
+                hostConnection.lastReceivedPredictedTickId = highestTickId;
+            }
         }
 
         public void Tick(TickId simulationTickId)
@@ -119,6 +123,8 @@ namespace Piot.Nimble.Host
                 _ => diff
             };
 
+            log.DebugLowLevel("writing {BufferInfo} {LastReceived} {WaitingAuthoritativeTickId}", diff,
+                lastReceivedTickId, authoritativeStepsQueue.WaitingForTickId);
             writer.WriteInt8((sbyte)diff);
         }
 

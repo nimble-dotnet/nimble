@@ -48,7 +48,7 @@ namespace Piot.Nimble.Client
         {
             get
             {
-                const int accountForMissingTheTick = 1;
+                const int accountForMissingTheTick = 2;
 
                 if (receiveStats.RoundTripTime.stat.average == 0)
                 {
@@ -57,7 +57,7 @@ namespace Piot.Nimble.Client
 
                 var tickCountAheadOnHost = bufferDiff.Stat.average;
                 var adjustmentForBufferOnHost = 0;
-                const int lowerThreshold = 2;
+                const int lowerThreshold = 3;
                 const int higherThreshold = 6;
                 if (tickCountAheadOnHost <= lowerThreshold)
                 {
@@ -139,6 +139,7 @@ namespace Piot.Nimble.Client
         private void ReadBufferInfo(OctetReader reader)
         {
             var diff = reader.ReadInt8();
+            log.DebugLowLevel("ReadBuffer {Diff}", diff);
             bufferDiff.Add(diff);
         }
 

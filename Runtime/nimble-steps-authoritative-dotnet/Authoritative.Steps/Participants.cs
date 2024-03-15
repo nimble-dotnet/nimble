@@ -72,7 +72,7 @@ namespace Nimble.Authoritative.Steps
                     continue;
                 }
 
-                if (participant.incomingSteps.Peek().appliedAtTickId == tickId && participant.incomingSteps.Count >= 1)
+                if (participant.incomingSteps.Peek().appliedAtTickId == tickId && participant.incomingSteps.Count >= 3)
                 {
                     log.DebugLowLevel("We have at least one {Participant} that can contribute now and {Delta} steps",
                         participant, participant.incomingSteps.Count);
