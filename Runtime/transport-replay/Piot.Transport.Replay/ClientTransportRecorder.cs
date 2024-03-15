@@ -8,7 +8,6 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Replay.Serialization;
 using Piot.Tick;
-using Piot.TransportReplay;
 
 namespace Piot.TransportReplay
 {
@@ -20,7 +19,7 @@ namespace Piot.TransportReplay
 
 		public ClientTransportRecorder(IOctetSerializableWrite state,
 			ReplayVersionInfo replayVersionInfo,
-			IMonotonicTimeMs timeProvider, TickId tickId, IOctetWriter target)
+			IMonotonicTimeMs timeProvider, TickId tickId, OctetWriter target)
 		{
 			TickId = tickId;
 			this.timeProvider = timeProvider;

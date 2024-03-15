@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Piot.Discoid;
 using Piot.Tick;
 
@@ -38,11 +39,13 @@ namespace Piot.Nimble.Steps
             this.waitingForTickId = waitingForTickId;
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public PredictedStep Peek()
         {
             return queue.Peek();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AddPredictedStep(PredictedStep predictedStep)
         {
             var wasReset = false;
@@ -66,10 +69,13 @@ namespace Piot.Nimble.Steps
             return wasReset;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reset()
         {
             queue.Clear();
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
         public bool HasStepForTickId(TickId tickId)
         {
@@ -84,6 +90,7 @@ namespace Piot.Nimble.Steps
             return tickId.tickId >= firstTickId && tickId.tickId <= lastTick;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public PredictedStep GetInputFromTickId(TickId tickId)
         {
             foreach (var input in queue)
@@ -96,6 +103,8 @@ namespace Piot.Nimble.Steps
 
             throw new ArgumentOutOfRangeException(nameof(tickId), "tick id is not found in queue");
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
         public void DiscardUpToAndExcluding(TickId tickId)
         {

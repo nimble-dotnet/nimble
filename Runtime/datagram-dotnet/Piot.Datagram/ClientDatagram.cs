@@ -4,7 +4,7 @@ namespace Piot.Datagram
 {
     public struct ClientDatagram
     {
-        public Memory<byte> payload;
+        public byte[] payload;
     }
 
 }

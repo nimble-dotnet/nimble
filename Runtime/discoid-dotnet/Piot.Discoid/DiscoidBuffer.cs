@@ -6,6 +6,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Piot.Discoid
 {
@@ -29,6 +30,7 @@ namespace Piot.Discoid
 			this.capacity = capacity;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Set(int index, T value)
 		{
 			int bufferLen = capacity;
@@ -47,6 +49,7 @@ namespace Piot.Discoid
 			set => Set(index, value);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool TryGet(int index, out T value)
 		{
 			int bufferLen = capacity;
@@ -68,6 +71,7 @@ namespace Piot.Discoid
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void DiscardFront(int count)
 		{
 			if(count > capacity)
@@ -83,6 +87,7 @@ namespace Piot.Discoid
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool TryDequeue(out T value)
 		{
 			var worked = TryGet(0, out value);
@@ -95,6 +100,7 @@ namespace Piot.Discoid
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public ulong Bits()
 		{
 			ulong bits = 0;
@@ -147,6 +153,7 @@ namespace Piot.Discoid
 			{
 			}
 
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			public bool MoveNext()
 			{
 				var nextIndex = (currentIndex + 1) % queue.capacity;

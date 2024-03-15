@@ -5,8 +5,6 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
-using Piot.Nimble.AuthoritativeReceiveStatus;
-using Piot.Nimble.Steps;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Piot.Tick;
@@ -44,6 +42,18 @@ namespace Piot.Nimble.Client
 
         public int RemotePredictedBufferDiff => bufferDiff.Stat.average;
 
+        public NimbleReceiveClient(TickId tickId, TimeMs now, FixedDeltaTimeMs deltaTimeMs, NimbleSendClient sendClient,
+            ILog log)
+        {
+            this.log = log;
+            this.sendClient = sendClient;
+            stepTimeMs = deltaTimeMs;
+            datagramBitsPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(500));
+            authoritativeTicksPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(250));
+            receiveStats = new NimbleClientReceiveStats(now);
+            combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
+        }
+        
         public uint TargetPredictStepCount
         {
             get
@@ -80,18 +90,6 @@ namespace Piot.Nimble.Client
             }
         }
 
-        public NimbleReceiveClient(TickId tickId, TimeMs now, FixedDeltaTimeMs deltaTimeMs, NimbleSendClient sendClient,
-            ILog log)
-        {
-            this.log = log;
-            this.sendClient = sendClient;
-            stepTimeMs = deltaTimeMs;
-            datagramBitsPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(500));
-            authoritativeTicksPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(250));
-            receiveStats = new NimbleClientReceiveStats(now);
-            combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
-        }
-
         public void ReceiveDatagram(TimeMs now, ReadOnlySpan<byte> payload)
         {
             //log.DebugLowLevel("Received datagram of {Size}", payload.Length);
@@ -120,7 +118,7 @@ namespace Piot.Nimble.Client
             ReadParticipantInfo(reader);
             ReadBufferInfo(reader);
 
-            var addedAuthoritativeCount = CombinedRangesReader.Read(combinedAuthoritativeStepsQueue, reader, log);
+            var addedAuthoritativeCount = AuthoritativeStepsReader.Read(combinedAuthoritativeStepsQueue, reader, log);
             log.DebugLowLevel("added {TickCount} authoritative steps", addedAuthoritativeCount);
             authoritativeTicksPerSecond.Add((int)addedAuthoritativeCount);
 

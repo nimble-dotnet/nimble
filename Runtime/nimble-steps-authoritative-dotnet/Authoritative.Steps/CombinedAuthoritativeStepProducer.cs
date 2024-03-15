@@ -20,14 +20,12 @@ namespace Nimble.Authoritative.Steps
             combinedAuthoritativeStepsQueue = new CombinedAuthoritativeStepsQueue(tickId);
         }
 
-        private CombinedAuthoritativeStep ComposeOneStep()
+        private void ComposeOneStep()
         {
             var combinedAuthoritativeStep = Combiner.ComposeOneAuthoritativeSteps(participants, tickId, log);
             tickId = tickId.Next;
 
             combinedAuthoritativeStepsQueue.Add(combinedAuthoritativeStep);
-
-            return combinedAuthoritativeStep;
         }
 
         private bool TryToComposeOneStep()

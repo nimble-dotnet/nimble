@@ -10,7 +10,7 @@ namespace Piot.SerializableVersion.Serialization
 {
     public static class VersionWriter
     {
-        public static void Write(IOctetWriter writer, SemanticVersion semanticVersion)
+        public static void Write(OctetWriter writer, SemanticVersion semanticVersion)
         {
             writer.WriteUInt16(semanticVersion.major);
             writer.WriteUInt16(semanticVersion.minor);

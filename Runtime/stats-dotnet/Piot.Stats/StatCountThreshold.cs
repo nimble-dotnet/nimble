@@ -65,6 +65,7 @@ namespace Piot.Stats
             Reset();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void Reset()
         {
             min = int.MaxValue;

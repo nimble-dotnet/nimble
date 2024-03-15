@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 
 namespace Piot.Flood
 {
@@ -20,6 +20,7 @@ namespace Piot.Flood
             size = array.Length;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadUInt8()
         {
             if (pos + 1 > size)
@@ -30,6 +31,7 @@ namespace Piot.Flood
             return array[pos++];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public sbyte ReadInt8()
         {
             if (pos + 1 > size)
@@ -40,6 +42,7 @@ namespace Piot.Flood
             return (sbyte)array[pos++];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadUInt16()
         {
             pos += 2;
@@ -51,6 +54,7 @@ namespace Piot.Flood
             return (ushort)((array[pos - 2] << 8) | array[pos - 1]);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short ReadInt16()
         {
             pos += 2;
@@ -62,6 +66,7 @@ namespace Piot.Flood
             return (short)((array[pos - 2] << 8) | array[pos - 1]);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadUInt32()
         {
             pos += 4;
@@ -74,6 +79,7 @@ namespace Piot.Flood
                    array[pos - 1];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ReadInt32()
         {
             pos += 4;
@@ -87,6 +93,7 @@ namespace Piot.Flood
         }
 
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadUInt64()
         {
             pos += 8;
@@ -102,6 +109,7 @@ namespace Piot.Flood
                    array[pos - 1];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long ReadInt64()
         {
             pos += 8;
@@ -118,6 +126,7 @@ namespace Piot.Flood
         }
 
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<byte> ReadOctets(int octetCount)
         {
             pos += octetCount;
@@ -130,6 +139,7 @@ namespace Piot.Flood
             return array.AsSpan(pos - octetCount, octetCount);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Skip(int octetCount)
         {
             pos += octetCount;
@@ -141,6 +151,7 @@ namespace Piot.Flood
 
         public ulong Position => (ulong)pos;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Seek(ulong position)
         {
             pos = (int)position;
@@ -148,11 +159,6 @@ namespace Piot.Flood
             {
                 throw new($"seek too far {pos} vs {array.Length}");
             }
-        }
-
-        public void Dispose()
-        {
-            // Intentionally blank
         }
     }
 }

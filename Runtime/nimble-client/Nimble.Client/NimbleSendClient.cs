@@ -22,7 +22,7 @@ namespace Piot.Nimble.Client
         public const uint MaxOctetSize = 1024;
         public readonly PredictedStepsLocalPlayers predictedSteps;
         private readonly ILog log;
-        private readonly OctetWriter octetWriter = new(1024);
+        private readonly OctetWriter octetWriter = new(MaxOctetSize);
         private const int MaximumClientOutDatagramCount = 4;
         private readonly CircularBuffer<ClientDatagram> clientOutDatagrams = new(MaximumClientOutDatagramCount);
 
@@ -68,7 +68,7 @@ namespace Piot.Nimble.Client
 
             StatusWriter.Write(octetWriter, expectingAuthoritativeTickId, 0);
 
-            var lastSentTickId = PredictedStepsSerialize.Serialize(octetWriter, predictedSteps, log);
+            var lastSentTickId = PredictedStepsWriter.Write(octetWriter, predictedSteps, log);
             if (lastSentTickId > lastSentPredictedTickId)
             {
                 lastSentPredictedTickId = lastSentTickId;

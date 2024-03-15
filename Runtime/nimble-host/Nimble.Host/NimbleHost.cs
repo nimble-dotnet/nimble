@@ -38,7 +38,7 @@ namespace Piot.Nimble.Host
                 datagram.connection);
             var hostConnection = hostConnections.GetOrCreateConnection(datagram.connection);
 
-            var reader = new OctetReader(datagram.payload.Span);
+            var reader = new OctetReader(datagram.payload);
 
             OrderedDatagramsSequenceIdReader.Read(reader);
 
@@ -48,7 +48,7 @@ namespace Piot.Nimble.Host
             hostConnection.expectingAuthoritativeTickId = expectingTickId;
             hostConnection.dropppedAuthoritativeAfterExpecting = droppedTicksAfterThat;
 
-            var highestTickId = PredictedStepsDeserialize.Deserialize(reader,
+            var highestTickId = PredictedStepsReader.Read(reader,
                 hostConnection.connectionId,
                 hostConnection.connectionToParticipants, participants, log);
             if (highestTickId > hostConnection.lastReceivedPredictedTickId)
@@ -97,7 +97,7 @@ namespace Piot.Nimble.Host
                 MonotonicTimeLowerBitsWriter.Write(hostConnection.lastReceivedMonotonicLowerBits, outWriter);
                 WriteParticipantInfo(hostConnection, outWriter);
                 WriteBufferInfo(hostConnection, outWriter);
-                CombinedRangesWriter.Write(authoritativeStepsQueue, startId, outWriter, log);
+                AuthoritativeStepsWriter.Write(authoritativeStepsQueue, startId, outWriter, log);
 
                 //            log.Warn("combined authoritative step range {OctetSize}", outWriter.Position);
 

@@ -11,6 +11,5 @@ namespace Piot.Flood
 
     public interface IOctetReaderWithSeekAndSkip : IOctetReader, ISkip, ISeekable
     {
-        void Dispose();
     }
 }

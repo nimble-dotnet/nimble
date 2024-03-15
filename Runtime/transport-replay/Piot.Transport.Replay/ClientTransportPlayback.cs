@@ -21,7 +21,7 @@ namespace Piot.TransportReplay
 		DeltaState nextDeltaState;
 
 		public ClientTransportPlayback(IOctetSerializableRead state, SemanticVersion applicationSemanticVersion,
-			IOctetReaderWithSeekAndSkip readerWithSeekAndSkip, IMonotonicTimeMs timeProvider)
+			OctetReader readerWithSeekAndSkip, IMonotonicTimeMs timeProvider)
 		{
 			this.timeProvider = timeProvider;
 			replayPlayback = new(applicationSemanticVersion, Constants.ReplayInfo, readerWithSeekAndSkip);

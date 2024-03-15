@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System.Runtime.CompilerServices;
 using Piot.Flood;
 using Piot.Tick;
 using Piot.Tick.Serialization;
@@ -18,7 +19,8 @@ namespace Piot.Nimble.AuthoritativeReceiveStatus
         /// <param name="writer"></param>
         /// <param name="lastReceivedTickId"></param>
         /// <param name="droppedFramesAfterThat"></param>
-        public static void Write(IOctetWriter writer, TickId lastReceivedTickId, byte droppedFramesAfterThat)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Write(OctetWriter writer, TickId lastReceivedTickId, byte droppedFramesAfterThat)
         {
 #if DEBUG
             //writer.WriteUInt8(Constants.SnapshotReceiveStatusSync);

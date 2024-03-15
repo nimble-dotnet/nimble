@@ -4,7 +4,7 @@ using Piot.Tick.Serialization;
 
 namespace Nimble.Authoritative.Steps
 {
-    public class CombinedRangesReader
+    public static class AuthoritativeStepsReader
     {
         public static uint Read(CombinedAuthoritativeStepsQueue combinedAuthoritativeSteps,
             IOctetReader reader, ILog log)

@@ -37,6 +37,7 @@ namespace Piot.Stats
             count++; // count is technically not needed, but is nice to know how many samples the average was based on.
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void Reset(TimeMs now)
         {
             count = 0;
@@ -44,6 +45,7 @@ namespace Piot.Stats
             lastTime = now;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Update(TimeMs now)
         {
             if (isInitialized && now.ms < lastTime.ms + minimumAverageTime.ms)

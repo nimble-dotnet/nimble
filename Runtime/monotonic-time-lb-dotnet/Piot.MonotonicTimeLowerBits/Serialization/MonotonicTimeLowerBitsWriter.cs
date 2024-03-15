@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------------------*/
 
+using System.Runtime.CompilerServices;
 using Piot.Flood;
 
 namespace Piot.MonotonicTimeLowerBits
@@ -14,7 +15,8 @@ namespace Piot.MonotonicTimeLowerBits
 
     public static class MonotonicTimeLowerBitsWriter
     {
-        public static void Write(MonotonicTimeLowerBits lowerBits, IOctetWriter writer)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Write(MonotonicTimeLowerBits lowerBits, OctetWriter writer)
         {
 #if DEBUG
             OctetMarker.WriteMarker(writer, Constants.MonotonicTimeLowerBitsSync);

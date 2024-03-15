@@ -22,12 +22,12 @@ namespace Piot.Replay.Serialization
 		readonly CompleteStateEntry[] completeStateEntries;
 		readonly ReplayFileSerializationInfo info;
 		readonly RaffReader raffReader;
-		readonly IOctetReaderWithSeekAndSkip readerWithSeek;
+		readonly OctetReader readerWithSeek;
 		TimeMs lastReadTimeMs;
 		TimeMs lastTimeMsFromDeltaState;
 
 		public ReplayReader(SemanticVersion expectedApplicationVersion, ReplayFileSerializationInfo info,
-			IOctetReaderWithSeekAndSkip readerWithSeek)
+			OctetReader readerWithSeek)
 		{
 			this.info = info;
 			this.readerWithSeek = readerWithSeek;

@@ -23,7 +23,7 @@ namespace Piot.Replay.Serialization
 		uint packCountSinceCompleteState;
 
 		public ReplayWriter(CompleteState completeState, ReplayVersionInfo replayVersionInfo,
-			ReplayFileSerializationInfo info, IOctetWriter writer,
+			ReplayFileSerializationInfo info, OctetWriter writer,
 			uint framesUntilCompleteState = 60)
 		{
 			this.info = info;
@@ -72,7 +72,7 @@ namespace Piot.Replay.Serialization
 			raffWriter.WriteChunk(info.CompleteStateInfo.Icon, info.CompleteStateInfo.Name, cachedStateWriter.Octets);
 		}
 
-		static void WriteDeltaHeader(IOctetWriter writer, TimeMs timeNowMs, TickIdRange tickIdRange)
+		static void WriteDeltaHeader(OctetWriter writer, TimeMs timeNowMs, TickIdRange tickIdRange)
 		{
 			writer.WriteUInt8(0x01);
 			var lowerBits = MonotonicTimeLowerBits.MonotonicTimeLowerBits.FromTime(timeNowMs);

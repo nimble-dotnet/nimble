@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Piot.Flood
 {
@@ -35,6 +36,7 @@ namespace Piot.Flood
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Seek(int pos)
         {
             if (position > maxSize || position > size)
@@ -47,6 +49,7 @@ namespace Piot.Flood
 
         public ReadOnlySpan<byte> Octets => array.AsSpan(0, position);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUInt8(byte value)
         {
             if (position + 1 > size)
@@ -57,6 +60,7 @@ namespace Piot.Flood
             array[position++] = value;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt8(sbyte value)
         {
             if (position + 1 > size)
@@ -67,6 +71,7 @@ namespace Piot.Flood
             array[position++] = (byte)value;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUInt16(ushort value)
         {
             if (position + 2 > size)
@@ -79,6 +84,7 @@ namespace Piot.Flood
             position += 2;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt16(short value)
         {
             if (position + 2 > size)
@@ -91,6 +97,7 @@ namespace Piot.Flood
             position += 2;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUInt32(uint value)
         {
             if (position + 4 > size)
@@ -105,6 +112,7 @@ namespace Piot.Flood
             position += 4;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt32(int value)
         {
             if (position + 4 > size)
@@ -119,6 +127,7 @@ namespace Piot.Flood
             position += 4;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUInt64(ulong value)
         {
             if (position + 8 > size)
@@ -137,6 +146,7 @@ namespace Piot.Flood
             position += 8;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt64(long value)
         {
             if (position + 8 > size)
@@ -155,6 +165,7 @@ namespace Piot.Flood
             position += 8;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteOctets(ReadOnlySpan<byte> readOnlySpan)
         {
             if (position + readOnlySpan.Length > size)
@@ -167,6 +178,7 @@ namespace Piot.Flood
             position += readOnlySpan.Length;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reset()
         {
             position = 0;

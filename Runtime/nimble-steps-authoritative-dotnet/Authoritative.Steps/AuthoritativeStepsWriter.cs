@@ -6,7 +6,7 @@ using Piot.Tick.Serialization;
 
 namespace Nimble.Authoritative.Steps
 {
-    public class CombinedRangesWriter
+    public class AuthoritativeStepsWriter
     {
         public static void Write(CombinedAuthoritativeStepsQueue combinedAuthoritativeSteps, TickId fromTickId,
             OctetWriter outStream, ILog log)

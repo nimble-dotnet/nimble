@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------------------*/
 
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Piot.Clog;
 using Piot.Flood;
@@ -18,13 +17,13 @@ namespace Piot.Nimble.Steps.Serialization
         public const byte PredictedStepsPayloadHeaderMarker = 0xdc;
     }
 
-    public static class PredictedStepsSerialize
+    public static class PredictedStepsWriter
     {
         /// <summary>
         ///     Serializing the game specific inputs to be sent from the client to the authoritative host.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TickId Serialize(OctetWriter writer, PredictedStepsLocalPlayers inputsForLocalPlayers,
+        public static TickId Write(OctetWriter writer, PredictedStepsLocalPlayers inputsForLocalPlayers,
             ILog log)
         {
             OctetMarker.WriteMarker(writer, Constants.PredictedStepsHeaderMarker);

@@ -7,7 +7,6 @@ namespace Piot.Nimble.Client
 {
 	public class NimbleClientReceiveStats
 	{
-		public DeltaTimeMs lastReceivedRoundTripDeltaTime;
 		private readonly StatCountThreshold statsRoundTripTime = new(50);
 		private readonly StatPerSecond datagramCountPerSecond;
 		public readonly OverwriteCircularBuffer<int> roundTripTimes = new(120);
@@ -26,7 +25,6 @@ namespace Piot.Nimble.Client
 		{
 			var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
 			var roundTripTimeMs = now.ms - pongTime.ms;
-			lastReceivedRoundTripDeltaTime = new((uint)roundTripTimeMs);
 			statsRoundTripTime.Add((int)roundTripTimeMs);
 			datagramCountPerSecond.Add(1);
 			datagramCountPerSecond.Update(now);

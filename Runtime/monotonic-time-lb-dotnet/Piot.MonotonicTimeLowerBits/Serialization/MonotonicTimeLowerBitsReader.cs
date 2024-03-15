@@ -3,13 +3,15 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------------------*/
 
+using System.Runtime.CompilerServices;
 using Piot.Flood;
 
 namespace Piot.MonotonicTimeLowerBits
 {
     public static class MonotonicTimeLowerBitsReader
     {
-        public static MonotonicTimeLowerBits Read(IOctetReader reader)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static MonotonicTimeLowerBits Read(OctetReader reader)
         {
 #if DEBUG
             OctetMarker.AssertMarker(reader, Constants.MonotonicTimeLowerBitsSync);

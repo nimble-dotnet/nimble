@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System.Runtime.CompilerServices;
 using Piot.Flood;
 using Piot.Tick;
 using Piot.Tick.Serialization;
@@ -19,6 +20,7 @@ namespace Piot.Nimble.AuthoritativeReceiveStatus
         /// <param name="reader"></param>
         /// <param name="expectingTickId"></param>
         /// <param name="droppedTicksAfterThat"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Read(IOctetReader reader, out TickId expectingTickId,
             out byte droppedTicksAfterThat)
         {

@@ -6,6 +6,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEditor;
 
 namespace Piot.Discoid
@@ -27,6 +28,7 @@ namespace Piot.Discoid
             count = 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Enqueue(T item)
         {
             if (count == capacity)
@@ -38,6 +40,8 @@ namespace Piot.Discoid
             tail = (tail + 1) % capacity;
             count++;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
         public ref T EnqueueRef()
         {
@@ -52,6 +56,7 @@ namespace Piot.Discoid
             return ref buffer[oldTail];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Dequeue()
         {
             if (count == 0)
@@ -65,6 +70,7 @@ namespace Piot.Discoid
             return dequeuedItem;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Discard(uint discardCount)
         {
             if (discardCount > count)
@@ -76,6 +82,7 @@ namespace Piot.Discoid
             count -= (int)discardCount;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
             head = 0;
@@ -83,6 +90,7 @@ namespace Piot.Discoid
             count = 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Peek()
         {
             if (count == 0)
@@ -93,6 +101,7 @@ namespace Piot.Discoid
             return buffer[head];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Peek(uint index)
         {
             if (index >= count)
@@ -165,6 +174,7 @@ namespace Piot.Discoid
             {
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext()
             {
                 if (itemsEnumerated >= queue.count)
@@ -177,6 +187,7 @@ namespace Piot.Discoid
                 return true;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Reset()
             {
                 currentIndex = queue.head - 1;
@@ -218,6 +229,7 @@ namespace Piot.Discoid
             {
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext()
             {
                 if (itemsEnumerated >= targetCount)
@@ -230,6 +242,7 @@ namespace Piot.Discoid
                 return true;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Reset()
             {
                 currentIndex = startIndex - 1;

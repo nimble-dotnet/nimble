@@ -15,7 +15,7 @@ using Piot.Tick.Serialization;
 
 namespace Nimble.Authoritative.Steps
 {
-    public static class PredictedStepsDeserialize
+    public static class PredictedStepsReader
     {
         public const byte MaxPredictedStepOctetCount = 64;
 
@@ -25,7 +25,7 @@ namespace Nimble.Authoritative.Steps
         /// <param name="reader"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TickId Deserialize(IOctetReader reader, byte connectionId,
+        public static TickId Read(OctetReader reader, byte connectionId,
             ConnectionToParticipants connectionToParticipants, Participants participants, ILog log)
         {
             TickId highestAcceptedTickId = default;
@@ -109,7 +109,8 @@ namespace Nimble.Authoritative.Steps
                     }
                 }
 
-                log.DebugLowLevel("Deserialized predicted steps {FirstTickID} {ReceivedTickCount} and {AcceptedTickCount}",
+                log.DebugLowLevel(
+                    "Deserialized predicted steps {FirstTickID} {ReceivedTickCount} and {AcceptedTickCount}",
                     firstTickId, stepCount, addedStepCount);
 
                 ///					log.Debug("deserialized predicted step {{LocalPlayerId}} {{PredictedStep}}", localPlayerId,
