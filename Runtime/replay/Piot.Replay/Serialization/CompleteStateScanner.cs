@@ -5,7 +5,6 @@
 
 using System.Collections.Generic;
 using Piot.Flood;
-using Piot.Raff;
 using Piot.Raff.Stream;
 using Piot.Tick.Serialization;
 
@@ -14,7 +13,7 @@ namespace Piot.Replay.Serialization
 	public static class CompleteStateScanner
 	{
 		public static CompleteStateEntry[] ScanForAllCompleteStatePositions(RaffReader tempRaffReader,
-			IOctetReaderWithSeekAndSkip readerWithSeek, IconAndName completeStateInfo)
+			IOctetReaderWithSeekAndSkip readerWithSeek)
 		{
 			List<CompleteStateEntry> entries = new();
 
@@ -28,7 +27,7 @@ namespace Piot.Replay.Serialization
 				}
 
 				var positionAfterHeader = readerWithSeek.Position;
-				if(icon.Value == completeStateInfo.Icon.Value)
+				if(icon.Value == Constants.CompleteStateIcon.Value)
 				{
 					var packType = readerWithSeek.ReadUInt8();
 					if(packType != 0x02)

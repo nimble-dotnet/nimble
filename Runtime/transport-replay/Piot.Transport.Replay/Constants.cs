@@ -18,11 +18,5 @@ namespace Piot.TransportReplay
 
         public static FourCC DeltaStateName = FourCC.Make("rtd1");
         public static FourCC DeltaStateIcon = new(0xF09FA096); // Right Arrow
-
-        public static ReplayFileSerializationInfo ReplayInfo = new(
-            new(ReplayIcon, ReplayName),
-            new(CompleteStateIcon, CompleteStateName),
-            new(DeltaStateIcon, DeltaStateName)
-        );
     }
 }

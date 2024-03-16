@@ -9,6 +9,7 @@ using Piot.MonotonicTime;
 using Piot.Replay.Serialization;
 using Piot.Tick;
 
+/*
 namespace Piot.TransportReplay
 {
 	public class ClientTransportRecorder
@@ -40,7 +41,7 @@ namespace Piot.TransportReplay
 			cachedBuffer.WriteOctets(datagram);
 
 			var delta = new DeltaState(timeProvider.TimeInMs, TickIdRange.FromTickId(TickId), cachedBuffer.Octets);
-			writer.AddDeltaState(delta);
+			writer.AddAuthoritativeStep(delta);
 		}
 
 		public void Close()
@@ -49,3 +50,4 @@ namespace Piot.TransportReplay
 		}
 	}
 }
+*/

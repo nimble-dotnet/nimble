@@ -7,12 +7,12 @@ namespace Piot.Flood
 {
     public static class OctetMarker
     {
-        public static void WriteMarker(OctetWriter writer, byte markValue)
+        public static void WriteMarker(IOctetWriter writer, byte markValue)
         {
             writer.WriteUInt8(markValue);
         }
 
-        public static void AssertMarker(OctetReader reader, byte expectedValue)
+        public static void AssertMarker(IOctetReader reader, byte expectedValue)
         {
             var value = reader.ReadUInt8();
             if (value != expectedValue)

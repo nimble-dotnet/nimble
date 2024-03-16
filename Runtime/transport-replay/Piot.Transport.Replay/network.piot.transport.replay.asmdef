@@ -7,6 +7,7 @@
     "network.piot.replay",
     "network.piot.datagram",
     "network.piot.tick",
-    "network.piot.serializable-version"
+    "network.piot.serializable-version",
+    "network.piot.clog"
   ]
 }

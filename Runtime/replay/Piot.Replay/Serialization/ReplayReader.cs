@@ -5,11 +5,12 @@
 
 #nullable enable
 using System;
+using System.IO;
+using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
 using Piot.Raff.Stream;
-using Piot.SerializableVersion;
 using Piot.SerializableVersion.Serialization;
 using Piot.Tick;
 using Piot.Tick.Serialization;
@@ -17,177 +18,206 @@ using Piot.Tick.Serialization;
 
 namespace Piot.Replay.Serialization
 {
-	public sealed class ReplayReader
-	{
-		readonly CompleteStateEntry[] completeStateEntries;
-		readonly ReplayFileSerializationInfo info;
-		readonly RaffReader raffReader;
-		readonly OctetReader readerWithSeek;
-		TimeMs lastReadTimeMs;
-		TimeMs lastTimeMsFromDeltaState;
+    public sealed class ReplayReader
+    {
+        readonly CompleteStateEntry[] completeStateEntries;
+        readonly RaffReader raffReader;
+        readonly IOctetReaderWithSeekAndSkip readerWithSeek;
+        TimeMs lastReadTimeMs;
+        TimeMs lastTimeMsFromDeltaState;
+        private ILog log;
 
-		public ReplayReader(SemanticVersion expectedApplicationVersion, ReplayFileSerializationInfo info,
-			OctetReader readerWithSeek)
-		{
-			this.info = info;
-			this.readerWithSeek = readerWithSeek;
-			raffReader = new(readerWithSeek);
-			ReadVersionInfo();
+        public ReplayReader(ApplicationVersion expectedApplicationVersion,
+            IOctetReaderWithSeekAndSkip readerWithSeek, ILog log)
+        {
+            this.log = log;
+            this.readerWithSeek = readerWithSeek;
+            raffReader = new(readerWithSeek);
+            ReadVersionInfo();
 
-			if(!expectedApplicationVersion.IsEqualDisregardSuffix(ApplicationVersion))
-			{
-				throw new(
-					$"version mismatch, can not use this replay file {ApplicationVersion} vs expected {expectedApplicationVersion}");
-			}
-
-			var positionBefore = readerWithSeek.Position;
-
-			completeStateEntries =
-				CompleteStateScanner.ScanForAllCompleteStatePositions(raffReader, readerWithSeek,
-					info.CompleteStateInfo);
-
-			Range = new(new(completeStateEntries[0].tickId), new(completeStateEntries[^1].tickId));
-
-			readerWithSeek.Seek(positionBefore);
-		}
-
-		public TickIdRange Range { get; }
-
-		public SemanticVersion ApplicationVersion { get; private set; }
-
-		public SemanticVersion StateSerializationVersion { get; private set; }
-
-		public TickId FirstCompleteStateTickId => new(completeStateEntries[0].tickId);
-
-		void ReadVersionInfo()
-		{
-			var versionPack = raffReader.ReadExpectedChunk(info.FileInfo.Icon, info.FileInfo.Name);
-			var reader = new OctetReader(versionPack);
-			ApplicationVersion = VersionReader.Read(reader);
-			StateSerializationVersion = VersionReader.Read(reader);
-		}
+            if (expectedApplicationVersion.a != ApplicationVersion.a)
+            {
+                throw new(
+                    $"version mismatch, can not use this replay file {ApplicationVersion} vs expected {expectedApplicationVersion}");
+            }
 
 
-		CompleteStateEntry FindClosestEntry(TickId tickId)
-		{
-			var tickIdValue = tickId.tickId;
-			if(completeStateEntries.Length == 0)
-			{
-				throw new("unexpected that no complete states are found");
-			}
+            var shouldScanFile = false;
+            if (shouldScanFile)
+            {
+                var positionBefore = readerWithSeek.Position;
+                completeStateEntries =
+                    CompleteStateScanner.ScanForAllCompleteStatePositions(raffReader, readerWithSeek);
+                readerWithSeek.Seek(positionBefore);
+                Range = new(new(completeStateEntries[0].tickId), new(completeStateEntries[^1].tickId));
+            }
+        }
 
-			var left = 0;
-			var right = completeStateEntries.Length - 1;
+        public TickIdRange Range { get; }
 
-			var tryCount = 0;
-			while (left != right && Math.Abs(left - right) >= 1 && tryCount < 20)
-			{
-				tryCount++;
-				var middle = (left + right) / 2;
-				var middleEntry = completeStateEntries[middle];
-				if(tickIdValue == middleEntry.tickId)
-				{
-					return middleEntry;
-				}
+        public ApplicationVersion ApplicationVersion { get; private set; }
 
-				if(tickIdValue < middleEntry.tickId)
-				{
-					right = middle;
-				}
-				else
-				{
-					left = middle;
-				}
-			}
+        public TickId FirstCompleteStateTickId => new(completeStateEntries[0].tickId);
 
-			var closest = completeStateEntries[left];
-			if(closest.tickId <= tickIdValue)
-			{
-				return closest;
-			}
+        void ReadVersionInfo()
+        {
+            var versionPack = raffReader.ReadExpectedChunk(Constants.ReplayIcon, Constants.ReplayName);
+            var reader = new OctetReader(versionPack);
+            var stateSerializationVersion = VersionReader.Read(reader);
+            if (!stateSerializationVersion.IsEqualDisregardSuffix(Constants.ReplayFileVersion))
+            {
+                throw new Exception(
+                    $"wrong replay file version {stateSerializationVersion} vs {Constants.ReplayFileVersion}");
+            }
 
-			if(left < 1)
-			{
-				return closest;
-			}
+            ApplicationVersion = ApplicationVersionReader.Read(reader);
+        }
 
-			var previous = completeStateEntries[left - 1];
-			if(previous.tickId > tickIdValue)
-			{
-				throw new("strange state in replay");
-			}
 
-			return previous;
-		}
+        public CompleteStateEntry FindClosestCompleteStateEntry(TickId tickId)
+        {
+            var tickIdValue = tickId.tickId;
+            if (completeStateEntries.Length == 0)
+            {
+                throw new("unexpected that no complete states are found");
+            }
 
-		public CompleteState Seek(TickId closestToTick)
-		{
-			var findClosestEntry = FindClosestEntry(closestToTick);
-			readerWithSeek.Seek(findClosestEntry.streamPosition);
+            var left = 0;
+            var right = completeStateEntries.Length - 1;
 
-			return ReadCompleteState();
-		}
+            var tryCount = 0;
+            while (left != right && Math.Abs(left - right) >= 1 && tryCount < 20)
+            {
+                tryCount++;
+                var middle = (left + right) / 2;
+                var middleEntry = completeStateEntries[middle];
+                if (tickIdValue == middleEntry.tickId)
+                {
+                    return middleEntry;
+                }
 
-		public DeltaState? ReadDeltaState()
-		{
-			while (true)
-			{
-				var octetLength = raffReader.ReadChunkHeader(out var icon, out var name);
-				if(icon.Value == 0 && name.Value == 0)
-				{
-					return null;
-				}
+                if (tickIdValue < middleEntry.tickId)
+                {
+                    right = middle;
+                }
+                else
+                {
+                    left = middle;
+                }
+            }
 
-				if(icon.Value == info.CompleteStateInfo.Icon.Value)
-				{
-					// Skip complete states, we only need the delta state
-					readerWithSeek.Seek(readerWithSeek.Position + octetLength);
-					continue;
-				}
+            var closest = completeStateEntries[left];
+            if (closest.tickId <= tickIdValue)
+            {
+                return closest;
+            }
 
-				var beforePosition = readerWithSeek.Position;
+            if (left < 1)
+            {
+                return closest;
+            }
 
-				var type = readerWithSeek.ReadUInt8();
-				if(type != 01)
-				{
-					throw new($"desync {type}");
-				}
+            var previous = completeStateEntries[left - 1];
+            if (previous.tickId > tickIdValue)
+            {
+                throw new("strange state in replay");
+            }
 
-				var timeLowerBits = MonotonicTimeLowerBitsReader.Read(readerWithSeek);
-				lastTimeMsFromDeltaState =
-					LowerBitsToMonotonic.LowerBitsToPastMonotonicMs(lastTimeMsFromDeltaState, timeLowerBits);
-				var tickIdRange = TickIdRangeReader.Read(readerWithSeek);
+            return previous;
+        }
 
-				var afterPosition = readerWithSeek.Position;
-				var headerOctetCount = (int)(afterPosition - beforePosition);
+        public ReadOnlySpan<byte> SeekToClosestCompleteState(TickId closestToTick, out TimeMs capturedAtTime,
+            out TickId tickId)
+        {
+            var findClosestEntry = FindClosestCompleteStateEntry(closestToTick);
+            readerWithSeek.Seek(findClosestEntry.streamPosition);
 
-				return new(lastTimeMsFromDeltaState, tickIdRange,
-					readerWithSeek.ReadOctets((int)octetLength - headerOctetCount));
-			}
-		}
+            return ReadCompleteState(out capturedAtTime, out tickId);
+        }
 
-		CompleteState ReadCompleteState()
-		{
-			var octetLength =
-				raffReader.ReadExpectedChunkHeader(info.CompleteStateInfo.Icon, info.CompleteStateInfo.Name);
-			var beforePosition = readerWithSeek.Position;
+        public void SeekToCompleteState(CompleteStateEntry entry)
+        {
+            readerWithSeek.Seek(entry.streamPosition);
+        }
 
-			var type = readerWithSeek.ReadUInt8();
-			if(type != 02)
-			{
-				throw new("desync");
-			}
+        public bool TryReadNextAuthoritativeStep(out TimeMs capturedAtTime, out TickId tickId,
+            out ReadOnlySpan<byte> payload)
+        {
+            while (true)
+            {
+                uint octetLength;
+                try
+                {
+                    octetLength = raffReader.ReadChunkHeader(out var icon, out var name);
+                    if (icon.Value == 0 && name.Value == 0)
+                    {
+                        capturedAtTime = default;
+                        tickId = default;
+                        payload = default;
+                        return false;
+                    }
 
-			var time = new TimeMs((long)readerWithSeek.ReadUInt64());
-			lastReadTimeMs = time;
-			lastTimeMsFromDeltaState = time;
-			var tickId = TickIdReader.Read(readerWithSeek);
+                    if (icon.Value == Constants.CompleteStateIcon.Value)
+                    {
+                        // Skip complete states, we only need the delta state
+                        readerWithSeek.Seek(readerWithSeek.Position + octetLength);
+                        continue;
+                    }
+                }
+                catch (EndOfStreamException)
+                {
+                    log.Error("Unexpected end of stream. replay file was probably not closed properly?");
+                    capturedAtTime = default;
+                    tickId = default;
+                    payload = default;
+                    return false;
+                }
 
-			var afterPosition = readerWithSeek.Position;
+                var beforePosition = readerWithSeek.Position;
 
-			var headerOctetCount = (int)(afterPosition - beforePosition);
+                var type = readerWithSeek.ReadUInt8();
+                if (type != 01)
+                {
+                    throw new($"desync {type}");
+                }
 
-			return new(time, tickId, readerWithSeek.ReadOctets((int)octetLength - headerOctetCount));
-		}
-	}
+                var timeLowerBits = MonotonicTimeLowerBitsReader.Read(readerWithSeek);
+                lastTimeMsFromDeltaState =
+                    LowerBitsToMonotonic.LowerBitsToPastMonotonicMs(lastTimeMsFromDeltaState, timeLowerBits);
+                capturedAtTime = lastTimeMsFromDeltaState;
+                tickId = TickIdReader.Read(readerWithSeek);
+
+                var afterPosition = readerWithSeek.Position;
+                var headerOctetCount = (int)(afterPosition - beforePosition);
+
+                payload = readerWithSeek.ReadOctets((int)octetLength - headerOctetCount);
+
+                return true;
+            }
+        }
+
+        ReadOnlySpan<byte> ReadCompleteState(out TimeMs capturedAtTime, out TickId tickId)
+        {
+            var octetLength =
+                raffReader.ReadExpectedChunkHeader(Constants.CompleteStateIcon, Constants.CompleteStateName);
+            var beforePosition = readerWithSeek.Position;
+
+            var type = readerWithSeek.ReadUInt8();
+            if (type != 02)
+            {
+                throw new("desync");
+            }
+
+            capturedAtTime = new TimeMs((long)readerWithSeek.ReadUInt64());
+            lastReadTimeMs = capturedAtTime;
+            lastTimeMsFromDeltaState = capturedAtTime;
+            tickId = TickIdReader.Read(readerWithSeek);
+
+            var afterPosition = readerWithSeek.Position;
+
+            var headerOctetCount = (int)(afterPosition - beforePosition);
+
+            return readerWithSeek.ReadOctets((int)octetLength - headerOctetCount);
+        }
+    }
 }

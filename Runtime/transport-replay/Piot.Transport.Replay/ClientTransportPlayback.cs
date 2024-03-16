@@ -4,11 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Replay.Serialization;
 using Piot.SerializableVersion;
+using Piot.Tick;
 
+/*
 
 namespace Piot.TransportReplay
 {
@@ -20,12 +23,12 @@ namespace Piot.TransportReplay
 		bool isEndOfStream;
 		DeltaState nextDeltaState;
 
-		public ClientTransportPlayback(IOctetSerializableRead state, SemanticVersion applicationSemanticVersion,
-			OctetReader readerWithSeekAndSkip, IMonotonicTimeMs timeProvider)
+		public ClientTransportPlayback(IOctetSerializableRead state, ApplicationVersion applicationSemanticVersion,
+			OctetReader readerWithSeekAndSkip, IMonotonicTimeMs timeProvider, ILog log)
 		{
 			this.timeProvider = timeProvider;
-			replayPlayback = new(applicationSemanticVersion, Constants.ReplayInfo, readerWithSeekAndSkip);
-			var completeState = replayPlayback.Seek(new(0));
+			replayPlayback = new(applicationSemanticVersion, Constants.ReplayInfo, readerWithSeekAndSkip, log);
+			var completeState = replayPlayback.Seek(new TickId(0));
 			InitialTimeMs = completeState.CapturedAtTimeMs;
 
 			var reader = new OctetReader(completeState.Payload);
@@ -64,3 +67,4 @@ namespace Piot.TransportReplay
 		}
 	}
 }
+*/
