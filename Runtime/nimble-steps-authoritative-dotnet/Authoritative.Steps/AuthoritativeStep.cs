@@ -20,6 +20,12 @@ namespace Nimble.Authoritative.Steps
                 var totalCount = 0;
                 foreach (var authoritativeStep in authoritativeSteps.Values)
                 {
+                    totalCount += 3;
+                    if (authoritativeStep.connectState != SerializeProviderConnectState.Normal)
+                    {
+                        continue;
+                    }
+
                     totalCount += authoritativeStep.payload.Length;
                 }
 
@@ -32,7 +38,8 @@ namespace Nimble.Authoritative.Steps
             return authoritativeSteps[participantId];
         }
 
-        public static string AuthoritativeStepsToString(Dictionary<ParticipantId, AuthoritativeStepForOneParticipant> steps)
+        public static string AuthoritativeStepsToString(
+            Dictionary<ParticipantId, AuthoritativeStepForOneParticipant> steps)
         {
             if (steps.Count == 0)
             {
@@ -54,5 +61,4 @@ namespace Nimble.Authoritative.Steps
             return $"{appliedAtTickId}: {AuthoritativeStepsToString(authoritativeSteps)}";
         }
     }
-
 }

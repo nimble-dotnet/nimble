@@ -12,10 +12,10 @@ namespace Piot.Replay.Serialization
 {
 	public static class CompleteStateScanner
 	{
-		public static CompleteStateEntry[] ScanForAllCompleteStatePositions(RaffReader tempRaffReader,
+		public static SimulationStateEntry[] ScanForAllCompleteStatePositions(RaffReader tempRaffReader,
 			IOctetReaderWithSeekAndSkip readerWithSeek)
 		{
-			List<CompleteStateEntry> entries = new();
+			List<SimulationStateEntry> entries = new();
 
 			while (true)
 			{

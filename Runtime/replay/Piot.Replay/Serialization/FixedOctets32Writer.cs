@@ -2,22 +2,18 @@
  *  Copyright (c) Peter Bjorklund. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using System;
+
+using Piot.FixedStruct;
 using Piot.Flood;
 
 namespace Piot.Replay.Serialization
 {
-    public static class ApplicationVersionReader
+    public static class FixedOctets32Writer
     {
-        public static ApplicationVersion Read(IOctetReader reader)
+        public static void Write(IOctetWriter writer, FixedOctets32WithLength applicationVersion)
         {
-            var length = reader.ReadUInt8();
-            if (length > 32)
-            {
-                throw new Exception($"application version has wrong length {length}");
-            }
-
-            return new ApplicationVersion(reader.ReadOctets(length));
+            writer.WriteUInt8((byte)applicationVersion.Length);
+            writer.WriteOctets(applicationVersion.a01.ToArray());
         }
     }
 }

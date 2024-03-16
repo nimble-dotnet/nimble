@@ -18,6 +18,6 @@ namespace Piot.Replay.Serialization
         public static FourCC AuthoritativeStepName = FourCC.Make("ras1");
         public static FourCC AuthoritativeStepIcon = new(0xF09F8EAE); // Gamepad
 
-        public static SemanticVersion ReplayFileVersion = new(0x0, 0x0, 0x1);
+        public static SemanticVersion ReplayFileVersion = new(0x0, 0x0, 0x2);
     }
 }

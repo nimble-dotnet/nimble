@@ -14,6 +14,9 @@ using Piot.Tick.Serialization;
 
 namespace Piot.Replay.Serialization
 {
+    /// <summary>
+    /// Writes simulation state and authoritative steps.
+    /// </summary>
     public sealed class ReplayWriter
     {
         readonly OctetWriter cachedOctetWriter = new(16 * 1024);
@@ -22,28 +25,44 @@ namespace Piot.Replay.Serialization
 
         uint packCountSinceCompleteState;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReplayWriter"/> class.
+        /// </summary>
+        /// <param name="capturedAtTimeMs">The time when the replay capture was started.</param>
+        /// <param name="tickId">The tick ID for the complete state.</param>
+        /// <param name="completeState">The complete state of the application.</param>
+        /// <param name="applicationVersion">The version of the application executable, at least the simulation code.</param>
+        /// <param name="serializationOptions">the application serialization version used in the replay.</param>
+        /// <param name="writer">The octet writer to use for writing the replay file.</param>
+        /// <param name="framesUntilCompleteState">The number of frames until a complete state is written (optional, default is 60).</param>
         public ReplayWriter(TimeMs capturedAtTimeMs, TickId tickId, ReadOnlySpan<byte> completeState,
-            ApplicationVersion applicationVersion,
+            ApplicationVersion applicationVersion, ApplicationSerializationOptions serializationOptions,
             IOctetWriter writer,
             uint framesUntilCompleteState = 60)
         {
             framesBetweenCompleteState = framesUntilCompleteState;
             raffWriter = new(writer);
-            WriteVersionChunk(applicationVersion);
+            WriteVersionChunk(applicationVersion, serializationOptions);
+
             packCountSinceCompleteState = 60;
-            WriteCompleteState(capturedAtTimeMs, tickId, completeState);
+            WriteCompleteSimulationState(capturedAtTimeMs, tickId, completeState);
         }
 
+        /// <summary>
+        /// Indicates when a WriteCompleteState should be called.
+        /// </summary>
         public bool NeedsCompleteState => framesBetweenCompleteState != 0 &&
                                           packCountSinceCompleteState >= framesBetweenCompleteState;
 
         bool AllowedToAddCompleteState => framesBetweenCompleteState == 0 || NeedsCompleteState;
 
-        void WriteVersionChunk(ApplicationVersion applicationVersion)
+        void WriteVersionChunk(ApplicationVersion applicationVersion,
+            ApplicationSerializationOptions serializationOptions)
         {
             cachedOctetWriter.Reset();
             VersionWriter.Write(cachedOctetWriter, Constants.ReplayFileVersion);
-            ApplicationVersionWriter.Write(cachedOctetWriter, applicationVersion);
+            FixedOctets32Writer.Write(cachedOctetWriter, applicationVersion.a);
+            FixedOctets32Writer.Write(cachedOctetWriter, serializationOptions.a);
             raffWriter.WriteChunk(Constants.ReplayIcon, Constants.ReplayName, cachedOctetWriter.Octets);
         }
 
@@ -54,7 +73,13 @@ namespace Piot.Replay.Serialization
             TickIdWriter.Write(writer, tickId);
         }
 
-        public void WriteCompleteState(TimeMs capturedAtTimeMs, TickId tickId, ReadOnlySpan<byte> payload)
+        /// <summary>
+        /// Writes a complete simulation state to the replay file.
+        /// </summary>
+        /// <param name="capturedAtTimeMs">The monotonic time when the simulation state was captured.</param>
+        /// <param name="tickId">The tick ID when the simulation state were snapshotted.</param>
+        /// <param name="payload">The serialized complete simulation state.</param>
+        public void WriteCompleteSimulationState(TimeMs capturedAtTimeMs, TickId tickId, ReadOnlySpan<byte> payload)
         {
             if (!AllowedToAddCompleteState)
             {
@@ -79,20 +104,30 @@ namespace Piot.Replay.Serialization
             TickIdWriter.Write(writer, tickId);
         }
 
+        /// <summary>
+        /// Writes an authoritative step to the replay file.
+        /// </summary>
+        /// <param name="timeProcessedMs">The monotonic time when the step was written</param>
+        /// <param name="tickId">The tick ID for which the input should be applied before making an update tick in the simulation.</param>
+        /// <param name="payload">The serialized authoritative step.</param>
         public void WriteAuthoritativeStep(TimeMs timeProcessedMs, TickId tickId, ReadOnlySpan<byte> payload)
         {
             if (NeedsCompleteState)
             {
-               // throw new($"needs complete state now, been {packCountSinceCompleteState} since last one");
+                // throw new($"needs complete state now, been {packCountSinceCompleteState} since last one");
             }
 
             cachedOctetWriter.Reset();
             WriteAuthoritativeStepHeader(cachedOctetWriter, timeProcessedMs, tickId);
             cachedOctetWriter.WriteOctets(payload);
-            raffWriter.WriteChunk(Constants.AuthoritativeStepIcon, Constants.AuthoritativeStepName, cachedOctetWriter.Octets);
+            raffWriter.WriteChunk(Constants.AuthoritativeStepIcon, Constants.AuthoritativeStepName,
+                cachedOctetWriter.Octets);
             packCountSinceCompleteState++;
         }
 
+        /// <summary>
+        /// Closes the replay writer.
+        /// </summary>
         public void Close()
         {
             raffWriter.Close();

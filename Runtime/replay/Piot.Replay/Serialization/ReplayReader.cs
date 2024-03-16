@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-#nullable enable
 using System;
 using System.IO;
 using Piot.Clog;
@@ -15,25 +14,34 @@ using Piot.SerializableVersion.Serialization;
 using Piot.Tick;
 using Piot.Tick.Serialization;
 
-
 namespace Piot.Replay.Serialization
 {
+    /// <summary>
+    /// Reads simulation state and authoritative steps from a replay file.
+    /// </summary>
     public sealed class ReplayReader
     {
-        readonly CompleteStateEntry[] completeStateEntries;
+        readonly SimulationStateEntry[] completeStateEntries;
         readonly RaffReader raffReader;
         readonly IOctetReaderWithSeekAndSkip readerWithSeek;
         TimeMs lastReadTimeMs;
         TimeMs lastTimeMsFromDeltaState;
         private ILog log;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReplayReader"/> class.
+        /// </summary>
+        /// <param name="expectedApplicationVersion">The expected application executable version.</param>
+        /// <param name="readerWithSeek">The octet reader with seek capability.</param>
+        /// <param name="options">The application specific serialization options.</param>
+        /// <param name="log">Logger.</param>
         public ReplayReader(ApplicationVersion expectedApplicationVersion,
-            IOctetReaderWithSeekAndSkip readerWithSeek, ILog log)
+            IOctetReaderWithSeekAndSkip readerWithSeek, out ApplicationSerializationOptions options, ILog log)
         {
             this.log = log;
             this.readerWithSeek = readerWithSeek;
             raffReader = new(readerWithSeek);
-            ReadVersionInfo();
+            options = ReadVersionInfo();
 
             if (expectedApplicationVersion.a != ApplicationVersion.a)
             {
@@ -53,13 +61,19 @@ namespace Piot.Replay.Serialization
             }
         }
 
+        /// <summary>
+        /// Gets the tick ID range found in the replay file.
+        /// </summary>
         public TickIdRange Range { get; }
 
+        /// <summary>
+        /// The application executable found in the replay file.
+        /// </summary>
         public ApplicationVersion ApplicationVersion { get; private set; }
 
         public TickId FirstCompleteStateTickId => new(completeStateEntries[0].tickId);
 
-        void ReadVersionInfo()
+        ApplicationSerializationOptions ReadVersionInfo()
         {
             var versionPack = raffReader.ReadExpectedChunk(Constants.ReplayIcon, Constants.ReplayName);
             var reader = new OctetReader(versionPack);
@@ -70,11 +84,21 @@ namespace Piot.Replay.Serialization
                     $"wrong replay file version {stateSerializationVersion} vs {Constants.ReplayFileVersion}");
             }
 
-            ApplicationVersion = ApplicationVersionReader.Read(reader);
+            var applicationVersion = new ApplicationVersion();
+            applicationVersion.a = FixedOctets32Reader.Read(reader);
+
+            var applicationSerializationOptions = new ApplicationSerializationOptions();
+            applicationSerializationOptions.a = FixedOctets32Reader.Read(reader);
+
+            return applicationSerializationOptions;
         }
 
-
-        public CompleteStateEntry FindClosestCompleteStateEntry(TickId tickId)
+        /// <summary>
+        /// Finds the closest complete simulation state entry to the given tick ID.
+        /// </summary>
+        /// <param name="tickId">The tick ID to find the closest complete state to.</param>
+        /// <returns>The closest complete state entry.</returns>
+        public SimulationStateEntry FindClosestSimulationStateEntry(TickId tickId)
         {
             var tickIdValue = tickId.tickId;
             if (completeStateEntries.Length == 0)
@@ -126,20 +150,38 @@ namespace Piot.Replay.Serialization
             return previous;
         }
 
-        public ReadOnlySpan<byte> SeekToClosestCompleteState(TickId closestToTick, out TimeMs capturedAtTime,
+        /// <summary>
+        /// Seeks to the closest complete state entry to the given tick ID and retrieves the complete simulation state.
+        /// </summary>
+        /// <param name="closestToTick">The tick ID used to find the closest simulation state.</param>
+        /// <param name="capturedAtTime">The captured time of the found complete simulation state.</param>
+        /// <param name="tickId">The found tick ID of the complete state.</param>
+        /// <returns>The payload of the complete state.</returns>
+        public ReadOnlySpan<byte> SeekToClosestSimulationState(TickId closestToTick, out TimeMs capturedAtTime,
             out TickId tickId)
         {
-            var findClosestEntry = FindClosestCompleteStateEntry(closestToTick);
+            var findClosestEntry = FindClosestSimulationStateEntry(closestToTick);
             readerWithSeek.Seek(findClosestEntry.streamPosition);
 
-            return ReadCompleteState(out capturedAtTime, out tickId);
+            return ReadSimulationState(out capturedAtTime, out tickId);
         }
 
-        public void SeekToCompleteState(CompleteStateEntry entry)
+        /// <summary>
+        /// Seeks to a specific complete state entry.
+        /// </summary>
+        /// <param name="entry">The complete state entry to seek to.</param>
+        public void SeekToCompleteSimulationState(SimulationStateEntry entry)
         {
             readerWithSeek.Seek(entry.streamPosition);
         }
 
+        /// <summary>
+        /// Tries to read the next authoritative step from the replay file.
+        /// </summary>
+        /// <param name="capturedAtTime">The captured time of the authoritative step.</param>
+        /// <param name="tickId">The tick ID of the authoritative step.</param>
+        /// <param name="payload">The serialized authoritative step.</param>
+        /// <returns>True if an authoritative step was successfully read, otherwise false.</returns>
         public bool TryReadNextAuthoritativeStep(out TimeMs capturedAtTime, out TickId tickId,
             out ReadOnlySpan<byte> payload)
         {
@@ -196,7 +238,7 @@ namespace Piot.Replay.Serialization
             }
         }
 
-        ReadOnlySpan<byte> ReadCompleteState(out TimeMs capturedAtTime, out TickId tickId)
+        ReadOnlySpan<byte> ReadSimulationState(out TimeMs capturedAtTime, out TickId tickId)
         {
             var octetLength =
                 raffReader.ReadExpectedChunkHeader(Constants.CompleteStateIcon, Constants.CompleteStateName);

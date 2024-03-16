@@ -5,13 +5,17 @@
 
 namespace Piot.Replay.Serialization
 {
-    public readonly struct CompleteStateEntry
+    /// <summary>
+    /// Representation of a complete and full simulation state.
+    /// Must include all data to be completely deterministic
+    /// </summary>
+    public readonly struct SimulationStateEntry
     {
         public readonly ulong timeMs;
         public readonly uint tickId;
         public readonly ulong streamPosition;
 
-        public CompleteStateEntry(ulong timeMs, uint tickId, ulong streamPosition)
+        public SimulationStateEntry(ulong timeMs, uint tickId, ulong streamPosition)
         {
             this.timeMs = timeMs;
             this.tickId = tickId;
