@@ -49,7 +49,7 @@ namespace Piot.Replay.Serialization
         }
 
         /// <summary>
-        /// Indicates when a WriteCompleteState should be called.
+        /// Indicates when a <see cref="WriteAuthoritativeStep" /> should be called.
         /// </summary>
         public bool NeedsCompleteState => framesBetweenCompleteState != 0 &&
                                           packCountSinceCompleteState >= framesBetweenCompleteState;

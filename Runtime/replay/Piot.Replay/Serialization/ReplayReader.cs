@@ -21,7 +21,13 @@ namespace Piot.Replay.Serialization
     /// </summary>
     public sealed class ReplayReader
     {
-        readonly SimulationStateEntry[] completeStateEntries;
+        public enum ScanOptions
+        {
+            Scan,
+            DoNotScan,
+            ScanButAllowIncompleteFile,
+        }
+        readonly SimulationStateEntry[] simulationStateEntries;
         readonly RaffReader raffReader;
         readonly IOctetReaderWithSeekAndSkip readerWithSeek;
         TimeMs lastReadTimeMs;
@@ -35,8 +41,9 @@ namespace Piot.Replay.Serialization
         /// <param name="readerWithSeek">The octet reader with seek capability.</param>
         /// <param name="options">The application specific serialization options.</param>
         /// <param name="log">Logger.</param>
+        /// <param name="scanOptions">How and if a scan for all simulation state should .</param>
         public ReplayReader(ApplicationVersion expectedApplicationVersion,
-            IOctetReaderWithSeekAndSkip readerWithSeek, out ApplicationSerializationOptions options, ILog log)
+            IOctetReaderWithSeekAndSkip readerWithSeek, out ApplicationSerializationOptions options, ILog log, ScanOptions scanOptions = ScanOptions.Scan)
         {
             this.log = log;
             this.readerWithSeek = readerWithSeek;
@@ -49,16 +56,16 @@ namespace Piot.Replay.Serialization
                     $"version mismatch, can not use this replay file {ApplicationVersion} vs expected {expectedApplicationVersion}");
             }
 
-
-            var shouldScanFile = false;
-            if (shouldScanFile)
+            if (scanOptions == ScanOptions.DoNotScan)
             {
-                var positionBefore = readerWithSeek.Position;
-                completeStateEntries =
-                    CompleteStateScanner.ScanForAllCompleteStatePositions(raffReader, readerWithSeek);
-                readerWithSeek.Seek(positionBefore);
-                Range = new(new(completeStateEntries[0].tickId), new(completeStateEntries[^1].tickId));
+                return;
             }
+            
+            var positionBefore = readerWithSeek.Position;
+            simulationStateEntries =
+                SimulationStateScanner.ScanForSimulationStatesInStream(raffReader, readerWithSeek, scanOptions == ScanOptions.ScanButAllowIncompleteFile);
+            readerWithSeek.Seek(positionBefore);
+            Range = new(new(simulationStateEntries[0].tickId), new(simulationStateEntries[^1].tickId));
         }
 
         /// <summary>
@@ -71,7 +78,7 @@ namespace Piot.Replay.Serialization
         /// </summary>
         public ApplicationVersion ApplicationVersion { get; private set; }
 
-        public TickId FirstCompleteStateTickId => new(completeStateEntries[0].tickId);
+        public TickId FirstCompleteStateTickId => new(simulationStateEntries[0].tickId);
 
         ApplicationSerializationOptions ReadVersionInfo()
         {
@@ -96,25 +103,27 @@ namespace Piot.Replay.Serialization
         /// <summary>
         /// Finds the closest complete simulation state entry to the given tick ID.
         /// </summary>
+        /// <remarks>
+        /// If the tick ID should be between two simulation states, it always returns the earlier one (lower value).
+        /// </remarks>
         /// <param name="tickId">The tick ID to find the closest complete state to.</param>
         /// <returns>The closest complete state entry.</returns>
         public SimulationStateEntry FindClosestSimulationStateEntry(TickId tickId)
         {
             var tickIdValue = tickId.tickId;
-            if (completeStateEntries.Length == 0)
+            if (simulationStateEntries.Length == 0)
             {
-                throw new("unexpected that no complete states are found");
+                throw new InvalidOperationException("Unexpected: No simulation states are found.");
             }
 
             var left = 0;
-            var right = completeStateEntries.Length - 1;
+            var right = simulationStateEntries.Length - 1;
 
-            var tryCount = 0;
-            while (left != right && Math.Abs(left - right) >= 1 && tryCount < 20)
+            while (left < right)
             {
-                tryCount++;
                 var middle = (left + right) / 2;
-                var middleEntry = completeStateEntries[middle];
+                var middleEntry = simulationStateEntries[middle];
+        
                 if (tickIdValue == middleEntry.tickId)
                 {
                     return middleEntry;
@@ -122,7 +131,7 @@ namespace Piot.Replay.Serialization
 
                 if (tickIdValue < middleEntry.tickId)
                 {
-                    right = middle;
+                    right = middle - 1;
                 }
                 else
                 {
@@ -130,24 +139,13 @@ namespace Piot.Replay.Serialization
                 }
             }
 
-            var closest = completeStateEntries[left];
-            if (closest.tickId <= tickIdValue)
+            var closest = simulationStateEntries[left];
+            if (closest.tickId > tickIdValue)
             {
-                return closest;
+                throw new InvalidOperationException("Strange state in replay.");
             }
 
-            if (left < 1)
-            {
-                return closest;
-            }
-
-            var previous = completeStateEntries[left - 1];
-            if (previous.tickId > tickIdValue)
-            {
-                throw new("strange state in replay");
-            }
-
-            return previous;
+            return closest;
         }
 
         /// <summary>
@@ -170,7 +168,7 @@ namespace Piot.Replay.Serialization
         /// Seeks to a specific complete state entry.
         /// </summary>
         /// <param name="entry">The complete state entry to seek to.</param>
-        public void SeekToCompleteSimulationState(SimulationStateEntry entry)
+        public void SeekToSimulationState(SimulationStateEntry entry)
         {
             readerWithSeek.Seek(entry.streamPosition);
         }
