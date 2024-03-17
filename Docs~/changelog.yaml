@@ -1,0 +1,74 @@
+repo: nimble-dotnet/nimble
+
+releases:
+  - name: 'v0.0.10'
+    date: '2024-03-17'
+    notice: |
+      Mainly rename, refactor and documentation.
+
+    sections:
+      Client:
+        order: 1
+        changes:
+          docs:
+          - Add documentation for `NimbleClientReceiveStats`, `NimbleReceiveClient`, `NimbleSendClient`
+
+      Host:
+        order: 2
+        changes:
+          docs:
+          - Add documentation for `NimbleHost` and `PredictedStepsReader`.
+
+      Replay:
+        order: 3
+        notice: >
+          Changed from a generic replay-implementation to a specific for deterministic applications.
+        changes:
+          changed:
+          - Change `ApplicationVersion` from `SemanticVersion` to a 32 octet payload for greater flexibility.
+          - Change icons for RAFF files.
+          added:
+          - Add `ScanOptions` for `ReplayReader` that enables a replay file to be read, ignoring some minor file corruptions like a missing end chunk.
+          docs:
+          - Documentation of `ReplayReader` and `ReplayWriter`.
+
+      Authoritative Steps:
+        order: 4
+        changes:
+          changed:
+          - rename `AuthoritativeStep` to `AuthoritativeStepForOneParticipant` to make it more clear.
+          fixed:
+          - now checks if the `SerializeProviderConnectState` is `Normal` before checking the payload.
+            Payload is null in all other states.
+
+      Predicted Steps:
+        order: 5
+        changes:
+          changed:
+          - Rename `Deserialize` to `Read` in `PredictedStepsReader`
+          - Rename `CombinedRangesReader` to `AuthoritativeStepsReader`
+          - Rename `CombinedRangesWriter` to `AuthoritativeStepsWriter`
+          - Rename `PredictedStepsSerialize` to `PredictedStepsWriter`
+
+          performance:
+          - Add AggressiveInlining in `PredictedStepsQueue`
+
+      Discoid (circular buffers):
+        order: 6
+        changes:
+          performance:
+          - Add AggressiveInlining for `CircularBuffer` and `DiscoidBuffer`
+
+      Flood (octet- and bit-serialization):
+        order: 7
+        changes:
+          performance:
+          - AggressiveInlining for methods in `OctetReader` and `OctetWriter`
+
+      Fixed Struct:
+        order: 8
+        notice: Start move of Piot.FixedStruct into Nimble
+        changes:
+          added:
+          - Add `FixedOctets16`, `FixedOctets32` and `FixedOctets32WithLength`
+
