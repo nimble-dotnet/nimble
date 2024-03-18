@@ -1,6 +1,15 @@
 repo: nimble-dotnet/nimble
 
 releases:
+  'v0.0.11':
+    date: '2024-03-18'
+    notice:
+    sections:
+      Fixed Struct:
+        changes:
+          fixed:
+          - Now `FixedOctets32WithLength` correctly serializes its length $c6df571a
+
   'v0.0.10':
     date: '2024-03-17'
     notice: |

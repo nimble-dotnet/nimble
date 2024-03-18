@@ -2,3 +2,4 @@ Runtime/copy.sh
 Runtime/copy.sh.meta
 *.tgz
 *.tgz.meta
+CHANGELOG.md.meta

@@ -1,9 +1,15 @@
 # Changelog
 
+## :bookmark: [v0.0.11](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.11) (2024-03-18)
+
+
+### Fixed Struct
+
+* :lady_beetle: Now `FixedOctets32WithLength` correctly serializes its length [c6df571a](https://github.com/nimble-dotnet/nimble/commit/c6df571a)
+
 ## :bookmark: [v0.0.10](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.10) (2024-03-17)
 
 Mainly rename, refactor and documentation.
-
 
 ### Client
 
@@ -16,7 +22,6 @@ Mainly rename, refactor and documentation.
 ### Replay
 
 Changed from a generic replay-implementation to a specific for deterministic applications.
-
 
 * :star2: Add `ScanOptions` for `ReplayReader` that enables a replay file to be read, ignoring some minor file corruptions like a missing end chunk.
 * :hammer_and_wrench: Change `ApplicationVersion` from `SemanticVersion` to a 32 octet payload for greater flexibility.
@@ -49,4 +54,3 @@ Changed from a generic replay-implementation to a specific for deterministic app
 Start move of Piot.FixedStruct into Nimble
 
 * :star2: Add `FixedOctets16`, `FixedOctets32` and `FixedOctets32WithLength`
-
