@@ -61,7 +61,9 @@ namespace Piot.Replay.Serialization
         {
             cachedOctetWriter.Reset();
             VersionWriter.Write(cachedOctetWriter, Constants.ReplayFileVersion);
+            OctetMarker.WriteMarker(cachedOctetWriter, 0xbf);
             FixedOctets32Writer.Write(cachedOctetWriter, applicationVersion.a);
+            OctetMarker.WriteMarker(cachedOctetWriter, 0xbe);
             FixedOctets32Writer.Write(cachedOctetWriter, serializationOptions.a);
             raffWriter.WriteChunk(Constants.ReplayIcon, Constants.ReplayName, cachedOctetWriter.Octets);
         }

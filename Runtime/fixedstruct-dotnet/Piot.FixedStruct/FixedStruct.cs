@@ -199,6 +199,16 @@ namespace Piot.FixedStruct
                 }
             }
         }
+        
+        public byte[] ToArray()
+        {
+            var octetArray = new byte[length];
+            
+            CopyTo(octetArray);
+
+            return octetArray;
+        }
+
 
         public void CopyTo(byte[] byteArray)
         {

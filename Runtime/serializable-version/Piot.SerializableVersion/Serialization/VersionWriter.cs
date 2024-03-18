@@ -16,7 +16,7 @@ namespace Piot.SerializableVersion.Serialization
             writer.WriteUInt16(semanticVersion.minor);
             writer.WriteUInt16(semanticVersion.patch);
             writer.WriteUInt8((byte)semanticVersion.suffix.Length);
-            if (semanticVersion.suffix != "")
+            if (semanticVersion.suffix.Length > 0)
             {
                 writer.WriteOctets(Encoding.ASCII.GetBytes(semanticVersion.suffix));
             }

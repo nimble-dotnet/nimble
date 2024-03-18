@@ -91,9 +91,12 @@ namespace Piot.Replay.Serialization
                     $"wrong replay file version {stateSerializationVersion} vs {Constants.ReplayFileVersion}");
             }
 
+            OctetMarker.AssertMarker(reader, 0xbf);
             var applicationVersion = new ApplicationVersion();
             applicationVersion.a = FixedOctets32Reader.Read(reader);
+            ApplicationVersion = applicationVersion;
 
+            OctetMarker.AssertMarker(reader, 0xbe);
             var applicationSerializationOptions = new ApplicationSerializationOptions();
             applicationSerializationOptions.a = FixedOctets32Reader.Read(reader);
 
