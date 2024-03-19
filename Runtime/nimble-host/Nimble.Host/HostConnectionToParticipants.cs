@@ -1,6 +1,9 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using Piot.Nimble.Steps;
-using Piot.Tick;
 
 namespace Nimble.Authoritative.Steps
 {

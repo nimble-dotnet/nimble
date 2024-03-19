@@ -1,0 +1,8 @@
+﻿{
+  "name": "network.piot.blob-stream",
+  "references": [
+    "network.piot.flood",
+    "network.piot.clog",
+    "network.piot.monotonic-time"
+  ]
+}
