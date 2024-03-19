@@ -13,9 +13,7 @@ namespace Piot.MonotonicTimeLowerBits
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static MonotonicTimeLowerBits Read(IOctetReader reader)
         {
-#if DEBUG
             OctetMarker.AssertMarker(reader, Constants.MonotonicTimeLowerBitsSync);
-#endif
             return new(reader.ReadUInt16());
         }
     }

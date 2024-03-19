@@ -18,9 +18,7 @@ namespace Piot.MonotonicTimeLowerBits
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Write(MonotonicTimeLowerBits lowerBits, OctetWriter writer)
         {
-#if DEBUG
             OctetMarker.WriteMarker(writer, Constants.MonotonicTimeLowerBitsSync);
-#endif
 
             writer.WriteUInt16((ushort)(lowerBits.lowerBits & 0xffff));
         }

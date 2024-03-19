@@ -22,14 +22,11 @@ namespace Piot.Tick.Serialization
             var count = 0u;
             if (tickIdRange.startTickId.tickId != 0)
             {
-                count = (uint)((int)tickIdRange.lastTickId.tickId - (int)tickIdRange.startTickId.tickId);
                 count = tickIdRange.Length;
-#if DEBUG
                 if (count > 255)
                 {
                     throw new InvalidOperationException($"range is too big {tickIdRange} for serialization");
                 }
-#endif
             }
 
             writer.WriteUInt8((byte)count);
