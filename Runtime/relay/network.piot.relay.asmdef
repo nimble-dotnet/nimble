@@ -1,0 +1,13 @@
+﻿{
+  "name": "network.piot.relay",
+  "references": [
+    "network.piot.flood",
+    "network.piot.raff",
+    "network.piot.monotonic-time",
+    "network.piot.tick",
+    "network.piot.serializable-version",
+    "network.piot.monotonic-time.lower-bits",
+    "network.piot.clog",
+    "network.piot.fixedstruct"
+  ]
+}

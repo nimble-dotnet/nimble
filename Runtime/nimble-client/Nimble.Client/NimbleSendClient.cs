@@ -87,6 +87,7 @@ namespace Piot.Nimble.Client
                 new((ushort)(now.ms & 0xffff)), octetWriter);
 
             StatusWriter.Write(octetWriter, expectingAuthoritativeTickId, 0);
+            log.DebugLowLevel("Status to host is we expect {AuthoritativeTickID}", expectingAuthoritativeTickId);
 
             var lastSentTickId = PredictedStepsWriter.Write(octetWriter, predictedSteps, log);
             if (lastSentTickId > lastSentPredictedTickId)

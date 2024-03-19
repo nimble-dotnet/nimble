@@ -41,7 +41,7 @@ namespace Nimble.Authoritative.Steps
             var localPlayerCount = reader.ReadUInt8();
             if (localPlayerCount == 0)
             {
-                //log.Notice("no predicted steps from client");
+                log.Notice("no predicted steps from client");
                 return highestAcceptedTickId;
             }
 
@@ -53,6 +53,7 @@ namespace Nimble.Authoritative.Steps
 
                 if (stepCount == 0)
                 {
+                    log.DebugLowLevel("no step count at all from {LocalPlayerIndex}", localPlayerIndex);
                     continue;
                 }
 

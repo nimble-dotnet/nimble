@@ -34,6 +34,7 @@ namespace Piot.Nimble.Steps.Serialization
 
             if (localPlayerCount == 0)
             {
+                log.Notice("no local players at all, so can not send predicted steps to host");
                 return highestWrittenPredictedTickId;
             }
 
@@ -57,13 +58,14 @@ namespace Piot.Nimble.Steps.Serialization
                 var tickCount = predictedStepsQueue.Count;
                 if (tickCount == 0)
                 {
-                    //log.Notice("no predicted steps to send");
+                    log.DebugLowLevel("no predicted steps to send for {LocalPlayerIndex}", localPlayerIndex);
                     continue;
                 }
 
-                if (tickCount > 255)
+                if (tickCount > 32)
                 {
-                    throw new("too many inputs to serialize");
+                    log.Notice("too many {TickCount} to serialize for {LocalPlayerIndex}", tickCount, localPlayerIndex);
+                    tickCount = 32;
                 }
 
 
@@ -89,8 +91,8 @@ namespace Piot.Nimble.Steps.Serialization
                         break;
                     }
 
-//					log.Debug("writing predicted step {{TickID}} {{PayloadLength}}", predictedStep.appliedAtTickId,
-//						(byte)predictedStep.payload.Length);
+					log.DebugLowLevel("writing predicted step {TickID} {PayloadLength}", predictedStep.appliedAtTickId,
+						(byte)predictedStep.payload.Length);
                     writer.WriteUInt8((byte)predictedStep.payload.Length);
                     writer.WriteOctets(predictedStep.payload.Span);
 
