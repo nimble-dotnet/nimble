@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Piot.BlobStream;
 using Piot.Clog;
 using Piot.Nimble.Steps;
 using Piot.Datagram;
@@ -8,6 +9,7 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
 using Piot.Nimble.AuthoritativeReceiveStatus;
+using Piot.Nimble.Serialize;
 using Piot.Nimble.Steps.Serialization;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
@@ -22,17 +24,18 @@ namespace Piot.Nimble.Client
     public sealed class NimbleSendClient
     {
         public const uint MaxOctetSize = 1024;
-        
+
         /// <summary>
         /// Predicted steps for local players.
         /// </summary>
         public readonly PredictedStepsLocalPlayers predictedSteps;
+
         private readonly ILog log;
         private readonly OctetWriter octetWriter = new(MaxOctetSize);
-        private const int MaximumClientOutDatagramCount = 4;
+        private const int MaximumClientOutDatagramCount = 1;
         private readonly CircularBuffer<ClientDatagram> clientOutDatagrams = new(MaximumClientOutDatagramCount);
 
- 
+
         private readonly StatPerSecond datagramCountPerSecond;
         private readonly StatPerSecond datagramBitsPerSecond;
         private readonly StatPerSecond predictedStepsSentPerSecond;
@@ -53,7 +56,7 @@ namespace Piot.Nimble.Client
         private TickId expectingAuthoritativeTickId;
         private TickId lastSentPredictedTickId;
         private TickId lastSentPredictedTickIdAddedToStats;
-
+        public BlobStreamReceiveLogic receiveStateLogic;
         public FormattedStat PredictedStepsSentPerSecond =>
             new(StandardFormatterPerSecond.Format, predictedStepsSentPerSecond.Stat);
 
@@ -66,39 +69,32 @@ namespace Piot.Nimble.Client
             predictedSteps = new PredictedStepsLocalPlayers(log.SubLog("PredictedStepsLocalPlayers"));
         }
 
-        /// <summary>
-        /// Collection of outgoing datagrams.
-        /// </summary>
-        public IEnumerable<ClientDatagram> OutDatagrams => clientOutDatagrams;
-
-
-        /// <summary>
-        /// Processes a tick. Fills the OutDatagrams.
-        /// </summary>
-        /// <param name="now">The current time.</param>
-        public void Tick(TimeMs now)
+        private void WriteHeader(OctetWriter writer, TimeMs now)
         {
-            octetWriter.Reset();
-
             OrderedDatagramsSequenceIdWriter.Write(octetWriter, datagramSequenceId);
             datagramSequenceId.Next();
 
             MonotonicTimeLowerBitsWriter.Write(
                 new((ushort)(now.ms & 0xffff)), octetWriter);
+        }
 
-            StatusWriter.Write(octetWriter, expectingAuthoritativeTickId, 0);
-            log.DebugLowLevel("Status to host is we expect {AuthoritativeTickID}", expectingAuthoritativeTickId);
+        /// <summary>
+        /// Processes a tick. Fills the OutDatagrams.
+        /// </summary>
+        /// <param name="now">The current time.</param>
+        public IEnumerable<ClientDatagram> Tick(TimeMs now)
+        {
+            octetWriter.Reset();
+            clientOutDatagrams.Clear();
 
-            var lastSentTickId = PredictedStepsWriter.Write(octetWriter, predictedSteps, log);
-            if (lastSentTickId > lastSentPredictedTickId)
-            {
-                lastSentPredictedTickId = lastSentTickId;
-            }
+            WriteHeader(octetWriter, now);
+
+            SendAckDownload(octetWriter);
+            SendPredictedSteps(octetWriter);
 
 
 //			log.Warn($"decision to send predicted steps to send to the host {filteredOutPredictedStepsForLocalPlayers} {{OctetCount}}", octetWriter.Position);
 
-            clientOutDatagrams.Clear();
 
             if (octetWriter.Position > Constants.MaxDatagramOctetSize)
             {
@@ -108,6 +104,40 @@ namespace Piot.Nimble.Client
             ref var datagram = ref clientOutDatagrams.EnqueueRef();
             datagram.payload = octetWriter.Octets.ToArray();
 
+            datagramCountPerSecond.Add(1);
+            datagramBitsPerSecond.Add(datagram.payload.Length * 8);
+
+            datagramCountPerSecond.Update(now);
+            datagramBitsPerSecond.Update(now);
+            predictedStepsSentPerSecond.Update(now);
+
+            return clientOutDatagrams;
+        }
+
+        private void SendAckDownloadStarted(OctetWriter sendWriter)
+        {
+            sendWriter.WriteUInt8((byte)ClientToHostRequest.AckSerializedSaveStateStart);
+            sendWriter.WriteUInt32(0); // TODO:
+        }
+
+        private void SendAckDownload(OctetWriter sendWriter)
+        {
+            sendWriter.WriteUInt8((byte)ClientToHostRequest.AckSerializedSaveStateBlobStream);
+            receiveStateLogic.WriteStream(sendWriter);
+        }
+
+        private void SendPredictedSteps(OctetWriter sendWriter)
+        {
+            sendWriter.WriteUInt8((byte)ClientToHostRequest.RequestAddPredictedStep);
+            StatusWriter.Write(sendWriter, expectingAuthoritativeTickId, 0);
+            log.DebugLowLevel("Status to host is we expect {AuthoritativeTickID}", expectingAuthoritativeTickId);
+
+            var lastSentTickId = PredictedStepsWriter.Write(sendWriter, predictedSteps, log);
+            if (lastSentTickId > lastSentPredictedTickId)
+            {
+                lastSentPredictedTickId = lastSentTickId;
+            }
+
             var diff = lastSentPredictedTickId.tickId - lastSentPredictedTickIdAddedToStats.tickId;
             if (diff > 0)
             {
@@ -115,13 +145,6 @@ namespace Piot.Nimble.Client
             }
 
             lastSentPredictedTickIdAddedToStats = lastSentPredictedTickId;
-
-            datagramCountPerSecond.Add(1);
-            datagramBitsPerSecond.Add(datagram.payload.Length * 8);
-
-            datagramCountPerSecond.Update(now);
-            datagramBitsPerSecond.Update(now);
-            predictedStepsSentPerSecond.Update(now);
         }
 
         /// <summary>

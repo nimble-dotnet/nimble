@@ -10,7 +10,7 @@ namespace Piot.BlobStream
     /// <summary>
     /// Reads and assembles chunks of a blob into a complete octet array.
     /// </summary>
-    public class BlobStreamReader
+    public class BlobStreamReceiver
     {
         private ILog log;
         private byte[] blob;
@@ -28,12 +28,12 @@ namespace Piot.BlobStream
         public bool IsComplete => isComplete;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlobStreamReader"/> class.
+        /// Initializes a new instance of the <see cref="BlobStreamReceiver"/> class.
         /// </summary>
         /// <param name="octetCount">The total size of the blob in octets.</param>
         /// <param name="fixedChunkSize">The size of each chunk in octets. The last chunk can be smaller.</param>
         /// <param name="log">The logging interface used for error and debug logging.</param>
-        public BlobStreamReader(ulong octetCount, ulong fixedChunkSize, ILog log)
+        public BlobStreamReceiver(ulong octetCount, ulong fixedChunkSize, ILog log)
         {
             this.log = log;
             this.octetCount = octetCount;

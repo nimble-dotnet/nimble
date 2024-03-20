@@ -9,23 +9,8 @@ using Piot.MonotonicTime;
 
 namespace Piot.BlobStream
 {
-    public struct BlobStreamWriterEntry
+    public struct BlobStreamSenderEntry
     {
-        /// <summary>
-        /// Gets or sets the chunk's octet data.
-        /// </summary>
-        public int index;
-
-        /// <summary>
-        /// Gets or sets the count of octets in this chunk.
-        /// </summary>
-        public ulong octetCount;
-
-        /// <summary>
-        /// Gets or sets the chunk ID.
-        /// </summary>
-        public ulong chunkId;
-
         /// <summary>
         /// Gets or sets the last time this chunk was sent. Represented as a <see cref="TimeMs"/>.
         /// </summary>
@@ -50,19 +35,14 @@ namespace Piot.BlobStream
     /// for chunks that have been successfully received. This allows for efficient transmission and
     /// retransmission of data over transports where packet loss may occur.
     /// </summary>
-    public class BlobStreamWriter
+    public class BlobStreamSender
     {
         private readonly ILog log;
-        private readonly byte[] blob;
-        private readonly ulong octetCount;
-        private readonly ulong fixedChunkSize;
+
         private bool isComplete;
-        private readonly BlobStreamWriterEntry[] entries;
-        
-        /// <summary>
-        /// Gets the total count of octets in the blob.
-        /// </summary>
-        public ulong OctetCount => octetCount;
+        private readonly BlobStreamSenderEntry[] entries;
+        private BlobStreamSenderChunks readOnlyChunks;       
+ 
 
         /// <summary>
         /// Indicates whether the entire blob has been acknowledged as received.
@@ -70,7 +50,7 @@ namespace Piot.BlobStream
         public bool IsComplete => isComplete;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlobStreamWriter"/> class for managing
+        /// Initializes a new instance of the <see cref="BlobStreamSender"/> class for managing
         /// the transmission of a blob.
         /// </summary>
         /// <param name="data">The blob data to be transmitted.</param>
@@ -79,20 +59,13 @@ namespace Piot.BlobStream
         /// <param name="log">The logger for recording events and errors.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="data"/> or <paramref name="log"/> is null.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="fixedChunkSize"/> is greater than 1024.</exception>
-        public BlobStreamWriter(byte[] data, ulong fixedChunkSize, TimeMs now, ILog log)
+        public BlobStreamSender(BlobStreamSenderChunks senderChunks, TimeMs now, ILog log)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
-            this.blob = data ?? throw new ArgumentNullException(nameof(data));
-            this.octetCount = (ulong)data.Length;
-            this.fixedChunkSize = fixedChunkSize;
-            if (fixedChunkSize > 1024)
-            {
-                throw new ArgumentException("Only chunks up to 1024 are supported", nameof(fixedChunkSize));
-            }
-
+            this.readOnlyChunks = senderChunks;
             isComplete = false;
-            var chunkCount = (octetCount + fixedChunkSize - 1) / fixedChunkSize;
-            entries = new BlobStreamWriterEntry[chunkCount];
+            var chunkCount = senderChunks.ChunkCount;
+            entries = new BlobStreamSenderEntry[chunkCount];
             InitializeEntries(chunkCount, now);
         }
 
@@ -100,29 +73,12 @@ namespace Piot.BlobStream
         {
             for (ulong i = 0; i < chunkCount; ++i)
             {
-                var expectedChunkSize = i == chunkCount - 1
-                    ? (octetCount % fixedChunkSize == 0 ? fixedChunkSize : octetCount % fixedChunkSize)
-                    : fixedChunkSize;
-
-                entries[i].octetCount = expectedChunkSize;
-                entries[i].index = (int)(i * fixedChunkSize);
-                entries[i].chunkId = i;
                 entries[i].lastSentAtTime = now;
                 entries[i].sendCount = 0;
                 entries[i].isReceived = false;
             }
         }
 
-        /// <summary>
-        /// Provides a read-only span of the specified chunk from the blob.
-        /// </summary>
-        /// <param name="chunkIndex">The index of the chunk to retrieve.</param>
-        /// <returns>A <see cref="ReadOnlySpan{Byte}"/> containing the bytes of the specified chunk.</returns>
-
-        public ReadOnlySpan<byte> Span(uint chunkIndex)
-        {
-            return blob.AsSpan((int)(chunkIndex * fixedChunkSize), (int)entries[chunkIndex].octetCount);
-        }
 
         /// <summary>
         /// Marks chunks as received based on the provided acknowledgment information.
@@ -133,7 +89,7 @@ namespace Piot.BlobStream
         {
             if (everythingBeforeThis > entries.Length)
             {
-                log.Error("Strange everythingBeforeThis");
+                log.Error("Strange everythingBeforeThis {EverythingBeforeThis} out of {Length}", everythingBeforeThis, entries.Length);
                 return;
             }
 
@@ -209,10 +165,15 @@ namespace Piot.BlobStream
 
                 result.Add((uint)i);
 
-                log.DebugLowLevel("Sending {ChunkId}", entry.chunkId);
+                log.DebugLowLevel("Sending {ChunkId}", i);
             }
 
             return result;
+        }
+
+        public ReadOnlySpan<byte> Span(uint chunkIndex)
+        {
+            return readOnlyChunks.Span(chunkIndex);
         }
     }
 }

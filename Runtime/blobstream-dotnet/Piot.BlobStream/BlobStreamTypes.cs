@@ -6,11 +6,11 @@ namespace Piot.BlobStream
 {
     public enum ClientReceiveCommand : byte
     {
-        SetChunk
+        SetChunk = 85
     }
     
     public enum ClientSendCommand : byte
     {
-        AckChunk
+        AckChunk = 53
     }
 }

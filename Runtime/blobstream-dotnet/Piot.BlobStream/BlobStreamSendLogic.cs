@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Datagram;
@@ -17,46 +18,39 @@ namespace Piot.BlobStream
     /// Manages the logic for writing to a blob stream, optimizing for network transmission by
     /// chunking data into optimal datagram sizes and managing acknowledgments for chunks received.
     /// </summary>
-    public class BlobStreamWriterLogic
+    public class BlobStreamSendLogic
     {
-        private BlobStreamWriter blobStream;
+        private BlobStreamSender blobStream;
         private const int OptimalDatagramSize = 1100;
         private readonly ILog log;
         private const int OptimalDatagramCountToSend = 4;
-        private readonly CircularBuffer<ClientDatagram> datagrams = new(OptimalDatagramCountToSend);
         private readonly OctetWriter cachedWriter = new(OptimalDatagramSize);
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlobStreamWriterLogic"/> class.
+        /// Initializes a new instance of the <see cref="BlobStreamSendLogic"/> class.
         /// </summary>
-        /// <param name="writer">The blob stream writer that holds the complete payload to be sent.</param>
+        /// <param name="sender">The blob stream writer that holds the complete payload to be sent.</param>
         /// <param name="log">The logging interface for recording log messages.</param>
-        public BlobStreamWriterLogic(BlobStreamWriter writer, ILog log)
+        public BlobStreamSendLogic(BlobStreamSender sender, ILog log)
         {
             this.log = log;
-            this.blobStream = writer;
+            this.blobStream = sender;
+        }
+
+        public bool IsReceivedByRemote => blobStream.IsComplete;
+
+        public IEnumerable<uint> PrepareChunksToSend(TimeMs now)
+        {
+            return blobStream.GetChunksToSend(now, OptimalDatagramCountToSend);
         }
 
         /// <summary>
         /// Processes and prepares datagrams for sending, based on the current state of the blob stream
         /// and the elapsed time.
         /// </summary>
-        /// <param name="now">The current time, used for determining what data needs to be sent.</param>
-        /// <returns>An enumerable of <see cref="ClientDatagram"/> that should be sent.</returns>
-        public IEnumerable<ClientDatagram> Update(TimeMs now)
+        public void WriteStream(OctetWriter writer, uint chunkIndex)
         {
-            var chunksToSend = blobStream.GetChunksToSend(now, OptimalDatagramCountToSend);
-            datagrams.Clear();
-
-            foreach (var chunkIndex in chunksToSend)
-            {
-                cachedWriter.Reset();
-                WriteEntry(cachedWriter, chunkIndex);
-                ref var datagram = ref datagrams.EnqueueRef();
-                datagram.payload = cachedWriter.Octets.ToArray();
-            }
-
-            return datagrams;
+            WriteEntry(writer, chunkIndex);
         }
 
         /// <summary>

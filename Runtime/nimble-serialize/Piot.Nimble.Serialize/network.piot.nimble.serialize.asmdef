@@ -1,0 +1,9 @@
+﻿{
+  "name": "network.piot.nimble.serialize",
+  "references": [
+    "network.piot.tick",
+    "network.piot.flood",
+    "network.piot.clog",
+    "network.piot.discoid"
+  ]
+}

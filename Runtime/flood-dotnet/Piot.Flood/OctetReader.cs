@@ -20,6 +20,10 @@ namespace Piot.Flood
             size = array.Length;
         }
 
+        public uint OctetsLeft => (uint)(size - pos);
+
+        public bool HasMore => pos < size;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadUInt8()
         {

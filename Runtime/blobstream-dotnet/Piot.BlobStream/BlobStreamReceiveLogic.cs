@@ -11,17 +11,17 @@ namespace Piot.BlobStream
     /// <summary>
     /// Handles the logic of receiving a blob over a transport that can have packet loss.
     /// </summary>
-    public class BlobStreamReaderLogic
+    public class BlobStreamReceiveLogic
     {
-        private readonly BlobStreamReader blobStream;
+        private readonly BlobStreamReceiver blobStream;
         private ILog log;
         
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlobStreamReaderLogic"/> class.
+        /// Initializes a new instance of the <see cref="BlobStreamReceiveLogic"/> class.
         /// </summary>
-        /// <param name="blobStream">The <see cref="BlobStreamReader"/> used to store and manage the blob's chunks.</param>
+        /// <param name="blobStream">The <see cref="BlobStreamReceiver"/> used to store and manage the blob's chunks.</param>
         /// <param name="log">The logging interface used for logging messages.</param>
-        public BlobStreamReaderLogic(BlobStreamReader blobStream, ILog log)
+        public BlobStreamReceiveLogic(BlobStreamReceiver blobStream, ILog log)
         {
             this.log = log;
             this.blobStream = blobStream;
@@ -60,7 +60,7 @@ namespace Piot.BlobStream
         
         /// <summary>
         /// Writes an acknowledgment to the specified <see cref="IOctetWriter"/> based on the chunks
-        /// received and processed by the <see cref="BlobStreamReader"/>.
+        /// received and processed by the <see cref="BlobStreamReceiver"/>.
         /// </summary>
         /// <param name="writer">The <see cref="IOctetWriter"/> to which the acknowledgment is written.</param>
         private void WriteAck(IOctetWriter writer)

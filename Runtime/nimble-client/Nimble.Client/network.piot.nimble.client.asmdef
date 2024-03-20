@@ -12,6 +12,8 @@
     "network.piot.discoid",
     "network.piot.stats",
     "network.piot.ordered-datagrams",
-    "network.piot.nimble.authoritative.status"
+    "network.piot.nimble.authoritative.status",
+    "network.piot.nimble.serialize",
+    "network.piot.blob-stream"
   ]
 }

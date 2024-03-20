@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using Nimble.Authoritative.Steps;
+using Piot.BlobStream;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
+using Piot.Nimble.Serialize;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Piot.Tick;
+using Constants = Piot.Nimble.Serialize.Constants;
 
 namespace Piot.Nimble.Client
 {
@@ -40,6 +43,8 @@ namespace Piot.Nimble.Client
 
         private FixedDeltaTimeMs stepTimeMs;
 
+        private BlobStreamReceiveLogic receiveLogic;
+
         public int RemotePredictedBufferDiff => bufferDiff.Stat.average;
 
         /// <summary>
@@ -55,13 +60,14 @@ namespace Piot.Nimble.Client
         {
             this.log = log;
             this.sendClient = sendClient;
+            this.receiveLogic = this.sendClient.receiveStateLogic;
             stepTimeMs = deltaTimeMs;
             datagramBitsPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(500));
             authoritativeTicksPerSecond = new StatPerSecond(now, new FixedDeltaTimeMs(250));
             receiveStats = new NimbleClientReceiveStats(now);
             AuthoritativeStepsQueue = new AuthoritativeStepsQueue(tickId);
         }
-        
+
         public uint TargetPredictStepCount
         {
             get
@@ -98,14 +104,8 @@ namespace Piot.Nimble.Client
             }
         }
 
-        public void ReceiveDatagram(TimeMs now, ReadOnlySpan<byte> payload)
+        private void HandleHeader(IOctetReader reader, TimeMs now)
         {
-            //log.DebugLowLevel("Received datagram of {Size}", payload.Length);
-
-            datagramBitsPerSecond.Add(payload.Length * 8);
-
-            var reader = new OctetReader(payload);
-
             var before = orderedDatagramsInChecker.LastValue;
             var wasOk = orderedDatagramsInChecker.ReadAndCheck(reader, out var diffPackets);
             if (!wasOk)
@@ -122,24 +122,56 @@ namespace Piot.Nimble.Client
             }
 
             var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
-
-            ReadParticipantInfo(reader);
-            ReadBufferInfo(reader);
-
-            var addedAuthoritativeCount = AuthoritativeStepsReader.Read(AuthoritativeStepsQueue, reader, log);
-            log.DebugLowLevel("added {TickCount} authoritative steps", addedAuthoritativeCount);
-            authoritativeTicksPerSecond.Add((int)addedAuthoritativeCount);
-
-            if (!AuthoritativeStepsQueue.IsEmpty)
-            {
-                var last = AuthoritativeStepsQueue.Last.appliedAtTickId;
-                sendClient.OnLatestAuthoritativeTickId(last, 0);
-            }
-
             receiveStats.ReceivedPongTime(now, pongTimeLowerBits);
+        }
+
+        public void ReceiveDatagram(TimeMs now, ReadOnlySpan<byte> payload)
+        {
+            //log.DebugLowLevel("Received datagram of {Size}", payload.Length);
+            datagramBitsPerSecond.Add(payload.Length * 8);
+
+            var reader = new OctetReader(payload);
+
+            HandleHeader(reader, now);
+
+            while (reader.HasMore)
+            {
+                var clientCommand = (ClientCommand)reader.ReadUInt8();
+                switch (clientCommand)
+                {
+                    case ClientCommand.AuthoritativeSteps:
+                        HandleAuthoritativeSteps(reader);
+                        break;
+                    case ClientCommand.DownloadSerializedSaveState:
+                        HandleIncomingSaveState(reader);
+                        break;
+                    case ClientCommand.StartDownload:
+                        HandleStartDownload(reader);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(clientCommand));
+                }
+            }
 
             datagramBitsPerSecond.Update(now);
             authoritativeTicksPerSecond.Update(now);
+        }
+
+        private void HandleStartDownload(OctetReader reader)
+        {
+            if (receiveLogic is not null)
+            {
+                return;
+            }
+            var octetSize = reader.ReadUInt32();
+            var blobStreamReceive =
+                new BlobStreamReceiver(octetSize, Constants.OptimalChunkSize, log.SubLog("downloader"));
+            this.receiveLogic = new BlobStreamReceiveLogic(blobStreamReceive, log.SubLog("download-logic"));
+        }
+
+        private void HandleIncomingSaveState(OctetReader reader)
+        {
+            receiveLogic.ReadStream(reader);
         }
 
         private void ReadBufferInfo(OctetReader reader)
@@ -175,6 +207,22 @@ namespace Piot.Nimble.Client
             }
 
             return AuthoritativeStepsQueue.Range;
+        }
+
+        private void HandleAuthoritativeSteps(OctetReader reader)
+        {
+            ReadParticipantInfo(reader);
+            ReadBufferInfo(reader);
+
+            var addedAuthoritativeCount = AuthoritativeStepsReader.Read(AuthoritativeStepsQueue, reader, log);
+            log.DebugLowLevel("added {TickCount} authoritative steps", addedAuthoritativeCount);
+            authoritativeTicksPerSecond.Add((int)addedAuthoritativeCount);
+
+            if (!AuthoritativeStepsQueue.IsEmpty)
+            {
+                var last = AuthoritativeStepsQueue.Last.appliedAtTickId;
+                sendClient.OnLatestAuthoritativeTickId(last, 0);
+            }
         }
     }
 }
