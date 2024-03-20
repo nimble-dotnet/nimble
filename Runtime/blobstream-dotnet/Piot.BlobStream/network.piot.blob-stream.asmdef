@@ -3,6 +3,8 @@
   "references": [
     "network.piot.flood",
     "network.piot.clog",
-    "network.piot.monotonic-time"
+    "network.piot.monotonic-time",
+    "network.piot.datagram",
+    "network.piot.discoid"
   ]
 }

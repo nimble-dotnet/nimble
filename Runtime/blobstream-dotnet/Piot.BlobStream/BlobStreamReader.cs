@@ -23,6 +23,8 @@ namespace Piot.BlobStream
         /// Gets the total number of octets that the blob stream is expected to contain.
         /// </summary>
         public ulong OctetCount => octetCount;
+
+        public ulong FixedChunkSize => fixedChunkSize;
         public bool IsComplete => isComplete;
 
         /// <summary>
@@ -50,7 +52,7 @@ namespace Piot.BlobStream
         /// This method updates the internal state of the blob stream reader,
         /// marking chunks as received and checking if the entire stream is complete.
         /// </remarks>
-        public void SetChunk(ushort chunkId, byte[] octets)
+        public void SetChunk(ushort chunkId, ReadOnlySpan<byte> octets)
         {
             var chunkOctetCount = (ulong)octets.Length;
             var offset = chunkId * fixedChunkSize;
@@ -82,7 +84,7 @@ namespace Piot.BlobStream
                 }
             }
 
-            Buffer.BlockCopy(octets, 0, blob, (int)offset, (int)octetCount);
+            Buffer.BlockCopy(octets.ToArray(), 0, blob, (int)offset, (int)octetCount);
 
             bitArray.Set(chunkId);
 
@@ -103,6 +105,29 @@ namespace Piot.BlobStream
         private bool CheckAllBitsSet()
         {
             return bitArray.AreAllSet();
+        }
+
+        /// <summary>
+        /// Finds the index of the first chunk that is not received.
+        /// </summary>
+        /// <returns>The index of the chunk that is not received, or the chunk count if all chunks have been received.</returns>
+        public uint FirstUnsetChunkIndex()
+        {
+            return bitArray.FirstUnset();
+        }
+
+        /// <summary>
+        /// Retrieves a subset of chunk indices that has not been received, starting from the specified chunk index.
+        /// </summary>
+        /// <param name="fromIndex">The zero-based starting chunk index from which to receive the chunk info.</param>
+        /// <returns>
+        /// A <see cref="ulong"/> representing the subset of chunks received, 
+        /// starting at the specified index. Chunk indices are packed into the <see cref="ulong"/> from left to right,
+        /// meaning that the first chunk index bit received is the most significant bit of the result.
+        /// </returns>
+        public ulong GetBitsStartingFrom(uint index)
+        {
+            return bitArray.GetBitsStartingFrom(index);
         }
 
         public override string ToString()

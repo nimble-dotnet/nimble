@@ -59,7 +59,7 @@ namespace Piot.BlobStream
         /// Finds the index of the first bit that is not set.
         /// </summary>
         /// <returns>The index of the first bit that is unset, or the bit count if all bits are set.</returns>
-        public int FirstUnset()
+        public uint FirstUnset()
         {
             for (var i = 0; i < atomCount; ++i)
             {
@@ -74,12 +74,12 @@ namespace Piot.BlobStream
                     ulong mask = 1U << bit;
                     if ((accumulator & mask) == 0)
                     {
-                        return i * BIT_ARRAY_BITS_IN_ATOM + bit;
+                        return (uint)(i * BIT_ARRAY_BITS_IN_ATOM + bit);
                     }
                 }
             }
 
-            return bitCount;
+            return (uint)bitCount;
         }
 
         /// <summary>
@@ -126,6 +126,39 @@ namespace Piot.BlobStream
 
                 return (array[arrayIndex] & (1U << bitIndex)) != 0; 
             }
+        }
+        
+        /// <summary>
+        /// Retrieves a subset of bits from the bit array, starting from a specified index.
+        /// </summary>
+        /// <param name="fromIndex">The zero-based starting index from which to begin retrieving bits.</param>
+        /// <returns>
+        /// A <see cref="ulong"/> representing the subset of bits retrieved from the bit array, 
+        /// starting at the specified index. Bits are packed into the <see cref="ulong"/> from left to right,
+        /// meaning that the first bit retrieved is the most significant bit of the result.
+        /// If the <paramref name="fromIndex"/> plus the number of bits to retrieve exceeds the bit count of the array,
+        /// the excess bits in the result will be set to 0.
+        /// </returns>
+        /// <remarks>
+        /// The method retrieves up to <c>BIT_ARRAY_BITS_IN_ATOM</c> bits. If the bit array contains fewer bits
+        /// than the number of bits to retrieve starting from <paramref name="fromIndex"/>, the result is padded with zeros.
+        /// </remarks>
+        public ulong GetBitsStartingFrom(uint fromIndex)
+        {
+            uint result = 0;
+
+            for (var i = 0; i < BIT_ARRAY_BITS_IN_ATOM; ++i)
+            {
+                var index = fromIndex + (BIT_ARRAY_BITS_IN_ATOM - 1) - i;
+                result <<= 1;
+                if (index >= bitCount)
+                {
+                    continue;
+                }
+                result |= (uint)(this[(int)index] ? 1 : 0);
+            }
+
+            return result;
         }
 
         public override string ToString()

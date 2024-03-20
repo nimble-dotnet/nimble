@@ -46,9 +46,10 @@ namespace Piot.BlobStream
 
 
     /// <summary>
-    /// Manages the outgoing stream of a blob, breaking it into chunks for sending.
+    /// Manages the streaming of a blob by dividing it into chunks and handling acknowledgments
+    /// for chunks that have been successfully received. This allows for efficient transmission and
+    /// retransmission of data over transports where packet loss may occur.
     /// </summary>
-    ///
     public class BlobStreamWriter
     {
         private readonly ILog log;
@@ -57,10 +58,27 @@ namespace Piot.BlobStream
         private readonly ulong fixedChunkSize;
         private bool isComplete;
         private readonly BlobStreamWriterEntry[] entries;
-
+        
+        /// <summary>
+        /// Gets the total count of octets in the blob.
+        /// </summary>
         public ulong OctetCount => octetCount;
+
+        /// <summary>
+        /// Indicates whether the entire blob has been acknowledged as received.
+        /// </summary>
         public bool IsComplete => isComplete;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BlobStreamWriter"/> class for managing
+        /// the transmission of a blob.
+        /// </summary>
+        /// <param name="data">The blob data to be transmitted.</param>
+        /// <param name="fixedChunkSize">The size of each chunk into which the blob is divided for transmission. Maximum allowed size is 1024.</param>
+        /// <param name="now">The current time, used for initializing transmission timing information.</param>
+        /// <param name="log">The logger for recording events and errors.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="data"/> or <paramref name="log"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="fixedChunkSize"/> is greater than 1024.</exception>
         public BlobStreamWriter(byte[] data, ulong fixedChunkSize, TimeMs now, ILog log)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
@@ -95,11 +113,22 @@ namespace Piot.BlobStream
             }
         }
 
+        /// <summary>
+        /// Provides a read-only span of the specified chunk from the blob.
+        /// </summary>
+        /// <param name="chunkIndex">The index of the chunk to retrieve.</param>
+        /// <returns>A <see cref="ReadOnlySpan{Byte}"/> containing the bytes of the specified chunk.</returns>
+
         public ReadOnlySpan<byte> Span(uint chunkIndex)
         {
             return blob.AsSpan((int)(chunkIndex * fixedChunkSize), (int)entries[chunkIndex].octetCount);
         }
 
+        /// <summary>
+        /// Marks chunks as received based on the provided acknowledgment information.
+        /// </summary>
+        /// <param name="everythingBeforeThis">Specifies that all chunks before this index have been received.</param>
+        /// <param name="maskReceived">A bitmask indicating the receipt of chunks starting from the index specified by <paramref name="everythingBeforeThis"/>.</param>
         public void MarkReceived(ushort everythingBeforeThis, ulong maskReceived)
         {
             if (everythingBeforeThis > entries.Length)
@@ -149,8 +178,9 @@ namespace Piot.BlobStream
         /// <summary>
         /// Determines which chunks need to be sent or resent based on reception acknowledgments and timing.
         /// </summary>
-        /// <param name="now">The current time.</param>
-        /// <returns>A list of chunks that need to be sent.</returns>
+        /// <param name="now">The current time, used to determine retransmission requirements.</param>
+        /// <param name="maxEntriesCount">The maximum number of chunk indices to return, limiting the number of chunks sent in one update cycle.</param>
+        /// <returns>A collection of chunk indices indicating which chunks need to be sent.</returns>
         public IEnumerable<uint> GetChunksToSend(TimeMs now, uint maxEntriesCount)
         {
             var result = new List<uint>();
