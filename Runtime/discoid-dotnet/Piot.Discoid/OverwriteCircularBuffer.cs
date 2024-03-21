@@ -6,6 +6,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEditor;
 
 namespace Piot.Discoid
@@ -27,6 +28,7 @@ namespace Piot.Discoid
             count = 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Enqueue(T item)
         {
             buffer[tail] = item;
@@ -41,6 +43,8 @@ namespace Piot.Discoid
             }
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T EnqueueRef()
         {
             var oldTail = tail;
@@ -57,6 +61,7 @@ namespace Piot.Discoid
             return ref buffer[oldTail];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Dequeue()
         {
             if (count == 0)
@@ -70,6 +75,7 @@ namespace Piot.Discoid
             return dequeuedItem;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Discard(uint discardCount)
         {
             if (discardCount > count)
@@ -81,6 +87,7 @@ namespace Piot.Discoid
             count -= (int)discardCount;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
             head = 0;
@@ -88,6 +95,7 @@ namespace Piot.Discoid
             count = 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Peek()
         {
             if (count == 0)
@@ -98,6 +106,8 @@ namespace Piot.Discoid
             return buffer[head];
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Peek(uint index)
         {
             if (index >= count)
@@ -145,7 +155,6 @@ namespace Piot.Discoid
         {
             return new RangeEnumerator(this, (uint)((head + offset) % capacity), itemCountToEnumerate);
         }
-
 
         private class Enumerator : IEnumerator<T>
         {

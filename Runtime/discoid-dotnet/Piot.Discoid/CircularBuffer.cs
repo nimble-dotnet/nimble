@@ -11,6 +11,12 @@ using UnityEditor;
 
 namespace Piot.Discoid
 {
+    /// <summary>
+    /// Implements a generic circular buffer (ring buffer) with a fixed capacity.
+    /// This collection allows for continuous insertion and removal of elements in a FIFO (First In First Out) manner,
+    /// while maintaining constant time operations.
+    /// </summary>
+    /// <typeparam name="T">Specifies the type of elements in the buffer.</typeparam>
     public class CircularBuffer<T> : IEnumerable<T>
     {
         private readonly T[] buffer;
@@ -19,6 +25,11 @@ namespace Piot.Discoid
         private int tail;
         private int count;
 
+        /// <summary>
+        /// Initializes a new instance of the CircularBuffer class that is empty and has the specified capacity.
+        /// </summary>
+        /// <param name="capacity">The fixed size of the buffer.</param>
+        /// <exception cref="ArgumentException">Thrown if the capacity is less than 1.</exception>
         public CircularBuffer(int capacity)
         {
             this.capacity = capacity;
@@ -28,6 +39,11 @@ namespace Piot.Discoid
             count = 0;
         }
 
+        /// <summary>
+        /// Adds an item to the end of the buffer. If the buffer is full, an InvalidOperationException is thrown.
+        /// </summary>
+        /// <param name="item">The item to add to the buffer.</param>
+        /// <exception cref="InvalidOperationException">Thrown if the buffer is full.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Enqueue(T item)
         {
@@ -41,8 +57,13 @@ namespace Piot.Discoid
             count++;
         }
 
+        /// <summary>
+        /// Adds an item by reference to the end of the buffer. This method is intended for advanced scenarios where manipulating the item directly is needed.
+        /// If the buffer is full, an InvalidOperationException is thrown.
+        /// </summary>
+        /// <returns>A reference to the added item in the buffer.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the buffer is full.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
         public ref T EnqueueRef()
         {
             if (count == capacity)
@@ -56,6 +77,11 @@ namespace Piot.Discoid
             return ref buffer[oldTail];
         }
 
+        /// <summary>
+        /// Removes and returns the item at the beginning of the buffer. If the buffer is empty, an InvalidOperationException is thrown.
+        /// </summary>
+        /// <returns>The item that was removed from the buffer.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the buffer is empty.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Dequeue()
         {
@@ -70,6 +96,12 @@ namespace Piot.Discoid
             return dequeuedItem;
         }
 
+
+        /// <summary>
+        /// Discards a specified number of items from the beginning of the buffer.
+        /// </summary>
+        /// <param name="discardCount">The number of items to discard.</param>
+        /// <exception cref="InvalidOperationException">Thrown if there are not enough items to discard.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Discard(uint discardCount)
         {
@@ -82,6 +114,9 @@ namespace Piot.Discoid
             count -= (int)discardCount;
         }
 
+        /// <summary>
+        /// Clears all items from the buffer.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
@@ -90,6 +125,11 @@ namespace Piot.Discoid
             count = 0;
         }
 
+        /// <summary>
+        /// Returns the item at the beginning of the buffer without removing it.
+        /// </summary>
+        /// <returns>The item at the beginning of the buffer.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the buffer is empty.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Peek()
         {
@@ -101,6 +141,12 @@ namespace Piot.Discoid
             return buffer[head];
         }
 
+        /// <summary>
+        /// Returns an item at a specific index from the buffer without removing it.
+        /// </summary>
+        /// <param name="index">The zero-based index of the item to retrieve.</param>
+        /// <returns>The item at the specified index.</returns>
+        /// <exception cref="IndexOutOfRangeException">Thrown if the index is out of range.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Peek(uint index)
         {
@@ -113,8 +159,17 @@ namespace Piot.Discoid
             return buffer[bufferIndex];
         }
 
+        /// <summary>
+        /// Gets the last item enqueued into the buffer.
+        /// </summary>
         public T Last => buffer[(tail - 1 + capacity) % capacity];
 
+        /// <summary>
+        /// Gets or sets the item at the specified index.
+        /// </summary>
+        /// <param name="index">The zero-based index of the item to get or set.</param>
+        /// <returns>The item at the specified index.</returns>
+        /// <exception cref="IndexOutOfRangeException">Thrown if the index is invalid.</exception>
         public T this[int index]
         {
             get
@@ -129,12 +184,24 @@ namespace Piot.Discoid
             }
         }
 
+        /// <summary>
+        /// Gets the number of items contained in the buffer.
+        /// </summary>
         public int Count => count;
 
+        /// <summary>
+        /// Gets the capacity of the buffer.
+        /// </summary>
         public int Capacity => capacity;
 
+        /// <summary>
+        /// Gets a value indicating whether the buffer is empty.
+        /// </summary>
         public bool IsEmpty => count == 0;
 
+        /// <summary>
+        /// Gets a value indicating whether the buffer is full.
+        /// </summary>
         public bool IsFull => count == capacity;
 
         public IEnumerator<T> GetEnumerator()
@@ -147,11 +214,16 @@ namespace Piot.Discoid
             return GetEnumerator();
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through a range of items in the buffer, starting at a specified offset.
+        /// </summary>
+        /// <param name="offset">The zero-based offset at which to start the enumeration.</param>
+        /// <param name="itemCountToEnumerate">The number of items to enumerate.</param>
+        /// <returns>An IEnumerator&lt;T&gt; for the specified range within the CircularBuffer.</returns>
         public IEnumerator<T> GetRangeEnumerator(uint offset, uint itemCountToEnumerate)
         {
             return new RangeEnumerator(this, (uint)((head + offset) % capacity), itemCountToEnumerate);
         }
-
 
         private class Enumerator : IEnumerator<T>
         {

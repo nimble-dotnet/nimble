@@ -10,11 +10,11 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Discoid
 {
-	/// <summary>
-	/// A buffer where it is possible to set items to index in any order
-	/// Buffer can be dequeued as long as there is no gap to the next item
+	/// Represents a specialized buffer that allows items to be set at any index without following a strict order.
+	/// It supports dequeueing elements as long as there are no gaps in the sequence.
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
+	/// <typeparam name="T">The type of elements stored in the buffer.</typeparam>
+
 	public class DiscoidBuffer<T> : IEnumerable<T>
 	{
 		private T[] buffer;
@@ -22,6 +22,10 @@ namespace Piot.Discoid
 		private int front;
 		private int capacity;
 
+		/// <summary>
+		/// Initializes a new instance of the DiscoidBuffer class with the specified capacity.
+		/// </summary>
+		/// <param name="capacity">The maximum number of elements the buffer can hold.</param>
 		public DiscoidBuffer(int capacity)
 		{
 			buffer = new T[capacity];
@@ -30,11 +34,17 @@ namespace Piot.Discoid
 			this.capacity = capacity;
 		}
 
+		/// <summary>
+		/// Sets the value at the specified index within the buffer. If the index exceeds the buffer capacity, an IndexOutOfRangeException is thrown.
+		/// </summary>
+		/// <param name="index">The zero-based index at which to set the value.</param>
+		/// <param name="value">The value to set.</param>
+		/// <exception cref="IndexOutOfRangeException">Thrown when the index is out of the bounds of the buffer capacity.</exception>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Set(int index, T value)
 		{
 			int bufferLen = capacity;
-			if(index >= bufferLen)
+			if (index >= bufferLen)
 			{
 				throw new IndexOutOfRangeException($"discoid buffer: index {index} out of bounds");
 			}
@@ -44,23 +54,35 @@ namespace Piot.Discoid
 			isSet[absoluteIndex] = true;
 		}
 
+		/// <summary>
+		/// Sets or gets the value at the specified index within the buffer.
+		/// </summary>
+		/// <param name="index">The zero-based index of the value to get or set.</param>
+		/// <returns>The value at the specified index.</returns>
 		public T this[int index]
 		{
 			set => Set(index, value);
 		}
 
+		/// <summary>
+		/// Attempts to get the value at the specified index. Returns true if the item exists and is set; otherwise, false.
+		/// </summary>
+		/// <param name="index">The zero-based index of the item to retrieve.</param>
+		/// <param name="value">When this method returns, contains the value of the item at the specified index,
+		/// if the item exists and is set; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns>true if the item exists and is set; otherwise, false.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool TryGet(int index, out T value)
 		{
 			int bufferLen = capacity;
-			if(index >= bufferLen)
+			if (index >= bufferLen)
 			{
 				value = default;
 				return false;
 			}
 
 			int absoluteIndex = (front + index) % bufferLen;
-			if(!isSet[absoluteIndex])
+			if (!isSet[absoluteIndex])
 			{
 				value = default;
 				return false;
@@ -71,10 +93,15 @@ namespace Piot.Discoid
 			return true;
 		}
 
+		/// <summary>
+		/// Discards a specified number of items from the front of the buffer.
+		/// </summary>
+		/// <param name="count">The number of items to discard.</param>
+		/// <exception cref="InvalidOperationException">Thrown when attempting to discard more items than the buffer's capacity.</exception>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void DiscardFront(int count)
 		{
-			if(count > capacity)
+			if (count > capacity)
 			{
 				throw new InvalidOperationException("discoid buffer: discarding too much");
 			}
@@ -87,11 +114,17 @@ namespace Piot.Discoid
 			}
 		}
 
+		/// <summary>
+		/// Attempts to dequeue the item at the front of the buffer. Returns true if successful; otherwise, false.
+		/// </summary>
+		/// <param name="value">When this method returns, contains the dequeued item, if the method succeeded;
+		/// otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns>true if the item was successfully dequeued; otherwise, false.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool TryDequeue(out T value)
 		{
 			var worked = TryGet(0, out value);
-			if(!worked)
+			if (!worked)
 			{
 				return false;
 			}
@@ -100,6 +133,11 @@ namespace Piot.Discoid
 			return true;
 		}
 
+
+		/// <summary>
+		/// Generates a bit mask representing the presence of elements in the buffer. Each bit corresponds to an element's set status.
+		/// </summary>
+		/// <returns>A <see cref="ulong"/> value where each bit represents the presence of an element at the corresponding index.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public ulong Bits()
 		{
@@ -109,7 +147,7 @@ namespace Piot.Discoid
 			for (int i = 0; i < bufferLen; i++)
 			{
 				int index = (front + i) % bufferLen;
-				if(!isSet[index])
+				if (!isSet[index])
 				{
 					continue;
 				}
@@ -157,12 +195,12 @@ namespace Piot.Discoid
 			public bool MoveNext()
 			{
 				var nextIndex = (currentIndex + 1) % queue.capacity;
-				if(!queue.isSet[nextIndex])
+				if (!queue.isSet[nextIndex])
 				{
 					return false;
 				}
 
-				if(nextIndex == lastIndex)
+				if (nextIndex == lastIndex)
 				{
 					return false;
 				}
