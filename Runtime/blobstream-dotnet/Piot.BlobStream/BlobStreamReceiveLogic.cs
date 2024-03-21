@@ -15,6 +15,8 @@ namespace Piot.BlobStream
     {
         private readonly BlobStreamReceiver blobStream;
         private ILog log;
+
+        public BlobStreamReceiver BlobStream => blobStream;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="BlobStreamReceiveLogic"/> class.
@@ -89,6 +91,7 @@ namespace Piot.BlobStream
             var chunkId = inStream.ReadUInt32();
             var octetLength = inStream.ReadUInt16();
 
+            log.DebugLowLevel("set Chunk {ChunkID} {OctetLength}", chunkId, octetLength);
             if (octetLength > blobStream.FixedChunkSize)
             {
                 throw new Exception($"octetLength overrun {octetLength}");

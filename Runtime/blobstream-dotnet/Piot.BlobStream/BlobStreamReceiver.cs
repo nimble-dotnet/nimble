@@ -27,6 +27,8 @@ namespace Piot.BlobStream
         public ulong FixedChunkSize => fixedChunkSize;
         public bool IsComplete => isComplete;
 
+        public byte[] Payload => blob;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BlobStreamReceiver"/> class.
         /// </summary>
@@ -39,6 +41,7 @@ namespace Piot.BlobStream
             this.octetCount = octetCount;
             blob = new byte[octetCount];
             var chunkCount = (octetCount + fixedChunkSize - 1) / fixedChunkSize;
+            log.DebugLowLevel("set {ChunkCount}", chunkCount);
             this.fixedChunkSize = fixedChunkSize;
             bitArray = new BitArray((int)chunkCount);
         }
@@ -92,6 +95,8 @@ namespace Piot.BlobStream
             {
                 return;
             }
+            
+            
             
             log.DebugLowLevel("stream is complete");
             

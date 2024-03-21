@@ -7,8 +7,8 @@
 
     public enum ClientCommand
     {
-        StartDownload,
-        DownloadSerializedSaveState,
-        AuthoritativeSteps,
+        StartDownload = 0xa4,
+        DownloadSerializedSaveState = 0x87,
+        AuthoritativeSteps = 0x1f,
     }
 }

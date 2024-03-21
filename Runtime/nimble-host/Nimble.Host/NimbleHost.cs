@@ -90,11 +90,11 @@ namespace Piot.Nimble.Host
         /// Tries to produce as much authoritative ticks as possible and adds outDatagrams with outgoing authoritative steps.
         /// </summary>
         /// <param name="simulationTickId">The tick ID.</param>
-        public IEnumerable<HostDatagram> Tick(TickId _, TimeMs now)
+        public IEnumerable<HostDatagram> Tick(TickId tickId, TimeMs now)
         {
-            authoritativeStepProducer.Tick();
+            log.DebugLowLevel("tick {TickID} {Now}", tickId, now);
 
-//            log.Warn("total authoritative steps in NimbleHost {Range}", range);
+            authoritativeStepProducer.Tick();
 
             outDatagrams.Clear();
             foreach (var (_, hostConnection) in hostConnections.connections)

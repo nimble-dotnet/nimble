@@ -22,7 +22,7 @@ namespace Piot.Flood
 
         public uint OctetsLeft => (uint)(size - pos);
 
-        public bool HasMore => pos < size;
+        public bool IsEmpty => pos >= size;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadUInt8()

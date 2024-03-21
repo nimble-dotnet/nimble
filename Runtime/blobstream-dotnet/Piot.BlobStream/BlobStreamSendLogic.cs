@@ -21,7 +21,7 @@ namespace Piot.BlobStream
     public class BlobStreamSendLogic
     {
         private BlobStreamSender blobStream;
-        private const int OptimalDatagramSize = 1100;
+        private const int OptimalDatagramSize = 900;
         private readonly ILog log;
         private const int OptimalDatagramCountToSend = 4;
         private readonly OctetWriter cachedWriter = new(OptimalDatagramSize);
@@ -97,7 +97,7 @@ namespace Piot.BlobStream
         private void AckChunk(IOctetReader reader)
         {
             var waitingForChunkId = reader.ReadUInt32();
-            var receiveMask = reader.ReadUInt32();
+            var receiveMask = reader.ReadUInt64();
 
             log.DebugLowLevel($"ack chunk: {waitingForChunkId} mask:{receiveMask}");
 

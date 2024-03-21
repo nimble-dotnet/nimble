@@ -25,8 +25,8 @@ namespace Piot.BlobStream
         public BitArray(int bitCount)
         {
             var calculatedAtomCount = (bitCount + (BIT_ARRAY_BITS_IN_ATOM - 1)) / BIT_ARRAY_BITS_IN_ATOM;
-            array = new ulong[atomCount];
             atomCount = calculatedAtomCount;
+            array = new ulong[atomCount];
             this.bitCount = bitCount;
             numberOfBitsSet = 0;
         }
@@ -87,16 +87,25 @@ namespace Piot.BlobStream
         /// </summary>
         /// <param name="index">The zero-based index of the bit to set.</param>
         /// <exception cref="ArgumentException">Thrown when the index is out of range.</exception>
-        public void Set(int index)
+        public void Set(uint index)
         {
+            if(array is null)
+            {
+                throw new Exception("array is null");
+            }
+            
             if (index >= bitCount)
             {
                 throw new ArgumentException("Index out of range", nameof(index));
             }
 
             var arrayIndex = index / BIT_ARRAY_BITS_IN_ATOM;
+            if(arrayIndex >= array.Length)
+            {
+                throw new Exception($"{arrayIndex} > {array.Length} ");
+            }
             var bitIndex = index % BIT_ARRAY_BITS_IN_ATOM;
-            ulong mask = 1U << bitIndex;
+            ulong mask = 1U << (int)bitIndex;
 
             if ((array[arrayIndex] & mask) == 0)
             {

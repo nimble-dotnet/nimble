@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace Piot.Clog.Unity
@@ -28,9 +29,27 @@ namespace Piot.Clog.Unity
             return Color(message, noticeColorName, true);
         }
 
+        static string SimpleMarkdown(string input)
+        {
+            const string pattern = @"\*{1,2}(.*?)\*{1,2}";
+
+            return Regex.Replace(input, pattern, m =>
+            {
+                if (m.Value.StartsWith("*"))
+                {
+                    return $"<b>{m.Groups[1].Value}</b>";
+                }
+                else
+                {
+                    return $"<color=green>{m.Groups[1].Value}</color>";
+                }
+            });
+        }
+
         public void Log(LogLevel level, string prefix, string message, object[] args)
         {
-            var messageWithValues = ArgumentReplace.ReplaceArgumentsWithValues(message, args);
+            var replacedMessage = SimpleMarkdown(message);
+            var messageWithValues = ArgumentReplace.ReplaceArgumentsWithValues(replacedMessage, args);
 
             var msg = $"<b>{prefix}</b>: {ColorMessage(level, messageWithValues)}";
 
