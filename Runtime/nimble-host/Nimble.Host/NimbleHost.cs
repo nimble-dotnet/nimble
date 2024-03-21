@@ -28,17 +28,17 @@ namespace Piot.Nimble.Host
         /// <summary>
         /// The authoritative step producer that combines multiple predicted steps and combines them into one.
         /// </summary>
-        public AuthoritativeStepProducer authoritativeStepProducer;
+        private AuthoritativeStepProducer authoritativeStepProducer;
 
         /// <summary>
         /// The participants connected to the host
         /// </summary>
-        public Participants participants;
+        private Participants participants;
 
         /// <summary>
         /// The incoming connections that has been established.
         /// </summary>
-        public HostConnections hostConnections = new();
+        private HostConnections hostConnections = new();
 
         private const int MaximumPlayers = 16;
         private const int MaximumOutDatagramCount = MaximumPlayers * 4;

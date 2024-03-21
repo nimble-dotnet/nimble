@@ -27,18 +27,18 @@ namespace Nimble.Authoritative.Steps
 			Playing
 		}
 
-		public ConnectionToParticipants connectionToParticipants = new();
+		private ConnectionToParticipants connectionToParticipants = new();
 
 		public byte transportConnectionId;
-		public MonotonicTimeLowerBits lastReceivedMonotonicLowerBits;
-		public TickId expectingAuthoritativeTickId;
-		public byte dropppedAuthoritativeAfterExpecting;
-		public TickId lastReceivedPredictedTickId;
-		public OrderedDatagramsSequenceId datagramSequenceIdOut;
-		public BlobStreamSendLogic blobStreamSendLogic;
-		public BlobStreamSender blobStreamSender;
-		public State state;
-		public ILog log;
+		private MonotonicTimeLowerBits lastReceivedMonotonicLowerBits;
+		private TickId expectingAuthoritativeTickId;
+		private byte dropppedAuthoritativeAfterExpecting;
+		private TickId lastReceivedPredictedTickId;
+		private OrderedDatagramsSequenceId datagramSequenceIdOut;
+		private BlobStreamSendLogic blobStreamSendLogic;
+		private BlobStreamSender blobStreamSender;
+		private State state;
+		private ILog log;
 		private AuthoritativeStepsQueue authoritativeStepsQueue;
 		private Participants participants;
 		private BlobStreamSenderChunks blobStreamSenderChunks;
@@ -62,14 +62,14 @@ namespace Nimble.Authoritative.Steps
 				$"[HostConnection {transportConnectionId} participantCount:{connectionToParticipants.connections.Count}]";
 		}
 
-		public void WriteDatagramHeader(OctetWriter reusableOctetWriter)
+		private void WriteDatagramHeader(OctetWriter reusableOctetWriter)
 		{
 			OrderedDatagramsSequenceIdWriter.Write(reusableOctetWriter, datagramSequenceIdOut);
 			datagramSequenceIdOut.Next();
 			MonotonicTimeLowerBitsWriter.Write(lastReceivedMonotonicLowerBits, reusableOctetWriter);
 		}
 
-		public void HandleRequestAddPredictedSteps(Participants participants, OctetReader reader)
+		private void HandleRequestAddPredictedSteps(Participants participants, OctetReader reader)
 		{
 			log.DebugLowLevel("handle predicted steps");
 			StatusReader.Read(reader, out var expectingTickId, out var droppedTicksAfterThat);
@@ -217,7 +217,7 @@ namespace Nimble.Authoritative.Steps
 			}
 		}
 
-		public void HandleHeader(OctetReader reader)
+		private void HandleHeader(OctetReader reader)
 		{
 			var sequenceId = OrderedDatagramsSequenceIdReader.Read(reader);
 			lastReceivedMonotonicLowerBits = MonotonicTimeLowerBitsReader.Read(reader);

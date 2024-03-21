@@ -56,7 +56,7 @@ namespace Piot.Nimble.Client
 		private TickId expectingAuthoritativeTickId;
 		private TickId lastSentPredictedTickId;
 		private TickId lastSentPredictedTickIdAddedToStats;
-		public BlobStreamReceiveLogic receiveStateLogic;
+		private BlobStreamReceiveLogic receiveStateLogic;
 		private bool sendOutAckNextTime;
 
 		public FormattedStat PredictedStepsSentPerSecond =>

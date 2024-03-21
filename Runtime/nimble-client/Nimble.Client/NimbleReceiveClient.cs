@@ -36,8 +36,8 @@ namespace Piot.Nimble.Client
 
 		public readonly Dictionary<byte, byte> localIndexToParticipant = new();
 
-		public StatCountThreshold bufferDiff = new(30);
-		public StatPerSecond authoritativeTicksPerSecond;
+		private StatCountThreshold bufferDiff = new(30);
+		private StatPerSecond authoritativeTicksPerSecond;
 
 		public FormattedStat AuthoritativeTicksPerSecond =>
 			new(StandardFormatterPerSecond.Format, authoritativeTicksPerSecond.Stat);
