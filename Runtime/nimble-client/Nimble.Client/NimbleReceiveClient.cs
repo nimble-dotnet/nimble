@@ -48,6 +48,9 @@ namespace Piot.Nimble.Client
 
 		public int RemotePredictedBufferDiff => bufferDiff.Stat.average;
 
+		public ReadOnlySpan<byte> SerializedSaveState => receiveLogic.BlobStream.Payload;
+		public bool HasSerializedSaveState => receiveLogic.BlobStream.IsComplete;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="NimbleReceiveClient"/> class.
 		/// </summary>
@@ -103,6 +106,8 @@ namespace Piot.Nimble.Client
 				return (uint)Math.Clamp(target, 1, 20);
 			}
 		}
+
+
 
 		private void HandleHeader(IOctetReader reader, TimeMs now)
 		{

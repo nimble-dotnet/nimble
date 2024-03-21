@@ -2,7 +2,7 @@
 {
     public static class Constants
     {
-        public const uint OptimalChunkSize = 1024;
+        public const uint OptimalChunkSize = 800;
     }
 
     public enum ClientCommand

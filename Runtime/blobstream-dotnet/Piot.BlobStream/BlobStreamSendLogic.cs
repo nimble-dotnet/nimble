@@ -85,6 +85,7 @@ namespace Piot.BlobStream
             writer.WriteUInt32(chunkIndex);
 
             var payload = blobStream.Span(chunkIndex);
+            log.DebugLowLevel("found chunk {ChunkIndex} {OctetLength}", chunkIndex, payload.Length);
             writer.WriteUInt16((ushort)payload.Length);
             writer.WriteOctets(payload);
         }

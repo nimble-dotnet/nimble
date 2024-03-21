@@ -97,6 +97,7 @@ namespace Nimble.Authoritative.Steps
 				state = State.UploadingSerializedSimulationState;
 			}
 		}
+		
 
 		public void HandleAckSerializedBlobStream(OctetReader reader)
 		{
@@ -139,7 +140,7 @@ namespace Nimble.Authoritative.Steps
 					{
 						state = State.Playing;
 					}
-					log.DebugLowLevel("uploading serialized state {Chunks}", chunksToSend);
+					log.DebugLowLevel("uploading *serialized state* {Chunks}", chunksToSend);
 					foreach (var chunkIndex in chunksToSend)
 					{
 						cachedWriter.Reset();
