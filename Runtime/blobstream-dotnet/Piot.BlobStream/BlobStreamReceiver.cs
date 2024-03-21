@@ -28,6 +28,7 @@ namespace Piot.BlobStream
         public bool IsComplete => isComplete;
 
         public byte[] Payload => blob;
+        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BlobStreamReceiver"/> class.
@@ -87,7 +88,7 @@ namespace Piot.BlobStream
                 }
             }
 
-            Buffer.BlockCopy(octets.ToArray(), 0, blob, (int)offset, (int)octetCount);
+            Buffer.BlockCopy(octets.ToArray(), 0, blob, (int)offset, (int)chunkOctetCount);
 
             bitArray.Set(chunkId);
 
@@ -102,6 +103,8 @@ namespace Piot.BlobStream
             
             isComplete = true;
         }
+        
+
 
         /// <summary>
         /// Checks if all bits in the internal bit array are set, indicating all chunks have been received.
