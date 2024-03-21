@@ -71,7 +71,7 @@ namespace Nimble.Authoritative.Steps
 
 		private void HandleRequestAddPredictedSteps(Participants participants, OctetReader reader)
 		{
-			log.DebugLowLevel("handle predicted steps");
+			log.DebugLowLevel("handle *predicted steps*");
 			StatusReader.Read(reader, out var expectingTickId, out var droppedTicksAfterThat);
 			expectingAuthoritativeTickId = expectingTickId;
 			dropppedAuthoritativeAfterExpecting = droppedTicksAfterThat;
@@ -89,7 +89,7 @@ namespace Nimble.Authoritative.Steps
 		private void HandleAckDownloadStart(OctetReader reader)
 		{
 			var octetCount = reader.ReadUInt32();
-			log.DebugLowLevel("handle ack download start {OctetCount}", octetCount);
+			log.DebugLowLevel("handle *ack download start* {OctetCount}", octetCount);
 			if(state == State.StartingUpload)
 			{
 				log.Debug("start uploading serialized save state to client {OctetCount}",
@@ -227,6 +227,8 @@ namespace Nimble.Authoritative.Steps
 
 		public void HandleDatagram(OctetReader reader)
 		{
+			log.DebugLowLevel("receive datagram {OctetCount}", reader.Size);
+
 			HandleHeader(reader);
 			while (!reader.IsEmpty)
 			{

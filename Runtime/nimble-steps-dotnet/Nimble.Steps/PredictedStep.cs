@@ -34,7 +34,7 @@ namespace Piot.Nimble.Steps
         public PredictedStepsQueue GetStepsQueueForLocalPlayer(LocalPlayerIndex playerIndex)
         {
             var queue = predictedStepsQueues[playerIndex.Value];
-            log.DebugLowLevel("get queue for {LocalPlayerIndex} {queue}", playerIndex, queue);
+           // log.DebugLowLevel("get queue for {LocalPlayerIndex} {queue}", playerIndex, queue);
             return queue;
         }
 

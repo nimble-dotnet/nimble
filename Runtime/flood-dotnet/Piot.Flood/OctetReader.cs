@@ -154,6 +154,7 @@ namespace Piot.Flood
         }
 
         public ulong Position => (ulong)pos;
+        public int Size => size;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Seek(ulong position)

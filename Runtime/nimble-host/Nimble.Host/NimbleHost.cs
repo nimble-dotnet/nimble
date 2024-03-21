@@ -69,14 +69,12 @@ namespace Piot.Nimble.Host
         /// <param name="datagram">The datagram to receive.</param>
         public void ReceiveDatagram(in HostDatagram datagram, TimeMs now)
         {
-            log.DebugLowLevel("receive datagram {OctetCount} from {Connection}", datagram.payload.Length,
-                datagram.connection);
             var foundConnection = hostConnections.TryGetConnection(datagram.connection, out var hostConnection);
             if (!foundConnection)
             {
                 hostConnection = new HostConnection(datagram.connection, serializedSavedState,
                     authoritativeStepProducer.AuthoritativeStepsQueue, participants, now,
-                    log.SubLog($"connection({datagram.connection})"));
+                    log.SubLog($"Connection({datagram.connection})"));
                 hostConnections.AddConnection(hostConnection);
             }
 

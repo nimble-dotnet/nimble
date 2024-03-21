@@ -49,7 +49,7 @@ namespace Piot.Nimble.Client
 		public int RemotePredictedBufferDiff => bufferDiff.Stat.average;
 
 		public ReadOnlySpan<byte> SerializedSaveState => receiveLogic.BlobStream.Payload;
-		public bool HasSerializedSaveState => receiveLogic.BlobStream.IsComplete;
+		public bool HasSerializedSaveState => receiveLogic is not null && receiveLogic.BlobStream.IsComplete;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="NimbleReceiveClient"/> class.
@@ -235,7 +235,7 @@ namespace Piot.Nimble.Client
 			ReadBufferInfo(reader);
 
 			var addedAuthoritativeCount = AuthoritativeStepsReader.Read(AuthoritativeStepsQueue, reader, log);
-			log.DebugLowLevel("added {TickCount} authoritative steps", addedAuthoritativeCount);
+			//log.DebugLowLevel("added {TickCount} authoritative steps", addedAuthoritativeCount);
 			authoritativeTicksPerSecond.Add((int)addedAuthoritativeCount);
 
 			if(!AuthoritativeStepsQueue.IsEmpty)

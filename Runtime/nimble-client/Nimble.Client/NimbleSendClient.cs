@@ -139,10 +139,9 @@ namespace Piot.Nimble.Client
 
 		private void SendPredictedSteps(OctetWriter sendWriter)
 		{
-			log.DebugLowLevel("send predicted steps");
 			sendWriter.WriteUInt8((byte)ClientToHostRequest.RequestAddPredictedStep);
 			StatusWriter.Write(sendWriter, expectingAuthoritativeTickId, 0);
-			log.DebugLowLevel("send to host that client is expecting authoritative step for {AuthoritativeTickID}",
+			log.DebugLowLevel("send *predicted steps* to host. client is waiting for authoritative step {AuthoritativeTickID}",
 				expectingAuthoritativeTickId);
 
 			var lastSentTickId = PredictedStepsWriter.Write(sendWriter, predictedSteps, log);
