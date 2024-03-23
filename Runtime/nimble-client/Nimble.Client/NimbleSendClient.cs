@@ -94,6 +94,7 @@ namespace Piot.Nimble.Client
 			if(sendOutAckNextTime)
 			{
 				SendAckDownloadStarted(octetWriter);
+				sendOutAckNextTime = false;
 			}
 
 			if(receiveStateLogic is not null)
