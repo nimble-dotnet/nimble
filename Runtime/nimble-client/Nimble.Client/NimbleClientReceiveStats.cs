@@ -3,7 +3,7 @@ using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
 using Piot.Stats;
 
-namespace Piot.Nimble.Client
+namespace Nimble.Client
 {
 	/// <summary>
 	/// Holds the statistics for receive related data in the client.
@@ -25,7 +25,7 @@ namespace Piot.Nimble.Client
 		public FormattedStat DatagramCountPerSecond =>
 			new(StandardFormatterPerSecond.Format, datagramCountPerSecond.Stat);
 
-		
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="NimbleClientReceiveStats"/> class.
 		/// </summary>
@@ -40,7 +40,7 @@ namespace Piot.Nimble.Client
 		/// </summary>
 		/// <param name="now">The current time.</param>
 		/// <param name="pongTimeLowerBits">The lower bits of the pong time.</param>
-		public void ReceivedPongTime(TimeMs now, MonotonicTimeLowerBits.MonotonicTimeLowerBits pongTimeLowerBits)
+		public void ReceivedPongTime(TimeMs now, MonotonicTimeLowerBits pongTimeLowerBits)
 		{
 			var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
 			var roundTripTimeMs = now.ms - pongTime.ms;

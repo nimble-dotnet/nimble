@@ -13,12 +13,12 @@ using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
-using Piot.Nimble.Serialize;
+using Nimble.Serialize;
 using Piot.OrderedDatagrams;
 using Piot.Tick;
-using Constants = Piot.Nimble.Serialize.Constants;
+using Constants = Nimble.Serialize.Constants;
 
-namespace Piot.Nimble.Host
+namespace Nimble.Host
 {
     /// <summary>
     /// Implements a Host for the Nimble protocol.

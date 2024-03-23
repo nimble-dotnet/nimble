@@ -1,4 +1,4 @@
-﻿namespace Piot.Nimble.Serialize
+﻿namespace Nimble.Serialize
 {
     public static class Constants
     {

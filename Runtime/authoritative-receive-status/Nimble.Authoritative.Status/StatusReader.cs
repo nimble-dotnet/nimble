@@ -8,7 +8,7 @@ using Piot.Flood;
 using Piot.Tick;
 using Piot.Tick.Serialization;
 
-namespace Piot.Nimble.AuthoritativeReceiveStatus
+namespace Nimble.AuthoritativeReceiveStatus
 {
     public static class StatusReader
     {

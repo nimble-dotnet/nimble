@@ -7,13 +7,13 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
-using Piot.Nimble.Serialize;
+using Nimble.Serialize;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Piot.Tick;
-using Constants = Piot.Nimble.Serialize.Constants;
+using Constants = Nimble.Serialize.Constants;
 
-namespace Piot.Nimble.Client
+namespace Nimble.Client
 {
 	public sealed class NimbleReceiveClient
 	{

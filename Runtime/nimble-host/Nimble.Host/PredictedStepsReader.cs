@@ -8,8 +8,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Piot.Clog;
 using Piot.Flood;
-using Piot.Nimble.Steps;
-using Piot.Nimble.Steps.Serialization;
+using Nimble.Steps;
+using Nimble.Steps.Serialization;
 using Piot.Tick;
 using Piot.Tick.Serialization;
 

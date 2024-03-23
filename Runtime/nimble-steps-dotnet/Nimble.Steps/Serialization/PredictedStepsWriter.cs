@@ -9,7 +9,7 @@ using Piot.Flood;
 using Piot.Tick;
 using Piot.Tick.Serialization;
 
-namespace Piot.Nimble.Steps.Serialization
+namespace Nimble.Steps.Serialization
 {
     public static class Constants
     {

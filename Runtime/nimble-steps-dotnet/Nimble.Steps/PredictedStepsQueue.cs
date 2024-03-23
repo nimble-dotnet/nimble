@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using Piot.Discoid;
 using Piot.Tick;
 
-namespace Piot.Nimble.Steps
+namespace Nimble.Steps
 {
     /// <summary>
     ///     Queue of serialized game specific inputs.
@@ -38,7 +38,7 @@ namespace Piot.Nimble.Steps
         {
             this.waitingForTickId = waitingForTickId;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public PredictedStep Peek()
         {

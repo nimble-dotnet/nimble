@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------------------*/
 
-namespace Piot.Nimble.Steps
+namespace Nimble.Steps
 {
 	/// <summary>
 	/// A unique local player index for the participating device (used for splitscreen)

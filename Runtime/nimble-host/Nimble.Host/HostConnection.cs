@@ -11,8 +11,8 @@ using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
-using Piot.Nimble.AuthoritativeReceiveStatus;
-using Piot.Nimble.Serialize;
+using Nimble.AuthoritativeReceiveStatus;
+using Nimble.Serialize;
 using Piot.OrderedDatagrams;
 using Piot.Tick;
 
@@ -97,7 +97,7 @@ namespace Nimble.Authoritative.Steps
 				state = State.UploadingSerializedSimulationState;
 			}
 		}
-		
+
 
 		public void HandleAckSerializedBlobStream(OctetReader reader)
 		{

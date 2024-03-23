@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Piot.Clog;
-using Piot.Nimble.Steps;
+using Nimble.Steps;
 using Piot.Tick;
 
 namespace Nimble.Authoritative.Steps

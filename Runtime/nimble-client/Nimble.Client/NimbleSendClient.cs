@@ -2,21 +2,21 @@ using System;
 using System.Collections.Generic;
 using Piot.BlobStream;
 using Piot.Clog;
-using Piot.Nimble.Steps;
+using Nimble.Steps;
 using Piot.Datagram;
 using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
-using Piot.Nimble.AuthoritativeReceiveStatus;
-using Piot.Nimble.Serialize;
-using Piot.Nimble.Steps.Serialization;
+using Nimble.AuthoritativeReceiveStatus;
+using Nimble.Serialize;
+using Nimble.Steps.Serialization;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Piot.Tick;
 using Constants = Piot.Datagram.Constants;
 
-namespace Piot.Nimble.Client
+namespace Nimble.Client
 {
 	/// <summary>
 	/// Client that sends data using the Nimble protocol.
@@ -42,7 +42,7 @@ namespace Piot.Nimble.Client
 
 		/// <summary>
 		/// Formatted statistic for datagram count per second.
-		/// </summary>        
+		/// </summary>
 		public FormattedStat DatagramCountPerSecond =>
 			new(StandardFormatterPerSecond.Format, datagramCountPerSecond.Stat);
 
@@ -165,18 +165,18 @@ namespace Piot.Nimble.Client
 		/// </summary>
 		/// <param name="tickId">The tick ID.</param>
 		/// <param name="droppedCount">The dropped count. Not used yet.</param>
-		public void OnLatestAuthoritativeTickId(TickId tickId, uint droppedCount)
+		internal void OnLatestAuthoritativeTickId(TickId tickId, uint droppedCount)
 		{
 			predictedSteps.DiscardUpToAndExcluding(tickId.Next);
 			expectingAuthoritativeTickId = tickId.Next;
 		}
 
-		public void OnReceiveStartDownload(uint octetSize)
+		internal void OnReceiveStartDownload(uint octetSize)
 		{
 			sendOutAckNextTime = true;
 		}
 
-		public void OnReceiveLogic(BlobStreamReceiveLogic receiveLogic)
+		internal void OnReceiveLogic(BlobStreamReceiveLogic receiveLogic)
 		{
 			this.receiveStateLogic = receiveLogic;
 		}

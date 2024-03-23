@@ -9,11 +9,11 @@ using Piot.Clog;
 using Piot.Tick;
 
 
-namespace Piot.Nimble.Steps
+namespace Nimble.Steps
 {
-    public static class CompareOctets
+    internal static class CompareOctets
     {
-        public static bool Compare(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
+        internal static bool Compare(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
         {
             return a.SequenceEqual(b);
         }
