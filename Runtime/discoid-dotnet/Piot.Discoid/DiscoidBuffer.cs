@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Discoid
 {
+	/// <summary>
 	/// Represents a specialized buffer that allows items to be set at any index without following a strict order.
 	/// It supports dequeueing elements as long as there are no gaps in the sequence.
 	/// </summary>
