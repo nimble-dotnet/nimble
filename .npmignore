@@ -2,10 +2,11 @@ Runtime/copy.sh
 Runtime/copy.sh.meta
 *.tgz
 *.tgz.meta
-CHANGELOG.md.meta
-
 _site/
 api/
 obj/
-_site
+_site/
 bin/
+.github/
+*.csproj
+docfx.json
