@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Runtime\**\*.cs" />
+        <Compile Remove="**\*Tests\**\*.cs" />
+        <Compile Remove="**\*Tests.cs" />
+        <Compile Remove="**\*unity\**\*.cs" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <PackageReference Include="NUnit" Version="3.13.2" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+    </ItemGroup>
+</Project>
