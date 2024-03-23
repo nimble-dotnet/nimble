@@ -1,0 +1,14 @@
+### YamlMime:ManagedReference
+apiRules:
+  - exclude:
+      uidRegex: ^Nimble\.Authoritative.*$
+      type: Namespace
+  - exclude:
+      uidRegex: ^Nimble\.Serialize.*$
+      type: Namespace
+  - exclude:
+      uidRegex: ^Nimble\.Steps.*$
+      type: Namespace
+  - exclude:
+      uidRegex: ^Piot\..*$
+      type: Namespace
