@@ -1,27 +1,16 @@
 ### YamlMime:ManagedReference
 apiRules:
-  - include:
-      uidRegex: ^Nimble\.Client$
-      type: Namespace
-  - include:
-      uidRegex: ^Nimble\.Host$
-      type: Namespace
+- include:
+    uidRegex: ^Piot\.Tick
 
-  - exclude:
-      uidRegex: ^Nimble\..*$
-      type: Namespace
+- include:
+    uidRegex: ^Piot\.Clog
 
+- include:
+    uidRegex: ^Piot\.MonotonicTime
 
-  - include:
-      uidRegex: ^Piot\.Tick$
-      type: Namespace
-  - include:
-      uidRegex: ^Piot\.Clog$
-      type: Namespace
-  - include:
-      uidRegex: ^Piot\.MonotonicTime$
-      type: Namespace
+- include:
+    uidRegex: ^Piot\.Nimble\.*
 
-  - exclude:
-      uidRegex: ^Piot\..*$
-      type: Namespace
+- exclude:
+    uidRegex: ^Piot\..*
