@@ -2,7 +2,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.Tick;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
 	public class AuthoritativeStepReader
 	{

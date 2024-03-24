@@ -1,6 +1,6 @@
 using Piot.Flood;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
     public class AuthoritativeStepWriter
     {

@@ -9,7 +9,7 @@ using Piot.Clog;
 using Piot.Tick;
 
 
-namespace Nimble.Steps
+namespace Piot.Nimble.Steps
 {
     internal static class CompareOctets
     {

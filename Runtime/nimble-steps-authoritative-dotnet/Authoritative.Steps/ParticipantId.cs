@@ -1,4 +1,4 @@
-﻿namespace Nimble.Authoritative.Steps
+﻿namespace Piot.Nimble.Authoritative.Steps
 {
     public struct ParticipantId
     {

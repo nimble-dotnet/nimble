@@ -11,12 +11,12 @@ using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
-using Nimble.AuthoritativeReceiveStatus;
-using Nimble.Serialize;
+using Piot.Nimble.AuthoritativeReceiveStatus;
+using Piot.Nimble.Serialize;
 using Piot.OrderedDatagrams;
 using Piot.Tick;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
 	public class HostConnection
 	{
@@ -30,7 +30,7 @@ namespace Nimble.Authoritative.Steps
 		private ConnectionToParticipants connectionToParticipants = new();
 
 		public byte transportConnectionId;
-		private MonotonicTimeLowerBits lastReceivedMonotonicLowerBits;
+		private MonotonicTimeLowerBits.MonotonicTimeLowerBits lastReceivedMonotonicLowerBits;
 		private TickId expectingAuthoritativeTickId;
 		private byte dropppedAuthoritativeAfterExpecting;
 		private TickId lastReceivedPredictedTickId;

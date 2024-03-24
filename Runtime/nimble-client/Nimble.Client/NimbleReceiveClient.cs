@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Nimble.Authoritative.Steps;
+using Piot.Nimble.Authoritative.Steps;
 using Piot.BlobStream;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
-using Nimble.Serialize;
+using Piot.Nimble.Serialize;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Piot.Tick;
-using Constants = Nimble.Serialize.Constants;
+using Constants = Piot.Nimble.Serialize.Constants;
 
-namespace Nimble.Client
+namespace Piot.Nimble.Client
 {
 	public sealed class NimbleReceiveClient
 	{

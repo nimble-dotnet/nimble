@@ -8,8 +8,8 @@ using System.Linq;
 using NUnit.Framework;
 using Piot.Clog;
 using Piot.Flood;
-using Nimble.Steps;
-using Nimble.Steps.Serialization;
+using Piot.Nimble.Steps;
+using Piot.Nimble.Steps.Serialization;
 using Piot.Tick;
 
 [SetUpFixture]

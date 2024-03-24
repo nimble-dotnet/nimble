@@ -4,9 +4,9 @@ using Piot.Tick;
 
 #nullable enable
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
-  
+
     public readonly struct AuthoritativeStepForOneParticipant
     {
         public readonly TickId appliedAtTickId;

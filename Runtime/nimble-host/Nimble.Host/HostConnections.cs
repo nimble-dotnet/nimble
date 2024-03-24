@@ -5,7 +5,7 @@
 
 using System.Collections.Generic;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
     public class HostConnections
     {

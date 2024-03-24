@@ -1,7 +1,7 @@
 using Piot.Clog;
 using Piot.Tick;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
     /// <summary>
     /// Created combined authoritative steps from participants incoming predicted steps.
@@ -68,7 +68,7 @@ namespace Nimble.Authoritative.Steps
                 */
                 return false;
             }
-            
+
             /*
             foreach (var (_, participant) in participants.participants)
             {
@@ -94,7 +94,7 @@ namespace Nimble.Authoritative.Steps
             {
               //  stepsComposedCount++;
             }
-            
+
 //            log.Warn("steps composed in one tick {StepsComposedCount}", stepsComposedCount);
         }
     }

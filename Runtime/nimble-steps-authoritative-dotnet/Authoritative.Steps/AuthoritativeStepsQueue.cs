@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Piot.Discoid;
 using Piot.Tick;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
 	/// <summary>
 	/// </summary>
@@ -31,7 +31,7 @@ namespace Nimble.Authoritative.Steps
 		public AuthoritativeStep Last => queue.Last;
 
 		public TickIdRange Range => new(queue.Peek().appliedAtTickId, queue.Last.appliedAtTickId);
-	
+
 		public AuthoritativeStepsQueue(TickId tickId)
 		{
 			waitingForTickId = tickId;

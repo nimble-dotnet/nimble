@@ -2,21 +2,21 @@ using System;
 using System.Collections.Generic;
 using Piot.BlobStream;
 using Piot.Clog;
-using Nimble.Steps;
+using Piot.Nimble.Steps;
 using Piot.Datagram;
 using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
-using Nimble.AuthoritativeReceiveStatus;
-using Nimble.Serialize;
-using Nimble.Steps.Serialization;
+using Piot.Nimble.AuthoritativeReceiveStatus;
+using Piot.Nimble.Serialize;
+using Piot.Nimble.Steps.Serialization;
 using Piot.OrderedDatagrams;
 using Piot.Stats;
 using Piot.Tick;
 using Constants = Piot.Datagram.Constants;
 
-namespace Nimble.Client
+namespace Piot.Nimble.Client
 {
 	/// <summary>
 	/// Client that sends data using the Nimble protocol.

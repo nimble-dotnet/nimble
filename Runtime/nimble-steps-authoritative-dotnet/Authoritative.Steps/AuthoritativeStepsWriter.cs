@@ -4,7 +4,7 @@ using Piot.Flood;
 using Piot.Tick;
 using Piot.Tick.Serialization;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
     public class AuthoritativeStepsWriter
     {

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Piot.Clog;
-using Nimble.Steps;
+using Piot.Nimble.Steps;
 using Piot.Tick;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
     public class Participants
     {

@@ -8,12 +8,12 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Piot.Clog;
 using Piot.Flood;
-using Nimble.Steps;
-using Nimble.Steps.Serialization;
+using Piot.Nimble.Steps;
+using Piot.Nimble.Steps.Serialization;
 using Piot.Tick;
 using Piot.Tick.Serialization;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
     /// <summary>
     /// Provides methods for deserializing predicted steps arriving on the host from the client.

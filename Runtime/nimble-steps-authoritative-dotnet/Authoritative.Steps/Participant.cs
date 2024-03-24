@@ -1,6 +1,6 @@
-using Nimble.Steps;
+using Piot.Nimble.Steps;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
 	public class Participant
 	{

@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------------------*/
 
 using System.Diagnostics;
-using Nimble.Authoritative.Steps;
+using Piot.Nimble.Authoritative.Steps;
 using NUnit.Framework;
 using Piot.Clog;
 using Piot.Flood;
-using Nimble.Steps;
+using Piot.Nimble.Steps;
 using Piot.Tick;
 
 [SetUpFixture]

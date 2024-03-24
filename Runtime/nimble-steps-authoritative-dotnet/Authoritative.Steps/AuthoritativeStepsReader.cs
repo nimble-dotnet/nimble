@@ -2,7 +2,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.Tick.Serialization;
 
-namespace Nimble.Authoritative.Steps
+namespace Piot.Nimble.Authoritative.Steps
 {
     public static class AuthoritativeStepsReader
     {
@@ -34,7 +34,7 @@ namespace Nimble.Authoritative.Steps
                     //log.Notice("ignoring authoritative step {{TickId}}, was waiting for {{WaitingTickId}}", tickId, combinedAuthoritativeSteps.WaitingForTickId);
                 }
             }
-            
+
             log.DebugLowLevel("{ReceivedCount} authoritative steps, and added {AddedCount} of them", count, addedCombinedAuthoritativeCount);
 
             return addedCombinedAuthoritativeCount;

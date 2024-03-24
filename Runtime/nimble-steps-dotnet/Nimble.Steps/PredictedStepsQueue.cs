@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using Piot.Discoid;
 using Piot.Tick;
 
-namespace Nimble.Steps
+namespace Piot.Nimble.Steps
 {
     /// <summary>
     ///     Queue of serialized game specific inputs.

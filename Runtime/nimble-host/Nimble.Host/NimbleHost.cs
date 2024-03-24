@@ -5,7 +5,7 @@
 
 using System;
 using System.Collections.Generic;
-using Nimble.Authoritative.Steps;
+using Piot.Nimble.Authoritative.Steps;
 using Piot.BlobStream;
 using Piot.Clog;
 using Piot.Datagram;
@@ -13,12 +13,12 @@ using Piot.Discoid;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.MonotonicTimeLowerBits;
-using Nimble.Serialize;
+using Piot.Nimble.Serialize;
 using Piot.OrderedDatagrams;
 using Piot.Tick;
-using Constants = Nimble.Serialize.Constants;
+using Constants = Piot.Nimble.Serialize.Constants;
 
-namespace Nimble.Host
+namespace Piot.Nimble.Host
 {
     /// <summary>
     /// Implements a Host for the Nimble protocol.
