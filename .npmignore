@@ -3,6 +3,7 @@ Runtime/copy.sh.meta
 *.tgz
 *.tgz.meta
 _site/
+_site.meta
 api/
 obj/
 _site/
@@ -10,3 +11,18 @@ bin/
 .github/
 *.csproj
 docfx.json
+docfx.json.meta
+Docs~/
+nimble.sln
+nimble.sln.meta
+api.meta
+bin.meta
+obj.meta
+toc.yml
+toc.yml.meta
+filter_config.yml
+filter_config.yml.meta
+index.md
+index.md.meta
+Nimble.csproj
+Nimble.csproj.meta

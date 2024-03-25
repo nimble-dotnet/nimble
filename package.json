@@ -1,6 +1,6 @@
 {
   "name": "network.piot.nimble",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "displayName": "Nimble",
   "description": "Input Serialization, Replication and Replay",
   "unity": "2022.3",
