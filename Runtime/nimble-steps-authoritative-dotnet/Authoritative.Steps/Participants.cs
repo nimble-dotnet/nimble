@@ -100,10 +100,18 @@ namespace Piot.Nimble.Authoritative.Steps
                 {
                     couldEveryoneContributeNowOrInTheFuture = false;
                     participant.AddPenalty();
-                    log.DebugLowLevel("{Participant} can not contribute now or in the future", participant);
-                    if (participant.Penalty > 50)
+                    if(participant.incomingSteps.IsEmpty)
                     {
-                        log.Warn("should disconnect {Participant}", participant);
+                        log.DebugLowLevel("{Participant} incoming steps is empty, so can not contribute for {TickId}", participant, tickId);
+                    }
+                    else
+                    {
+                        log.DebugLowLevel("{Participant} only has old steps in the buffer, so can not contribute to {TickId}", tickId);
+                    }
+                    
+                    if (participant.Penalty > 150)
+                    {
+                        log.Warn("should disconnect {Participant} penalties: {PenaltyCount}", participant, participant.Penalty);
                     }
                 }
                 else

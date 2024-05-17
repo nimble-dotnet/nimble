@@ -155,7 +155,7 @@ namespace Piot.BlobStream
                 }
 
                 var timeSinceLastSent = now.ms - entry.lastSentAtTime.ms;
-                if (entry.sendCount != 0 && timeSinceLastSent <= 200)
+                if (entry.sendCount != 0 && timeSinceLastSent <= 150)
                 {
                     continue;
                 }
@@ -165,7 +165,7 @@ namespace Piot.BlobStream
 
                 result.Add((uint)i);
 
-                log.DebugLowLevel("Sending {ChunkId}", i);
+            //    log.DebugLowLevel("Sending {ChunkId}", i);
             }
 
             return result;

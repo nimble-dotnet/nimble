@@ -182,7 +182,7 @@ namespace Piot.Nimble.Client
 
 		private void HandleIncomingSaveState(OctetReader reader)
 		{
-			log.DebugLowLevel("handle incoming *save state*");
+//			log.DebugLowLevel("handle incoming *save state*");
 
 			receiveLogic.ReadStream(reader);
 

@@ -91,7 +91,7 @@ namespace Piot.BlobStream
             var chunkId = inStream.ReadUInt32();
             var octetLength = inStream.ReadUInt16();
 
-            log.DebugLowLevel("set Chunk {ChunkID} {OctetLength}", chunkId, octetLength);
+//            log.DebugLowLevel("set Chunk {ChunkID} {OctetLength}", chunkId, octetLength);
             if (octetLength > blobStream.FixedChunkSize)
             {
                 throw new Exception($"octetLength overrun {octetLength}");

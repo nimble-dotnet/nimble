@@ -23,7 +23,7 @@ namespace Piot.BlobStream
         private BlobStreamSender blobStream;
         private const int OptimalDatagramSize = 900;
         private readonly ILog log;
-        private const int OptimalDatagramCountToSend = 4;
+        private const int OptimalDatagramCountToSend = 60;
         private readonly OctetWriter cachedWriter = new(OptimalDatagramSize);
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Piot.BlobStream
             writer.WriteUInt32(chunkIndex);
 
             var payload = blobStream.Span(chunkIndex);
-            log.DebugLowLevel("found chunk {ChunkIndex} {OctetLength}", chunkIndex, payload.Length);
+//            log.DebugLowLevel("found chunk {ChunkIndex} {OctetLength}", chunkIndex, payload.Length);
             writer.WriteUInt16((ushort)payload.Length);
             writer.WriteOctets(payload);
         }
