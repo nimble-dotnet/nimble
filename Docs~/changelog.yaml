@@ -1,6 +1,33 @@
 repo: nimble-dotnet/nimble
 
 releases:
+  'v0.0.14':
+    date: '2024-05-17'
+    notice:
+    sections:
+      Fixed Struct:
+        changes:
+          fixed:
+          - increase number of datagrams and datagram sizes when sending blob stream $af3b19b4
+
+  'v0.0.13':
+    date: '2024-03-25'
+    notice:
+    sections:
+      Fixed Struct:
+        changes:
+          fixed:
+          - fix block copy count $d2cf6fe9
+
+  'v0.0.12':
+    date: '2024-03-19'
+    notice:
+    sections:
+      Fixed Struct:
+        changes:
+          fixed:
+          - write markers even for non debug streams $68e3852d
+
   'v0.0.11':
     date: '2024-03-18'
     notice:

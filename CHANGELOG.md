@@ -1,5 +1,26 @@
 # Changelog
 
+## :bookmark: [v0.0.14](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.14) (2024-05-17)
+
+
+### Fixed Struct
+
+* :lady_beetle: increase number of datagrams and datagram sizes when sending blob stream [af3b19b4](https://github.com/nimble-dotnet/nimble/commit/af3b19b4)
+
+## :bookmark: [v0.0.13](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.13) (2024-03-25)
+
+
+### Fixed Struct
+
+* :lady_beetle: fix block copy count [d2cf6fe9](https://github.com/nimble-dotnet/nimble/commit/d2cf6fe9)
+
+## :bookmark: [v0.0.12](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.12) (2024-03-19)
+
+
+### Fixed Struct
+
+* :lady_beetle: write markers even for non debug streams [68e3852d](https://github.com/nimble-dotnet/nimble/commit/68e3852d)
+
 ## :bookmark: [v0.0.11](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.11) (2024-03-18)
 
 
