@@ -1,6 +1,15 @@
 repo: nimble-dotnet/nimble
 
 releases:
+  'v0.0.15':
+    date: '2024-05-21'
+    notice:
+    sections:
+      Fixed Struct:
+        changes:
+          fixed:
+          - simulation state entries in replay stored stream position after header instead of before header.
+
   'v0.0.14':
     date: '2024-05-17'
     notice:

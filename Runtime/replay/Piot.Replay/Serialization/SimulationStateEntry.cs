@@ -21,5 +21,10 @@ namespace Piot.Replay.Serialization
             this.tickId = tickId;
             this.streamPosition = streamPosition;
         }
+
+        public override string ToString()
+        {
+            return $"[SimulationState tickID:{tickId} timeMs:{timeMs} streamPosition:{streamPosition}]";
+        }
     }
 }

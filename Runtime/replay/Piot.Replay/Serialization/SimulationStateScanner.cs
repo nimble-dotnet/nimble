@@ -24,13 +24,14 @@ namespace Piot.Replay.Serialization
             {
                 try
                 {
+                    var positionForLastHeader = readerWithSeek.Position;
                     var octetLength = tempRaffReader.ReadChunkHeader(out var icon, out _);
                     if (octetLength == 0)
                     {
                         break;
                     }
 
-                    var positionBefore = readerWithSeek.Position;
+                    var positionAfterChunkHeaderBefore = readerWithSeek.Position;
                     if (icon.Value == Constants.CompleteStateIcon.Value)
                     {
                         var packType = readerWithSeek.ReadUInt8();
@@ -46,10 +47,10 @@ namespace Piot.Replay.Serialization
 
                         var time = readerWithSeek.ReadUInt64();
                         var tickId = TickIdReader.Read(readerWithSeek);
-                        entries.Add(new SimulationStateEntry(time, tickId.tickId, positionBefore));
+                        entries.Add(new SimulationStateEntry(time, tickId.tickId, positionForLastHeader));
                     }
 
-                    readerWithSeek.Seek(positionBefore + octetLength);
+                    readerWithSeek.Seek(positionAfterChunkHeaderBefore + octetLength);
                 }
                 catch (EndOfStreamException)
                 {

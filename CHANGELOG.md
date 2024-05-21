@@ -1,5 +1,12 @@
 # Changelog
 
+## :bookmark: [v0.0.15](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.15) (2024-05-21)
+
+
+### Fixed Struct
+
+* :lady_beetle: simulation state entries in replay stored stream position after header instead of before header.
+
 ## :bookmark: [v0.0.14](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.14) (2024-05-17)
 
 

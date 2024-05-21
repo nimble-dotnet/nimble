@@ -49,12 +49,12 @@ namespace Piot.Raff
             var octetCount = ReadChunkHeader(reader, out var readIcon, out var readName);
             if (!readIcon.Value.Equals(expectedIcon.Value))
             {
-                throw new("not equal");
+                throw new($"not equal raff chunk icon. expected {expectedIcon}, but encountered {readIcon}");
             }
 
             if (!readName.Value.Equals(expectedName.Value))
             {
-                throw new("not equal");
+                throw new($"not equal raff chunk name. expected {expectedName}, but encountered {readName}");
             }
 
             return octetCount;

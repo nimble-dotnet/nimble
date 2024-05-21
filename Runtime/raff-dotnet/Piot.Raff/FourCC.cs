@@ -44,5 +44,10 @@ namespace Piot.Raff
 
             return new(octets);
         }
+
+        public override string ToString()
+        {
+            return $"[raff-fourcc {Value:X}]";
+        }
     }
 }
