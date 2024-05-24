@@ -1,6 +1,15 @@
 repo: nimble-dotnet/nimble
 
 releases:
+  'v0.0.16':
+    date: '2024-05-24'
+    notice:
+    sections:
+      Fixed Struct:
+        changes:
+          fixed:
+          - Remove some .meta files.
+
   'v0.0.15':
     date: '2024-05-21'
     notice:

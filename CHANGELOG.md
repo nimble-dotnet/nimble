@@ -1,5 +1,12 @@
 # Changelog
 
+## :bookmark: [v0.0.16](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.16) (2024-05-24)
+
+
+### Fixed Struct
+
+* :lady_beetle: Remove some .meta files.
+
 ## :bookmark: [v0.0.15](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.15) (2024-05-21)
 
 
