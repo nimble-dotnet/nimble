@@ -1,11 +1,38 @@
 repo: nimble-dotnet/nimble
 
+# added:
+# changed:
+# deprecated:
+# removed:
+# fixed:
+# security:
+# improved:
+# workaround:
+# tests:
+# docs:
+# refactored:
+# performance:
+# breaking:
+# experimental:
+# noted:
+# style:
+# unreleased:
+
 releases:
+  'v0.0.17':
+    date: '2024-05-31'
+    notice:
+    sections:
+      General:
+        changes:
+          added:
+          - ReplayWriterConfig. Settings for the ReplayWriter, e.g. set the maximum octet size for authoritative steps or state. ($cdb83588)
+
   'v0.0.16':
     date: '2024-05-24'
     notice:
     sections:
-      Fixed Struct:
+      General:
         changes:
           fixed:
           - Remove some .meta files.
@@ -14,7 +41,7 @@ releases:
     date: '2024-05-21'
     notice:
     sections:
-      Fixed Struct:
+      General:
         changes:
           fixed:
           - simulation state entries in replay stored stream position after header instead of before header.
@@ -23,16 +50,16 @@ releases:
     date: '2024-05-17'
     notice:
     sections:
-      Fixed Struct:
+      General:
         changes:
-          fixed:
+          improved:
           - increase number of datagrams and datagram sizes when sending blob stream $af3b19b4
 
   'v0.0.13':
     date: '2024-03-25'
     notice:
     sections:
-      Fixed Struct:
+      General:
         changes:
           fixed:
           - fix block copy count $d2cf6fe9
@@ -41,7 +68,7 @@ releases:
     date: '2024-03-19'
     notice:
     sections:
-      Fixed Struct:
+      General:
         changes:
           fixed:
           - write markers even for non debug streams $68e3852d
@@ -50,7 +77,7 @@ releases:
     date: '2024-03-18'
     notice:
     sections:
-      Fixed Struct:
+      General:
         changes:
           fixed:
           - Now `FixedOctets32WithLength` correctly serializes its length $c6df571a

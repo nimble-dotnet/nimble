@@ -1,44 +1,51 @@
 # Changelog
 
+## :bookmark: [v0.0.17](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.17) (2024-05-31)
+
+
+### General
+
+* :star2: ReplayWriterConfig. Settings for the ReplayWriter, e.g. set the maximum octet size for authoritative steps or state. ([cdb83588](https://github.com/nimble-dotnet/nimble/commit/cdb83588))
+
 ## :bookmark: [v0.0.16](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.16) (2024-05-24)
 
 
-### Fixed Struct
+### General
 
 * :lady_beetle: Remove some .meta files.
 
 ## :bookmark: [v0.0.15](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.15) (2024-05-21)
 
 
-### Fixed Struct
+### General
 
 * :lady_beetle: simulation state entries in replay stored stream position after header instead of before header.
 
 ## :bookmark: [v0.0.14](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.14) (2024-05-17)
 
 
-### Fixed Struct
+### General
 
-* :lady_beetle: increase number of datagrams and datagram sizes when sending blob stream [af3b19b4](https://github.com/nimble-dotnet/nimble/commit/af3b19b4)
+* :art: increase number of datagrams and datagram sizes when sending blob stream [af3b19b4](https://github.com/nimble-dotnet/nimble/commit/af3b19b4)
 
 ## :bookmark: [v0.0.13](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.13) (2024-03-25)
 
 
-### Fixed Struct
+### General
 
 * :lady_beetle: fix block copy count [d2cf6fe9](https://github.com/nimble-dotnet/nimble/commit/d2cf6fe9)
 
 ## :bookmark: [v0.0.12](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.12) (2024-03-19)
 
 
-### Fixed Struct
+### General
 
 * :lady_beetle: write markers even for non debug streams [68e3852d](https://github.com/nimble-dotnet/nimble/commit/68e3852d)
 
 ## :bookmark: [v0.0.11](https://github.com/nimble-dotnet/nimble/releases/tag/v0.0.11) (2024-03-18)
 
 
-### Fixed Struct
+### General
 
 * :lady_beetle: Now `FixedOctets32WithLength` correctly serializes its length [c6df571a](https://github.com/nimble-dotnet/nimble/commit/c6df571a)
 
