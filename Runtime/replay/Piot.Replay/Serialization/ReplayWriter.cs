@@ -19,7 +19,7 @@ namespace Piot.Replay.Serialization
     /// </summary>
     public sealed class ReplayWriter
     {
-        readonly OctetWriter cachedOctetWriter = new(16 * 1024);
+        readonly OctetWriter cachedOctetWriter;
         readonly uint framesBetweenCompleteState;
         readonly RaffWriter raffWriter;
 
@@ -34,17 +34,17 @@ namespace Piot.Replay.Serialization
         /// <param name="applicationVersion">The version of the application executable, at least the simulation code.</param>
         /// <param name="serializationOptions">the application serialization version used in the replay.</param>
         /// <param name="writer">The octet writer to use for writing the replay file.</param>
-        /// <param name="framesUntilCompleteState">The number of frames until a complete state is written (optional, default is 60).</param>
+        /// <param name="replayConfig">configuration for how the replay writer should be setup and how often complete states should be written</param>
         public ReplayWriter(TimeMs capturedAtTimeMs, TickId tickId, ReadOnlySpan<byte> completeState,
             ApplicationVersion applicationVersion, ApplicationSerializationOptions serializationOptions,
-            IOctetWriter writer,
-            uint framesUntilCompleteState = 60)
+            IOctetWriter writer, ReplayWriterConfig replayConfig)
         {
-            framesBetweenCompleteState = framesUntilCompleteState;
+            cachedOctetWriter = new(replayConfig.maximumStepOrStateOctetSize);
+            framesBetweenCompleteState = replayConfig.framesUntilCompleteState;
             raffWriter = new(writer);
             WriteVersionChunk(applicationVersion, serializationOptions);
 
-            packCountSinceCompleteState = 60;
+            packCountSinceCompleteState = replayConfig.framesUntilCompleteState;
             WriteCompleteSimulationState(capturedAtTimeMs, tickId, completeState);
         }
 
